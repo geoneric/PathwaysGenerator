@@ -6,7 +6,7 @@ https://publicwiki.deltares.nl/display/AP/Adaptation+Pathways
 ```bash
 # Create virtual environment that will contain all packages we need:
 # https://docs.python.org/3/library/venv.html
-python3 -m venv --system-site-packages env
+python3 -m venv env
 source env/bin/activate
 pip install --upgrade pip
 
