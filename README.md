@@ -23,9 +23,31 @@ pre-commit autoupdate
 pip install pylint
 
 # Install software our code depends on:
-pip install dash docopt jupyterlab pandas plotly pyside6
+pip install cmake dash docopt jupyterlab ninja pandas plotly pyside6 sphinx
 
 pathway_generator.py browser
 pathway_generator.py window
 jupyter-lab --notebook-dir=source/notebook/
+```
+
+The project contains code for generating targets, like documentation and the installation
+package. Create a new directory for storing these. It is best to create this directory outside
+of the source directory. CMake is used to generate build scripts that will do the actual work. We
+use the Ninja build tool here, but you can use any build tool supported by CMake.
+
+```bash
+# Assuming we are in the adaptation_pathways source directory...
+
+mkdir ../build
+cd ../build
+cmake -S ../adaptation_pathways -G Ninja
+
+# Execute the tests
+ninja test
+
+# Generate the documentation
+ninja documentation
+
+# Create the package
+ninja package
 ```
