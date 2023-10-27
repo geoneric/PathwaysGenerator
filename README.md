@@ -23,7 +23,7 @@ pre-commit autoupdate
 pip install pylint
 
 # Install software our code depends on:
-pip install cmake dash docopt jupyterlab ninja pandas plotly pyside6 sphinx
+pip install cmake dash docopt furo jupyterlab ninja pandas plotly pyside6 sphinx
 
 pathway_generator.py browser
 pathway_generator.py window
@@ -46,8 +46,9 @@ cmake -S ../adaptation_pathways -G Ninja
 ninja test
 
 # Generate the documentation
+ninja ap_apidoc  # TODO Make documentation depend on this target
 ninja documentation
 
 # Create the package
-ninja package
+ninja package  # TODO Does not work yet
 ```

@@ -8,7 +8,6 @@ add_test(
 
 set_tests_properties(python_tests
     PROPERTIES
-        # Add the path to our Python package to PYTHONPATH
         ENVIRONMENT_MODIFICATION
             PYTHONPATH=path_list_prepend:${PROJECT_SOURCE_DIR}/source/package
 )
