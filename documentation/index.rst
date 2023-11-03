@@ -1,14 +1,12 @@
 Adaptation Pathways
 ===================
 
+What do you want to do?
+
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   Develop the package <develop>
+   Test the package <test>
+   Use the package <use>

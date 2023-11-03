@@ -8,5 +8,12 @@ find_program(SPHINX_BUILD_EXECUTABLE
 
 include(FindPackageHandleStandardArgs)
 
-find_package_handle_standard_args(Sphinx "Failed to find sphinx-apidoc executable" SPHINX_APIDOC_EXECUTABLE)
-find_package_handle_standard_args(Sphinx "Failed to find sphinx-build executable" SPHINX_BUILD_EXECUTABLE)
+find_package_handle_standard_args(Sphinx DEFAULT_MSG
+    SPHINX_APIDOC_EXECUTABLE
+    SPHINX_BUILD_EXECUTABLE
+)
+
+mark_as_advanced(
+    SPHINX_APIDOC_EXECUTABLE
+    SPHINX_BUILD_EXECUTABLE
+)

@@ -4,11 +4,13 @@ configure_file(
     @ONLY
 )
 
-configure_file(
-    index.rst
-    index.rst
-    COPYONLY
-)
+foreach(name IN ITEMS develop index test use)
+    configure_file(
+        ${name}.rst
+        ${name}.rst
+        COPYONLY
+    )
+endforeach()
 
 set(AP_SPHINX_SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR})
 set(AP_SPHINX_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/html)
@@ -36,3 +38,5 @@ add_custom_target(
                 -c ${CMAKE_CURRENT_BINARY_DIR}
                 ${CMAKE_CURRENT_BINARY_DIR} ${AP_SPHINX_BUILD_DIR}
 )
+
+add_dependencies(documentation ap_apidoc)

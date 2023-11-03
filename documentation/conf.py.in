@@ -22,6 +22,7 @@ extensions = [
 templates_path = ['@CMAKE_CURRENT_SOURCE_DIR@/_templates']
 exclude_patterns = []
 
+modindex_common_prefix = ["adaptation_pathways."]
 
 
 # -- Options for HTML output -------------------------------------------------

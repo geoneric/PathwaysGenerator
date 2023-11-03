@@ -1,6 +1,60 @@
 [tool.isort]
 lines_after_imports = 2
 profile = "black"
+
 [tool.pylint]
 disable = "C0114, C0115, C0116, W0511"
 extension-pkg-allow-list = "PySide6"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "adaptation_pathways"
+version = "0.0.1"
+# dynamic = [
+#     "version",
+# ]
+authors = [
+    { name = "Example Author", email = "author@example.com" },
+]
+description = "A small example package"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "dash",
+    "docopt",
+    "jupyterlab",
+    "pandas",
+    "plotly",
+    "pyside6",
+]
+
+[project.urls]
+"Homepage" = "https://todo"
+"Bug Tracker" = "https://todo"
+
+[project.scripts]
+adaptation_pathways = "adaptation_pathways.cli:generator_main"
+
+[tool.hatch.build.targets.sdist]
+# include = [
+# ]
+packages = [
+    "source/package/adaptation_pathways",
+]
+# TODO Doesn't work yet ...
+exclude = [
+    ".gitignore",
+    "/pyproject.toml",
+]
+
+# [tool.hatch.version]
+# path = "adaptation_pathways/version.py"
+# pattern = "VERSION (?P<version>\\d+\\.\\d+\\.\\d+)\\s"

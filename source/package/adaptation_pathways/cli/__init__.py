@@ -4,12 +4,12 @@ import sys
 import docopt
 import pandas as pd
 
-from .browser import view_in_browser  # noqa: F401
+from ..browser import view_in_browser  # noqa: F401
 
-# from .jupyter import view_in_jupyter  # noqa: F401
-from .networkx import plot_pathways as plot_pathways_nx
-from .version import __version__
-from .window import view_in_window  # noqa: F401
+# from ..jupyter import view_in_jupyter  # noqa: F401
+from ..networkx import plot_pathways as plot_pathways_nx
+from ..version import __version__
+from ..window import view_in_window  # noqa: F401
 
 
 def plot_pathways(
