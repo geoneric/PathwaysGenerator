@@ -1,12 +1,22 @@
 Develop
 =======
 
+Code
+----
+
 .. toctree::
    :maxdepth: 1
    :caption: Contents:
 
    API <modules>
 
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+
+
+Development environment
+-----------------------
 
 .. code-block:: bash
 
@@ -55,34 +65,65 @@ use the Ninja build tool here, but you can use any build tool supported by CMake
    ninja documentation
 
    # Create the package
-   ninja package  # TODO Does not work yet
+   ninja package
 
+
+Create and test a package
+-------------------------
+Creating a package and inspecting its contents can be done as follows:
 
 .. code-block:: bash
 
-   # As a regular user (clean environment). To try out new version of a package. First see the
-   # commands mentioned above.
-   pip uninstall --yes adaptation_pathways && pip install --upgrade -f dist adaptation_pathways
+   ninja
+   ninja package
+   tar -tf dist/adaptation_pathways-1.2.3.tar.gz
+   unzip -l dist/adaptation_pathways-1.2.3-py3-none-any.whl
 
-   # Rebuild the package and check its contents
-   ninja && ninja package && tar -tf dist/adaptation_pathways-0.0.1.tar.gz && unzip -l dist/adaptation_pathways-0.0.1-py3-none-any.whl
+Creating a package (``ninja package``) results in a Wheel file in the ``dist`` directory in
+the project's output directory. The next commands can be used to test the package.
 
-   # Iterate untill good
-   # ...
+.. code-block:: bash
+
+   python3 -m venv ap_test
+   source ap_test/bin/activate
+   pip install --upgrade pip
+   pip install -f dist adaptation_pathways
+   adaptation_pathways --help
+
+After testing the package, new versions of the package can be installed like this:
+
+.. code-block:: bash
+
+   pip uninstall --yes adaptation_pathways
+   pip install --upgrade -f dist adaptation_pathways
 
 
-Build a package
----------------
+Release a package
+-----------------
 
-* `Python Packaging User Guide <https://packaging.python.org/en/latest/>`_
-* `build packaging frontend <https://pypa-build.readthedocs.io/en/stable/>`_
-* `Hatch packaging backend <https://hatch.pypa.io/latest/>`_
-* `pip package installer <https://pip.pypa.io/en/stable/>`_
+Create zip with Python Wheel package and the documentation:
+
+.. code-block:: bash
+
+   ninja release
+
+Output is stored in ``adaptation_pathways-1.2.3.zip``.
 
 
-Indices and tables
-------------------
+Create and push a tag.
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. code-block:: bash
+
+   git tag -a v1.2.3 -m"Release that solves all problems"
+   git push origin v1.2.3
+
+
+Background information
+----------------------
+
+* Build a package
+
+    * `Python Packaging User Guide <https://packaging.python.org/en/latest/>`_
+    * `build packaging frontend <https://pypa-build.readthedocs.io/en/stable/>`_
+    * `Hatch packaging backend <https://hatch.pypa.io/latest/>`_
+    * `pip package installer <https://pip.pypa.io/en/stable/>`_
