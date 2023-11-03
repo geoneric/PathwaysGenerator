@@ -13,11 +13,22 @@ from ..window import view_in_window  # noqa: F401
 
 
 def plot_pathways(
-    interventions_table_pathname,
-    pathways_table_pathname,
-    scenarios_table_pathname,
-    pathways_plot_pathname,
+    interventions_table_pathname: str,
+    pathways_table_pathname: str,
+    scenarios_table_pathname: str,
+    pathways_plot_pathname: str,
 ) -> int:
+    """
+    Plot pathways
+
+    :param str interventions_table_pathname: Pathname of CSV file containing information about
+        the interventions
+    :param str pathways_table_pathname: Pathname of CSV file containing information about
+        the pathways
+    :param str scenarios_table_pathname: Pathname of CSV file containing information about
+        the scenarios
+    :param str pathways_plot_pathname: Pathname of output graphics file
+    """
     try:
         interventions_table = pd.read_csv(interventions_table_pathname)
         pathways_table = pd.read_csv(pathways_table_pathname)
@@ -35,7 +46,7 @@ def plot_pathways(
 
 def generator_main() -> int:
     usage = """\
-TODO
+Generate adaptation pathways
 
 Usage:
     {command} [--port=<port>] (browser | window)

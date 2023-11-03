@@ -127,3 +127,10 @@ Background information
     * `build packaging frontend <https://pypa-build.readthedocs.io/en/stable/>`_
     * `Hatch packaging backend <https://hatch.pypa.io/latest/>`_
     * `pip package installer <https://pip.pypa.io/en/stable/>`_
+
+* Check and style the code
+
+    * `Black <https://black.readthedocs.io/en/stable/>`_
+    * `Flake8 <https://flake8.pycqa.org/en/latest/>`_
+    * `Mypy <https://mypy-lang.org/>`_
+    * `Pylint <https://pylint.readthedocs.io/en/latest/>`_
