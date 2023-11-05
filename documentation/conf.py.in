@@ -8,7 +8,11 @@
 
 project = '@CMAKE_PROJECT_NAME@'
 copyright = '2023, TODO'
-author = 'TODO'
+author = ", ".join([
+    "Marjolijn Haasnoot (Deltares, NL)",
+    "Willem van Deursen (Carthago Consultancy, NL)",
+    "Kor de Jong (Geoneric, NL)",
+])
 version = '@CMAKE_PROJECT_VERSION_MAJOR@.@CMAKE_PROJECT_VERSION_MINOR@'
 
 # -- General configuration ---------------------------------------------------
