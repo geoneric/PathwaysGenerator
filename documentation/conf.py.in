@@ -24,7 +24,9 @@ extensions = [
     "sphinx.ext.intersphinx",
 ]
 
-templates_path = ['@CMAKE_CURRENT_SOURCE_DIR@/_templates']
+templates_path = [
+    '@CMAKE_CURRENT_SOURCE_DIR@/_templates',
+]
 exclude_patterns = []
 
 modindex_common_prefix = ["adaptation_pathways."]
@@ -36,6 +38,21 @@ modindex_common_prefix = ["adaptation_pathways."]
 # html_theme = 'alabaster'
 html_theme = "furo"
 html_static_path = ['@CMAKE_CURRENT_SOURCE_DIR@/_static']
+# html_sidebars = {
+#     "develop/**": [
+#         "localtoc.html",
+#         "api.html",
+#         "searchbox.html",
+#     ],
+#     "test/**": [
+#         "localtoc.html",
+#         "searchbox.html",
+#     ],
+#     "use/**": [
+#         "localtoc.html",
+#         "searchbox.html",
+#     ],
+# }
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
