@@ -7,9 +7,9 @@ What do you want to do?
    :maxdepth: 1
    :caption: Contents:
 
-   Develop the package <develop>
-   Test the package <test>
    Use the package <use>
+   Test the package <test>
+   Develop the package <develop>
 
 See also:
 

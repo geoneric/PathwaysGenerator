@@ -41,7 +41,7 @@ dependencies = [
 "Bug Tracker" = "https://todo"
 
 [project.scripts]
-adaptation_pathways = "adaptation_pathways.cli:generator_main"
+pathways_generator = "adaptation_pathways.cli:generator_main"
 
 [tool.hatch.build.targets.sdist]
 # include = [

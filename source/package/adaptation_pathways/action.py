@@ -1,16 +1,16 @@
 """
-An intervention (AKA policy action and action) is ...
+An action (AKA policy action, intervention, and measure) is ...
 
-This module contains the implementation of the :py:class:`Intervention` class.
+This module contains the implementation of the :py:class:`Action` class.
 """
 
 
-class Intervention:
+class Action:
     """
-    Intervention instances represent ...
+    Action instances represent ...
 
     :param description: ...
-    :param tipping_point: The magnitude after which the intervention is not sufficient any
+    :param tipping_point: The magnitude after which the action is not sufficient any
         more. The value is directly related to the changing condition (e.g. sedimentation rate)
         being considered.
     """
