@@ -7,22 +7,21 @@ This module contains the implementation of the :py:class:`Pathway` class.
 from .action import Action
 
 
-# TODO Is this maybe a ConditionBasedPathway? Is an Action maybe a
-# ConditionBasedIntervention? → condition_based.pathway, condition_based.action vs
-# time_based.pathway and time_based.action?
-
-
-# Pathways can be compared according to scores:
-# - target effects (benefits?)
-# - costs
-# - side effect (pos and neg?)
-
-
 class Pathway:
     """
     Pathway instances represent a sequence of actions.
 
     :param actions: List of actions that define the pathway
+    :param tipping_points: The time points after which each action is not sufficient any
+        more. The value is directly related to the changing condition (e.g. sedimentation rate)
+        being considered.
+
+    A pathway defines the tipping point of actions. For example:
+
+    Action 1: Current situation, do  nothing
+    Action 2: Increase dike crest levels by 0.5m
+    Action 3: Create more room for the river by adding 1km of floodplains
+    Action 4: Ring dikes around population centers
     """
 
     _actions: list[Action]

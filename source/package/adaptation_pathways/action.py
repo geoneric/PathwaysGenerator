@@ -10,28 +10,29 @@ class Action:
     Action instances represent ...
 
     :param description: ...
-    :param tipping_point: The magnitude after which the action is not sufficient any
-        more. The value is directly related to the changing condition (e.g. sedimentation rate)
-        being considered.
     """
 
     _description: str
-    _tipping_point: float
+    # _tipping_point: float
 
-    def __init__(self, description: str, tipping_point: float) -> None:
-        if tipping_point <= 0:
-            raise ValueError(f"Invalid, non-positive, tipping point {tipping_point}")
+    # def __init__(self, description: str, tipping_point: float) -> None:
+    def __init__(self, description: str) -> None:
+        # if tipping_point <= 0:
+        #     raise ValueError(f"Invalid, non-positive, tipping point {tipping_point}")
 
         self._description = description
-        self._tipping_point = tipping_point
+        # self._tipping_point = tipping_point
+
+    def __str__(self) -> str:
+        return self._description
 
     @property
     def description(self) -> str:
         return self._description
 
-    @property
-    def tipping_point(self) -> float:
-        return self._tipping_point
+    # @property
+    # def tipping_point(self) -> float:
+    #     return self._tipping_point
 
 
 # Policy action or pathway table

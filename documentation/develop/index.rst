@@ -40,7 +40,7 @@ In commands:
    pip3 install --upgrade pip
 
    # Install software needed to help develop our software:
-   pip3 install build cmake dash docopt furo jupyterlab ninja pandas plotly pyside6 sphinx
+   pip3 install build cmake dash docopt furo jupyterlab networkx[default] ninja pandas plotly pyside6 sphinx
 
    # Install handy tools that will keep our code in good shape:
    pip3 install pre-commit
