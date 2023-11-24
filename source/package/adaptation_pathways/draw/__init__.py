@@ -1,1 +1,5 @@
-from .layout import pathways_graph_layout  # noqa: F401
+from .layout import (  # noqa: F401
+    actions_graph_layout,
+    pathways_graph_layout,
+    pathways_map_layout,
+)

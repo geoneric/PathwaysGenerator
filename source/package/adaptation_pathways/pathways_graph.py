@@ -1,8 +1,8 @@
 from .action import Action
-from .rooted_tree import RootedTree
+from .rooted_graph import RootedGraph
 
 
-class PathwaysGraph(RootedTree):
+class PathwaysGraph(RootedGraph):
     """
     A PathwaysGraph represents the dependencies between action sequences. The nodes represent
     the conversion from one action to another (think tipping points or vertical lines in a

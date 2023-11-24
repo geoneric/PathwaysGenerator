@@ -1,5 +1,7 @@
 from .actions_graph import ActionsGraph
 from .pathways_graph import PathwaysGraph
+
+# from .pathways_map import PathwaysMap
 from .sequenced_action import SequencedAction
 
 
@@ -43,3 +45,9 @@ def actions_graph_to_pathways_graph(actions_graph: ActionsGraph) -> PathwaysGrap
             )
 
     return pathways_graph
+
+
+# def pathways_graph_to_pathways_map(pathways_graph: PathwaysGraph) -> PathwaysMap:
+#     pathways_map = PathwaysMap()
+#
+#     return pathways_map

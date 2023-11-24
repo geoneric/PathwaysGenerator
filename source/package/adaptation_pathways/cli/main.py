@@ -3,6 +3,13 @@ import traceback
 from typing import Callable
 
 
+def common_arguments() -> str:
+    return """\
+    -h --help      Show this screen
+    --version      Show version
+"""
+
+
 def main_function(function: Callable):
     def wrapper(*args, **kwargs) -> int:
         try:
@@ -18,10 +25,3 @@ def main_function(function: Callable):
         return status
 
     return wrapper
-
-
-def common_arguments() -> str:
-    return """\
-    -h --help      Show this screen
-    --version      Show version
-"""

@@ -7,7 +7,7 @@ import networkx as nx
 
 import adaptation_pathways as ap
 
-from ..draw import pathways_graph_layout
+from ..draw import actions_graph_layout, pathways_graph_layout  # , pathways_map_layout
 from .main import common_arguments, main_function
 
 
@@ -42,6 +42,7 @@ def pathways() -> None:
 
     # Create pathways graph
     pathways_graph = ap.actions_graph_to_pathways_graph(actions_graph)
+    # pathways_map = ap.pathways_graph_to_pathways_map(pathways_graph)
 
     # Define tipping points in terms of sedimentation rates
 
@@ -52,29 +53,31 @@ def pathways() -> None:
     # Create some plot that contains all information we want to see in the pathway map
 
     plt.clf()
-
-    axis = plt.subplot(311)
-    axis.set_title("Actions graph, planar")
-    layout = nx.planar_layout(actions_graph.graph)
+    _, axis = plt.subplots()
+    axis.set_title("Actions graph")
+    layout = actions_graph_layout(actions_graph)
     nx.draw_networkx(
         actions_graph.graph, pos=layout, with_labels=True, font_size="xx-small"
     )
+    plt.savefig("hello_world-actions_graph.pdf", bbox_inches="tight")
 
-    axis = plt.subplot(312)
-    axis.set_title("Pathways graph, planar")
-    layout = nx.planar_layout(pathways_graph.graph)
-    nx.draw_networkx(
-        pathways_graph.graph, pos=layout, with_labels=True, font_size="xx-small"
-    )
-
-    axis = plt.subplot(313)
-    axis.set_title("Pathways graph, layout")
+    plt.clf()
+    _, axis = plt.subplots()
+    axis.set_title("Pathways graph")
     layout = pathways_graph_layout(pathways_graph)
     nx.draw_networkx(
         pathways_graph.graph, pos=layout, with_labels=True, font_size="xx-small"
     )
+    plt.savefig("hello_world-pathways_graph.pdf", bbox_inches="tight")
 
-    plt.savefig("hello_world.pdf", bbox_inches="tight")
+    # plt.clf()
+    # _, axis = plt.subplots()
+    # axis.set_title("Pathways map")
+    # layout = pathways_map_layout(pathways_map)
+    # nx.draw_networkx(
+    #     pathways_map.graph, pos=layout, with_labels=True, font_size="xx-small"
+    # )
+    # plt.savefig("hello_world-pathways_map.pdf", bbox_inches="tight")
 
 
 @main_function

@@ -1,8 +1,8 @@
 from .action import Action
-from .rooted_tree import RootedTree
+from .rooted_graph import RootedGraph
 
 
-class ActionsGraph(RootedTree):
+class ActionsGraph(RootedGraph):
     """
     An ActionsGraph represents the dependencies between actions. The nodes represent the actions,
     and the edges the fact that actions follow each other in ѕequences.

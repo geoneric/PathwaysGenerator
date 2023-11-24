@@ -1,9 +1,10 @@
 import networkx as nx
 
 
-class RootedTree:
+class RootedGraph:
     """
-    A rooted tree represents a directed graph in which each node can reach the same root node.
+    A rooted graph represents a directed out-graph in which each node can be reached from the
+    root node.
     """
 
     _graph: nx.DiGraph
