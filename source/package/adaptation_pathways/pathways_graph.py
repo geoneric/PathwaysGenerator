@@ -1,23 +1,17 @@
-import networkx as nx
-
 from .action import Action
-from .sequenced_action import SequencedAction
+from .rooted_tree import RootedTree
 
 
-class PathwaysGraph:
-    _graph: nx.DiGraph
-
-    def __init__(self) -> None:
-        self._graph = nx.DiGraph()
-
-    @property
-    def graph(self) -> nx.DiGraph:
-        return self._graph
+class PathwaysGraph(RootedTree):
+    """
+    A PathwaysGraph represents the dependencies between action sequences. The nodes represent
+    the conversion from one action to another (think tipping points or vertical lines in a
+    pathways map), and the edges the period of time a certain action is active (think horizontal
+    lines in a pathways map).
+    """
 
     def add_action(self, from_action: Action, to_action: Action) -> None:
-        # Think "horizontal line in pathways map"
+        """
+        Add an action, defined by two tipping points
+        """
         self._graph.add_edge(from_action, to_action)
-
-    def add_sequence(self, action: SequencedAction) -> None:
-        # Think "vertical line in pathways map"
-        self._graph.add_node(action)

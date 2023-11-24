@@ -24,13 +24,6 @@ def condition_based_pathways() -> None:
     # Create actions graph
     actions_graph = ap.ActionsGraph()
 
-    actions_graph.add_action(current_situation)
-    actions_graph.add_action(small_ships)
-    actions_graph.add_action(medium_ships)
-    actions_graph.add_action(small_dredging)
-    actions_graph.add_action(large_dredging)
-    actions_graph.add_action(medium_ships_and_small_dredging)
-
     actions_graph.add_sequence(current_situation, small_ships)
     actions_graph.add_sequence(current_situation, medium_ships)
     actions_graph.add_sequence(current_situation, small_dredging)
@@ -91,12 +84,6 @@ def time_based_pathways() -> None:
     # Create actions graph
     actions_graph = ap.ActionsGraph()
 
-    actions_graph.add_action(current_situation)
-    actions_graph.add_action(pump_capacity)
-    actions_graph.add_action(discharge_capacity)
-    actions_graph.add_action(increase_water_level_and_dikes1)
-    actions_graph.add_action(increase_water_level_and_dikes2)
-
     actions_graph.add_sequence(current_situation, pump_capacity)
     actions_graph.add_sequence(current_situation, discharge_capacity)
     actions_graph.add_sequence(current_situation, increase_water_level_and_dikes1)
@@ -138,20 +125,16 @@ def flyer_examples() -> int:
 
 
 def main() -> int:
-    usage = """\
+    command = os.path.basename(sys.argv[0])
+    usage = f"""\
 Replicate examples from flyer
 
 Usage:
     {command}
-    {command} -h | --help
-    {command} --version
 
 Options:
-{common_arguments}
-""".format(
-        command=os.path.basename(sys.argv[0]),
-        common_arguments=common_arguments,
-    )
+{common_arguments()}
+"""
 
     arguments = sys.argv[1:]
     arguments = docopt.docopt(usage, arguments, version=ap.__version__)

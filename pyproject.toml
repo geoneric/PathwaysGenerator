@@ -2,6 +2,9 @@
 lines_after_imports = 2
 profile = "black"
 
+[tool.mypy]
+disable-error-code = "duplicate-code"
+
 [tool.pylint]
 disable = "C0114, C0115, C0116, W0511"
 extension-pkg-allow-list = "PySide6"

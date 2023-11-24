@@ -5,9 +5,7 @@ from adaptation_pathways.action import Action
 
 class ActionTest(unittest.TestCase):
     def test_constructor(self):
-        description = "Current situation"
-        # tipping_point = 1100
-        action = Action(description)  # , tipping_point)
+        label = "Current situation"
+        action = Action(label)
 
-        self.assertEqual(action.description, description)
-        # self.assertEqual(action.tipping_point, tipping_point)
+        self.assertEqual(action.label, label)

@@ -10,13 +10,13 @@ class CombinedAction(Action):
     """
     CombinedAction instances represent ...
 
-    :param description: ...
+    :param actions: ...
     """
 
     _actions: list[Action]
 
     def __init__(self, actions: list[Action]) -> None:
-        super().__init__(" + ".join([action.description for action in actions]))
+        super().__init__(" + ".join([action.label for action in actions]))
         self._actions = actions
 
     @property
