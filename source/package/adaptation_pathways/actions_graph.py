@@ -24,3 +24,9 @@ class ActionsGraph(RootedGraph):
         :param actions: List of tuples of ``from_action`` and ``to_action``
         """
         return self._graph.add_edges_from(actions)
+
+    def nr_to_actions(self, from_action: Action) -> int:
+        return self._graph.out_degree(from_action)
+
+    def to_actions(self, from_action: Action) -> list[Action]:
+        return list(self._graph.adj[from_action])

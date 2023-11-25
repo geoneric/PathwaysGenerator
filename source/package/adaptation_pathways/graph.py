@@ -14,21 +14,21 @@ def actions_graph_to_pathways_graph(actions_graph: ActionsGraph) -> PathwaysGrap
         to_action,
     ):
         actions_graph_nx = actions_graph.graph
-        sequenced_action = SequencedAction(from_action, to_action)
+        tipping_point = SequencedAction(from_action, to_action)
 
         if actions_graph_nx.in_degree(from_action) == 0:
-            pathways_graph.add_action(from_action, sequenced_action)
+            pathways_graph.add_action(from_action, tipping_point)
 
         if actions_graph_nx.out_degree(to_action) == 0:
-            pathways_graph.add_action(sequenced_action, to_action)
+            pathways_graph.add_action(tipping_point, to_action)
         else:
             for to_action_new in actions_graph_nx.adj[to_action]:
-                to_sequenced_action = visit_graph(
+                to_tipping_point = visit_graph(
                     actions_graph, pathways_graph, to_action, to_action_new
                 )
-                pathways_graph.add_action(sequenced_action, to_sequenced_action)
+                pathways_graph.add_action(tipping_point, to_tipping_point)
 
-        return sequenced_action
+        return tipping_point
 
     # - The root node of the action graph must end up in the pathways graph as the root node
     # - Each leaf node of the actions graph (that is not also a root node) must end up as a

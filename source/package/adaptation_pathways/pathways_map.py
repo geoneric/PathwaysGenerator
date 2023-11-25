@@ -18,5 +18,13 @@ class PathwaysMap(RootedGraph):
         """
         self._graph.add_edge(from_tipping_point, to_tipping_point)
 
-    def nr_pathways(self, from_tipping_point: Action) -> int:
+    def nr_downstream_actions(self, from_tipping_point: Action) -> int:
         return self._graph.out_degree(from_tipping_point)
+
+    def to_tipping_point(self, from_tipping_point: Action) -> Action:
+        out_edges = list(self._graph.out_edges(from_tipping_point))
+        assert len(out_edges) == 1, out_edges
+        return out_edges[0][1]
+
+    def from_tipping_points(self, to_tipping_point: Action) -> list[Action]:
+        return list(self._graph.adj[to_tipping_point])
