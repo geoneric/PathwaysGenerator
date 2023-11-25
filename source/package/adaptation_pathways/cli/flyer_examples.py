@@ -22,7 +22,7 @@ def condition_based_pathways() -> None:
     medium_ships_and_small_dredging = ap.CombinedAction([medium_ships, small_dredging])
 
     # Create actions graph
-    actions_graph = ap.ActionsGraph()
+    actions_graph = ap.graph.ActionsGraph()
 
     actions_graph.add_sequence(current_situation, small_ships)
     actions_graph.add_sequence(current_situation, medium_ships)
@@ -36,7 +36,7 @@ def condition_based_pathways() -> None:
     actions_graph.add_sequence(small_dredging, large_dredging)
 
     # Create pathways graph
-    pathways_graph = ap.actions_graph_to_pathways_graph(actions_graph)
+    pathways_graph = ap.graph.actions_graph_to_pathways_graph(actions_graph)
 
     # Define tipping points in terms of sedimentation rates
 
@@ -82,7 +82,7 @@ def time_based_pathways() -> None:
     )
 
     # Create actions graph
-    actions_graph = ap.ActionsGraph()
+    actions_graph = ap.graph.ActionsGraph()
 
     actions_graph.add_sequence(current_situation, pump_capacity)
     actions_graph.add_sequence(current_situation, discharge_capacity)
@@ -105,7 +105,7 @@ def time_based_pathways() -> None:
     )
 
     # Create pathways graph
-    pathways_graph = ap.actions_graph_to_pathways_graph(actions_graph)
+    pathways_graph = ap.graph.actions_graph_to_pathways_graph(actions_graph)
 
     plt.clf()
     axis = plt.subplot(211)

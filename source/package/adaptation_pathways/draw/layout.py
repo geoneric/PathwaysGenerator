@@ -1,9 +1,7 @@
 import numpy as np
 
 from ..action import Action
-from ..actions_graph import ActionsGraph
-from ..pathways_graph import PathwaysGraph
-from ..pathways_map import PathwaysMap
+from ..graph import ActionsGraph, PathwaysGraph, PathwaysMap
 
 
 def actions_graph_layout(actions_graph: ActionsGraph) -> dict[Action, np.ndarray]:

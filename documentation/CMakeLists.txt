@@ -27,12 +27,14 @@ set(AP_SPHINX_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/html)
 add_custom_target(
     apidoc
     COMMAND
-        ${SPHINX_APIDOC_EXECUTABLE}
-            --force
-            --separate
-            --module-first
-            -o ${CMAKE_CURRENT_BINARY_DIR}
-            ${PROJECT_SOURCE_DIR}/source/package/adaptation_pathways
+        ${CMAKE_COMMAND} -E env "SPHINX_APIDOC_OPTIONS=members,undoc-members,show-inheritance,inherited-members"
+            ${SPHINX_APIDOC_EXECUTABLE}
+                --force
+                --separate
+                --module-first
+                -d 1
+                -o ${CMAKE_CURRENT_BINARY_DIR}
+                ${PROJECT_SOURCE_DIR}/source/package/adaptation_pathways
 )
 
 # https://www.sphinx-doc.org/en/master/man/sphinx-build.html

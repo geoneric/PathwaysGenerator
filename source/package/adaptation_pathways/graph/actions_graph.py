@@ -1,4 +1,4 @@
-from .action import Action
+from ..action import Action
 from .rooted_graph import RootedGraph
 
 
@@ -26,7 +26,13 @@ class ActionsGraph(RootedGraph):
         return self._graph.add_edges_from(actions)
 
     def nr_to_actions(self, from_action: Action) -> int:
+        """
+        :return: Number of downstream actions
+        """
         return self._graph.out_degree(from_action)
 
     def to_actions(self, from_action: Action) -> list[Action]:
+        """
+        :return: Collection of downstream actions
+        """
         return list(self._graph.adj[from_action])

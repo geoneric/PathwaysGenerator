@@ -7,7 +7,6 @@ import networkx as nx
 
 import adaptation_pathways as ap
 
-from ..draw import actions_graph_layout, pathways_graph_layout, pathways_map_layout
 from .main import common_arguments, main_function
 
 
@@ -17,7 +16,7 @@ def pathways() -> None:
     action_b = ap.Action("b")
     action_c = ap.Action("c")
 
-    actions_graph = ap.ActionsGraph()
+    actions_graph = ap.graph.ActionsGraph()
 
     actions_graph.add_sequence(current, action_a)
     actions_graph.add_sequence(current, action_b)
@@ -26,8 +25,8 @@ def pathways() -> None:
     actions_graph.add_sequence(action_b, action_c)
     actions_graph.add_sequence(action_c, action_a)
 
-    pathways_graph = ap.actions_graph_to_pathways_graph(actions_graph)
-    pathways_map = ap.pathways_graph_to_pathways_map(pathways_graph)
+    pathways_graph = ap.graph.actions_graph_to_pathways_graph(actions_graph)
+    pathways_map = ap.graph.pathways_graph_to_pathways_map(pathways_graph)
 
     plt.rc(
         "axes.spines", **{"bottom": False, "left": False, "right": False, "top": False}
@@ -46,21 +45,21 @@ def pathways() -> None:
 
     _, axis = plt.subplots()
     axis.set_title("Actions graph")
-    layout = actions_graph_layout(actions_graph)
+    layout = ap.draw.actions_graph_layout(actions_graph)
     nx.draw_networkx(actions_graph.graph, pos=layout, **draw_options)
     plt.savefig("hello_world-actions_graph.pdf", **plt_options)
 
     plt.clf()
     _, axis = plt.subplots()
     axis.set_title("Pathways graph")
-    layout = pathways_graph_layout(pathways_graph)
+    layout = ap.draw.pathways_graph_layout(pathways_graph)
     nx.draw_networkx(pathways_graph.graph, pos=layout, **draw_options)
     plt.savefig("hello_world-pathways_graph.pdf", **plt_options)
 
     plt.clf()
     _, axis = plt.subplots()
     axis.set_title("Pathways map")
-    layout = pathways_map_layout(pathways_map)
+    layout = ap.draw.pathways_map_layout(pathways_map)
     # layout = nx.planar_layout(pathways_map.graph)
     nx.draw_networkx(pathways_map.graph, pos=layout, **draw_options)
     plt.savefig("hello_world-pathways_map.pdf", **plt_options)

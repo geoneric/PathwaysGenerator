@@ -1,9 +1,9 @@
 import copy
 
+from ..sequenced_action import SequencedAction
 from .actions_graph import ActionsGraph
 from .pathways_graph import PathwaysGraph
 from .pathways_map import PathwaysMap
-from .sequenced_action import SequencedAction
 
 
 def actions_graph_to_pathways_graph(actions_graph: ActionsGraph) -> PathwaysGraph:
