@@ -198,3 +198,7 @@ Background information
     * `Flake8 <https://flake8.pycqa.org/en/latest/>`_
     * `Mypy <https://mypy-lang.org/>`_
     * `Pylint <https://pylint.readthedocs.io/en/latest/>`_
+
+* Packages used:
+
+    * `NetworkX <https://networkx.org/documentation/stable/>`_

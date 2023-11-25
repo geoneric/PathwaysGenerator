@@ -20,6 +20,9 @@ class Action:
     def __str__(self) -> str:
         return self._label
 
+    def __repr__(self) -> str:
+        return f'Action("{self._label}")'
+
     @property
     def label(self) -> str:
         return self._label
