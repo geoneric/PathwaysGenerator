@@ -1,0 +1,154 @@
+---
+title: "Adaptation pathways"
+subtitle: "Progress update"
+date: "20231205"
+format:
+  revealjs:
+    theme: moon
+    fontsize: 2em
+    code-line-numbers: false
+    highlight-style: nord
+    standalone: true
+    embed-resources: true
+---
+
+
+# Repository
+
+## Guidelines for repository setup
+
+:::: {.columns}
+::: {.column width="60%"}
+- Generate as much as possible:
+    - Documentation
+    - This presentation
+    - Test data
+- Script everything:
+    - Generate documentation
+    - Run tests
+    - Create package
+- Automate as much as possible:
+    - Harmonize code style
+    - Perform static analyses
+:::
+
+::: {.column width="40%"}
+```bash
+adaptation_pathways$ tree -d -L 2 .
+.
+├── documentation
+│   ├── develop
+│   ├── _static
+│   ├── _templates
+│   ├── test
+│   └── use
+├── environment
+│   └── cmake
+├── presentation
+│   └── 2023
+└── source
+    ├── notebook
+    ├── package
+    ├── script
+    └── test
+```
+:::
+::::
+
+
+## Building targets
+
+```bash
+# Generate the documentation
+ninja documentation
+
+# Run the tests
+ninja test
+
+# Build the package
+ninja package
+
+# Build this presentation
+ninja 2023.12.progress.presentation
+```
+
+Use of Ninja is optional -- use your favourite build tool
+
+
+::: {.notes}
+- Generate and view documentation
+- Run the tests
+- Build the package
+
+All knowledge is captured in text files that are under version control.
+:::
+
+
+# Software design
+
+## Overview
+
+```{mermaid}
+flowchart LR
+    actionsgraph[actions graph] --> pathwaysgraph[pathways graph]
+    pathwaysgraph --> pathwaysmap[pathways map]
+    tippingpoints[tipping points] --> pathwaysmap
+    visualizationproperties[visualization properties] --> pathwaysmap
+    pathwaysmap --> visualizationa[visualization A]
+    pathwaysmap --> visualizationb[visualization B]
+    pathwaysmap --> visualizationc[visualization C]
+```
+
+
+::: {.notes}
+- Terminology may be wrong
+- Approach my not be fully correct
+:::
+
+
+## Actions graph
+
+:::: {.columns}
+::: {.column width="40%"}
+![](https://publicwiki.deltares.nl/download/attachments/119053076/APbanner2-735x176.jpg?version=1&modificationDate=1450250779000&api=v2)
+:::
+::::
+
+TODO Actions graph
+
+
+## Pathways graph
+
+:::: {.columns}
+::: {.column width="40%"}
+![](https://publicwiki.deltares.nl/download/attachments/119053076/APbanner2-735x176.jpg?version=1&modificationDate=1450250779000&api=v2)
+TODO Actions graph
+:::
+::::
+
+TODO Pathways graph
+
+
+## Pathways map
+
+:::: {.columns}
+::: {.column width="40%"}
+![](https://publicwiki.deltares.nl/download/attachments/119053076/APbanner2-735x176.jpg?version=1&modificationDate=1450250779000&api=v2)
+
+TODO Actions graph
+
+TODO Pathways graph
+:::
+::::
+
+TODO Pathways map
+
+
+## Next steps
+
+- Proof design supports all cases
+- Work on visualizing pathways maps
+- Work on convenient way to define:
+    - Adaptation pathways (sequences of actions)
+    - Tipping points (condition-based, time-based)
+    - Visualization properties (colours, layout, fonts, symbols, ...)

@@ -11,10 +11,15 @@ enable_testing()
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/environment/cmake)
 
+find_package(Quarto)
 find_package(Sphinx REQUIRED)
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
 add_subdirectory(documentation)
+
+if(Quarto_FOUND)
+    add_subdirectory(presentation)
+endif()
 add_subdirectory(source)
 
 add_custom_target(
