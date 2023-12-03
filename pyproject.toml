@@ -12,7 +12,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "adaptation_pathways"
-version = "0.0.1"
+version = "0.0.2"
 # dynamic = [
 #     "version",
 # ]
@@ -31,6 +31,8 @@ dependencies = [
     "dash",
     "docopt",
     "jupyterlab",
+    "matplotlib",
+    "networkx",
     "pandas",
     "plotly",
     "pyside6",
@@ -42,18 +44,16 @@ dependencies = [
 
 [project.scripts]
 pathways_generator = "adaptation_pathways.cli:generator_main"
+ap_plot_graphs = "adaptation_pathways.cli:plot_graphs_main"
 
-[tool.hatch.build.targets.sdist]
+[tool.hatch.build.targets.wheel]
 # include = [
 # ]
 packages = [
     "source/package/adaptation_pathways",
 ]
-# TODO Doesn't work yet ...
-exclude = [
-    ".gitignore",
-    "/pyproject.toml",
-]
+# exclude = [
+# ]
 
 # [tool.hatch.version]
 # path = "adaptation_pathways/version.py"
