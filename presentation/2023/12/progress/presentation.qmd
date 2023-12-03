@@ -13,28 +13,27 @@ format:
 ---
 
 
+::: {.callout-important}
+Disclaimer: very, very much work in progress, of course
+:::
+
+
 # Repository
 
-## Guidelines for repository setup
+## Repository setup
 
 :::: {.columns}
 ::: {.column width="60%"}
-- Generate as much as possible:
-    - Documentation
-    - This presentation
-    - Test data
-- Script everything:
-    - Generate documentation
-    - Run tests
-    - Create package
-- Automate as much as possible:
-    - Harmonize code style
-    - Perform static analyses
+- **Generate** as much as possible
+    - Documentation, this presentation, ...
+- **Script** as much as possible
+    - Generate documentation, run tests, create package, ...
+- **Automate** as much as possible
+    - Code style, static analyses, ...
 :::
 
 ::: {.column width="40%"}
 ```bash
-adaptation_pathways$ tree -d -L 2 .
 .
 ├── documentation
 │   ├── develop
@@ -55,8 +54,16 @@ adaptation_pathways$ tree -d -L 2 .
 :::
 ::::
 
+::: {.callout-important}
+Repository is single place for all information
+
+→ code, scripts, documentation, designs, ...
+:::
+
 
 ## Building targets
+
+Once development environment is setup (see docs):
 
 ```bash
 # Generate the documentation
@@ -68,8 +75,8 @@ ninja test
 # Build the package
 ninja package
 
-# Build this presentation
-ninja 2023.12.progress.presentation
+# Build this presentation ;-)
+ninja presentation.2023.12.progress
 ```
 
 Use of Ninja is optional -- use your favourite build tool
@@ -84,69 +91,149 @@ All knowledge is captured in text files that are under version control.
 :::
 
 
+## Software setup
+
+:::: {.columns}
+::: {.column width="60%"}
+- Abstraction layers
+- Dependencies between modules and between packages
+- Use of sub-packages and modules
+:::
+
+::: {.column width="40%"}
+```bash
+.
+└── adaptation_pathways
+    ├── cli
+    ├── condition_based
+    ├── graph
+    └── time_based
+```
+:::
+::::
+
+
 # Software design
 
-## Overview
+## Actions
+
+- Do not change often
+- Same actions used in multiple adaptation pathways
+- Same actions used in multiple studies(?)
+
+    - Can be part of a "library"(?)
+
+
+## Adaptation pathways
+
+- Do not change often (within a study)
+- Same pathways used in multiple scenarios
+
+
+## Scenarios
+
+- Same pathways combined with multiple sets of tipping points
+- Different resulting adaptation pathways maps
+
+
+---
+
+## Current focus
+
+How to organize and represent all relevant information in such a way:
+
+- That allows us to capture all cases
+- That makes complete sense
+- That makes it easy to use in software
+
+
+## Out of focus, for now
+
+- How to conveniently define actions, adaptation pathways, tipping points, scenarios
+- How to visualize adaptation pathway maps
+
+
+## Current line of thought
 
 ```{mermaid}
 flowchart LR
-    actionsgraph[actions graph] --> pathwaysgraph[pathways graph]
-    pathwaysgraph --> pathwaysmap[pathways map]
+    actionsgraph[actions graph]:::current --> pathwaysgraph[pathways graph]:::current
+    pathwaysgraph --> pathwaysmap[pathways map]:::current
     tippingpoints[tipping points] --> pathwaysmap
+    tippingpoints[tipping points] -.-> pathwaysgraph
     visualizationproperties[visualization properties] --> pathwaysmap
     pathwaysmap --> visualizationa[visualization A]
     pathwaysmap --> visualizationb[visualization B]
     pathwaysmap --> visualizationc[visualization C]
+    classDef current stroke:#ebcb8b
 ```
-
 
 ::: {.notes}
 - Terminology may be wrong
-- Approach my not be fully correct
+- Approach is not fully correct yet
 :::
 
 
-## Actions graph
+## Actions graph {background-color="#d8dee9"}
 
 :::: {.columns}
-::: {.column width="40%"}
+::: {.column width="50%"}
 ![](https://publicwiki.deltares.nl/download/attachments/119053076/APbanner2-735x176.jpg?version=1&modificationDate=1450250779000&api=v2)
+:::
+::: {.column width="50%"}
+![](pathways-1-actions_graph.svg)
 :::
 ::::
 
-TODO Actions graph
+Define sequences of actions:
+
+- Nodes: actions
+- Edges: conversions between actions
 
 
-## Pathways graph
+## Pathways graph {background-color="#d8dee9"}
 
 :::: {.columns}
-::: {.column width="40%"}
-![](https://publicwiki.deltares.nl/download/attachments/119053076/APbanner2-735x176.jpg?version=1&modificationDate=1450250779000&api=v2)
-TODO Actions graph
+::: {.column width="50%"}
+![](pathways-1-actions_graph.svg)
+:::
+::: {.column width="50%"}
+![](pathways-1-pathways_graph.svg)
 :::
 ::::
 
-TODO Pathways graph
+Automatic translation I:
+
+- Nodes: action conversions
+- Edges: periods of actions
 
 
-## Pathways map
+## Pathways map {background-color="#d8dee9"}
 
 :::: {.columns}
-::: {.column width="40%"}
-![](https://publicwiki.deltares.nl/download/attachments/119053076/APbanner2-735x176.jpg?version=1&modificationDate=1450250779000&api=v2)
-
-TODO Actions graph
-
-TODO Pathways graph
+::: {.column width="50%"}
+![](pathways-1-pathways_graph.svg)
+:::
+::: {.column width="50%"}
+![](pathways-1-pathways_map.svg)
 :::
 ::::
 
-TODO Pathways map
+Automatic translation II, towards adaptation pathways map:
+
+- Duplicate action conversions
+- ...
+
+
+## Why do this?
+
+- Allow for complex behaviour
+- Make individual steps relatively easy
 
 
 ## Next steps
 
-- Proof design supports all cases
+- Work towards a design supporting all cases
 - Work on visualizing pathways maps
 - Work on convenient way to define:
     - Adaptation pathways (sequences of actions)

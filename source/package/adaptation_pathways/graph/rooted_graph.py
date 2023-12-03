@@ -12,6 +12,9 @@ class RootedGraph:
     def __init__(self) -> None:
         self._graph = nx.DiGraph()
 
+    def __str__(self) -> str:
+        return "\n".join(nx.generate_network_text(self._graph))
+
     @property
     def graph(self) -> nx.DiGraph:
         """
@@ -32,3 +35,6 @@ class RootedGraph:
         :return: The root node
         """
         return next(nx.topological_sort(self._graph))
+        # print(self._graph.in_degree())
+        # print([node for node, degree in self._graph.in_degree()])
+        # return [node for node, degree in self._graph.in_degree() if degree == 0][0]

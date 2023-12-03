@@ -6,8 +6,7 @@ from typing import Callable
 def common_arguments() -> str:
     return """\
     -h --help      Show this screen
-    --version      Show version
-"""
+    --version      Show version"""
 
 
 def main_function(function: Callable):

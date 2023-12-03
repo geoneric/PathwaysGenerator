@@ -1,0 +1,6 @@
+current a
+current b
+current c
+b a
+b c
+c a
