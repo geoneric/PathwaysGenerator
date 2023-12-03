@@ -131,6 +131,8 @@ Create and push a tag.
    git push origin v1.2.3
 
 
+Bump versions in ``CMakeLists.txt`` and ``pyproject.toml``.
+
 
 Notes on software we use
 ------------------------
