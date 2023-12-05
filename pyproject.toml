@@ -32,7 +32,7 @@ dependencies = [
     "docopt",
     "jupyterlab",
     "matplotlib",
-    "networkx",
+    "networkx[default]",
     "pandas",
     "plotly",
     "pyside6",
