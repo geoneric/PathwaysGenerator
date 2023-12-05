@@ -1,0 +1,74 @@
+---
+title: "Graph"
+date: "20231205"
+format:
+  revealjs:
+    theme: moon
+    fontsize: 2em
+    code-line-numbers: false
+    highlight-style: nord
+    standalone: true
+    embed-resources: true
+---
+
+
+## Actions graph
+
+```{mermaid}
+    flowchart LR
+    current --> a:::a
+    current --> b:::b
+    current --> c:::c
+    b --> a
+    b --> c
+    c --> a
+    c --> b2[b]:::b
+    classDef a stroke:red
+    classDef b stroke:yellow
+    classDef c stroke:green
+```
+
+---
+
+- Sequences of actions
+    - Nodes are actions
+    - Edges are conversions between actions
+- Rules:
+    - All actions must end up as terminators in the pathways map
+    - ...
+
+
+## Pathways graph
+
+```{mermaid}
+    flowchart LR
+    current --> currenta{"current|a"}:::a
+    currenta --> a:::a
+    current --> currentb{"current|b"}:::b
+    currentb --> b:::b
+    b --> ba{"b|a"}:::b
+    ba --> a
+    b --> bc{"b|c"}:::b
+    bc --> c
+    current --> currentc{"current|c"}:::c
+    currentc --> c:::c
+    c --> ca{"c|a"}:::c
+    ca --> a
+    c --> cb{"c|b"}:::c
+    cb --> b2[b]:::b
+    classDef a stroke:red
+    classDef b stroke:yellow
+    classDef c stroke:green
+```
+
+---
+
+- Sequences of conversions between actions
+    - Nodes are the conversions
+    - Edges are the periods
+- Includes non-conversions: from nothing to current, from a/b/c to nothing
+- Conversions need to be mapped to tipping points
+- Actions from actions graph end up as tipping points
+- Visualization:
+    - Out-degree > 0 → vertical line in pathways map
+    - Conversions from pathways graph must end up as horizontal lines

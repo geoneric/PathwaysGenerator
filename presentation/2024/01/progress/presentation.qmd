@@ -1,0 +1,13 @@
+---
+title: "Adaptation pathways"
+subtitle: "Progress update"
+date: "20240108"
+format:
+  revealjs:
+    theme: moon
+    fontsize: 2em
+    code-line-numbers: false
+    highlight-style: nord
+    standalone: true
+    embed-resources: true
+---

@@ -1,5 +1,3 @@
-set(AP_PLOT_GRAPHS "${CMAKE_SOURCE_DIR}/source/script/ap_plot_graphs.py")
-
 add_custom_command(
     OUTPUT
         pathways-1-actions_graph.svg
@@ -21,4 +19,12 @@ add_custom_target(
         pathways-1-actions_graph.svg
         pathways-1-pathways_graph.svg
         pathways-1-pathways_map.svg
+)
+
+add_custom_target(
+    presentation.2023.12.graph
+    COMMAND
+        ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/graph.qmd ${CMAKE_CURRENT_BINARY_DIR}
+    COMMAND
+        ${QUARTO_EXECUTABLE} render ${CMAKE_CURRENT_BINARY_DIR}/graph.qmd --to html
 )

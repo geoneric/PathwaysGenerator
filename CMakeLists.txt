@@ -15,6 +15,10 @@ find_package(Quarto)
 find_package(Sphinx REQUIRED)
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
+set(AP_PLOT_GRAPHS
+    "${CMAKE_CURRENT_SOURCE_DIR}/source/script/ap_plot_graphs.py"
+)
+
 add_subdirectory(documentation)
 
 if(Quarto_FOUND)
