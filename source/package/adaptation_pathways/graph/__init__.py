@@ -1,35 +1,38 @@
 import copy
 
 from ..sequenced_action import SequencedAction
-from .actions_graph import ActionsGraph
+from .io import read_sequences  # noqa: F401
+from .layout import sequence_graph_layout  # noqa: F401
 from .pathways_graph import PathwaysGraph
 from .pathways_map import PathwaysMap
 from .plot import (  # noqa: F401
-    plot_actions_graph,
+    plot_and_save_sequence_graph,
     plot_pathways_graph,
     plot_pathways_map,
+    plot_sequence_graph,
 )
+from .sequence_graph import SequenceGraph
 
 
-def actions_graph_to_pathways_graph(actions_graph: ActionsGraph) -> PathwaysGraph:
+def sequence_graph_to_pathways_graph(sequence_graph: SequenceGraph) -> PathwaysGraph:
     def visit_graph(
-        actions_graph: ActionsGraph,
+        sequence_graph: SequenceGraph,
         pathways_graph: PathwaysGraph,
         from_action,
         to_action,
     ):
-        actions_graph_nx = actions_graph.graph
+        sequence_graph_nx = sequence_graph.graph
         tipping_point = SequencedAction(from_action, to_action)
 
-        if actions_graph_nx.in_degree(from_action) == 0:
+        if sequence_graph_nx.in_degree(from_action) == 0:
             pathways_graph.add_action(from_action, tipping_point)
 
-        if actions_graph_nx.out_degree(to_action) == 0:
+        if sequence_graph_nx.out_degree(to_action) == 0:
             pathways_graph.add_action(tipping_point, to_action)
         else:
-            for to_action_new in actions_graph_nx.adj[to_action]:
+            for to_action_new in sequence_graph_nx.adj[to_action]:
                 to_tipping_point = visit_graph(
-                    actions_graph, pathways_graph, to_action, to_action_new
+                    sequence_graph, pathways_graph, to_action, to_action_new
                 )
                 pathways_graph.add_action(tipping_point, to_tipping_point)
 
@@ -42,12 +45,12 @@ def actions_graph_to_pathways_graph(actions_graph: ActionsGraph) -> PathwaysGrap
 
     pathways_graph = PathwaysGraph()
 
-    if not actions_graph.is_empty:
-        actions_graph_nx = actions_graph.graph
-        root_action = actions_graph.root_node
+    if sequence_graph.nr_actions() > 0:
+        sequence_graph_nx = sequence_graph.graph
+        root_action = sequence_graph.root_node
 
-        for to_action in actions_graph_nx.adj[root_action]:
-            visit_graph(actions_graph, pathways_graph, root_action, to_action)
+        for to_action in sequence_graph_nx.adj[root_action]:
+            visit_graph(sequence_graph, pathways_graph, root_action, to_action)
 
     return pathways_graph
 
@@ -79,7 +82,7 @@ def pathways_graph_to_pathways_map(pathways_graph: PathwaysGraph) -> PathwaysMap
 
     pathways_map = PathwaysMap()
 
-    if not pathways_graph.is_empty:
+    if pathways_graph.nr_nodes() > 0:
         root_conversion = pathways_graph.root_node
 
         visit_graph(pathways_graph, pathways_map, root_conversion)

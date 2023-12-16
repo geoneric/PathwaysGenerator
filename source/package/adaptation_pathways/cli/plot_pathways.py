@@ -10,7 +10,7 @@ from ..browser import view_in_browser  # noqa: F401
 from ..networkx import plot_pathways as plot_pathways_nx
 from ..version import __version__
 from ..window import view_in_window  # noqa: F401
-from .main import common_arguments, main_function
+from .main import main_function
 
 
 @main_function
@@ -41,7 +41,8 @@ def plot_pathways(
 
 
 def main() -> int:
-    usage = """\
+    command = os.path.basename(sys.argv[0])
+    usage = f"""\
 Generate adaptation pathways
 
 Usage:
@@ -51,12 +52,10 @@ Usage:
     {command} --version
 
 Options:
-{common_arguments}
-    --port=<port>  Port number [default: 8050]
-""".format(
-        command=os.path.basename(sys.argv[0]),
-        common_arguments=common_arguments,
-    )
+    -h --help          Show this screen and exit
+    --version          Show version and exit
+    --port=<port>      Port number [default: 8050]
+"""
     # {command} [--url=<url>] [--mode=<mode>] jupyter
 
     arguments = sys.argv[1:]

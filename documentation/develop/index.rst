@@ -9,6 +9,7 @@ Code
 
    API <../modules>
    Index <../genindex>
+   Examples <example/index>
 
 
 Development environment
@@ -40,7 +41,7 @@ In commands:
    pip3 install --upgrade pip
 
    # Install software needed to help develop our software:
-   pip3 install build cmake dash docopt furo jupyterlab matplotlib networkx[default] ninja pandas plotly pyside6 sphinx
+   pip3 install build cmake dash docopt furo jupyterlab matplotlib networkx[default] ninja pandas plotly pyside6 sphinx sphinxcontrib-mermaid sphinx-gallery
 
    # Install handy tools that will keep our code in good shape:
    pip3 install pre-commit
@@ -79,6 +80,9 @@ work. We use the Ninja build tool here, but you can use any build tool supported
 
    # Create the package
    ninja package
+
+   # List all targets
+   ninja -t targets
 
 
 Create and test a package

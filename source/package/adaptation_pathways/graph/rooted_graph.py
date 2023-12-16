@@ -19,15 +19,28 @@ class RootedGraph:
     def graph(self) -> nx.DiGraph:
         """
         :return: The layered directed graph instance
+
+        Try not to use it -- it should be an implementation detail as much as possible.
         """
         return self._graph
 
-    @property
-    def is_empty(self) -> bool:
+    # def is_empty(self) -> bool:
+    #     """
+    #     :return: Wheter or not the tree is empty
+    #     """
+    #     return nx.is_empty(self._graph)
+
+    def nr_nodes(self) -> int:
         """
-        :return: Wheter or not the tree is empty
+        :return: Number of nodes
         """
-        return nx.is_empty(self._graph)
+        return len(self._graph.nodes)
+
+    def nr_edges(self) -> int:
+        """
+        :return: Number of edges
+        """
+        return len(self._graph.edges)
 
     @property
     def root_node(self):

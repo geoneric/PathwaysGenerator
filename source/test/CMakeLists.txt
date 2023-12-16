@@ -2,6 +2,7 @@ add_test(
     NAME python_tests
     COMMAND ${Python3_EXECUTABLE}
         -m unittest discover
+        --verbose
         --start-directory ${CMAKE_CURRENT_SOURCE_DIR}
         --pattern "*_test.py"
 )

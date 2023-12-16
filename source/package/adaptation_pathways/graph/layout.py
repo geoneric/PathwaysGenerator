@@ -1,144 +1,120 @@
-# from dataclasses import dataclass
+import itertools
 
-# import networkx as nx
 import numpy as np
 
 from ..action import Action
-from .actions_graph import ActionsGraph
+from .coordinate import distribute
 from .pathways_graph import PathwaysGraph
 from .pathways_map import PathwaysMap
+from .sequence_graph import SequenceGraph
 
 
-# def actions_graph_layout(actions_graph: ActionsGraph) -> dict[Action, np.ndarray]:
-#     def visit_graph(
-#         actions_graph: ActionsGraph,
-#         from_action: Action,
-#         to_action: Action,
-#         coordinates: tuple[float, float],
-#         nodes: dict[Action, np.ndarray],
-#     ):
-#         x, y = coordinates
-#
-#         if from_action not in nodes:
-#             nodes[from_action] = np.array([x, y], dtype=np.float64)
-#
-#         x += 1
-#
-#         if to_action not in nodes:
-#             nodes[to_action] = np.array([x, y], dtype=np.float64)
-#
-#         if actions_graph.nr_to_actions(to_action) > 0:
-#             x += 1
-#
-#             for to_action_new in actions_graph.to_actions(to_action):
-#                 visit_graph(actions_graph, to_action, to_action_new, (x, y), nodes)
-#                 y += 1
-#
-#     nodes: dict[Action, np.ndarray] = {}
-#
-#     if not actions_graph.is_empty:
-#         root_action = actions_graph.root_node
-#         x, y = 0, 0
-#
-#         # All edges, in breath-first order
-#         print([str(edge) for edge in nx.edge_bfs(actions_graph.graph, root_action)])
-#
-#         # Layout must extend from left to right, only setting a location for nodes not yet visited
-#         # Some edges will point back to nodes already visited. This is relevant information. It
-#         # is an indication that the pathway continues along the other action, which has started
-#         # in the past, or, in case the other action has ended already (depends on tipping points),
-#         # starts that other action anew.
-#
-#         # For now, for laying out the graph we need to figure out this information:
-#         # - How many "vertical levels" are present at each "horizontal level". This determines
-#         #   the y-coordinate of each node. Remember, nodes already visited don't count here.
-#
-#         # For any given node, we need info about how many vertical levels will be encountered
-#         # to its right. The root node starts at a certain y-coordinate. Its child-nodes need
-#         # to be positioned based on the max number of vertical nodes of the children of the root
-#         # nodes (all nodes), Only then can root's immediate children be positioned. We not
-#         # only need the total number of vertical nodes, but we need it per immediate child
-#         # node. Otherwise we cannot distribute the child nodes along the vertial axis correctly.
-#
-#         # Algorithm:
-#         # - Visit all nodes and determine:
-#         #     - depth
-#         #     - nr-siblings
-#
-#         @dataclass
-#         class Properties:
-#             depth: int
-#             nr_siblings: int
-#
-#
-#         action_properties: dict[Action, Properties] = {}
-#
-#         def visit_action(actions_graph, action, properties, depth, idx):
-#
-#             if action not in properties:
-#                 properties[action] = Properties(depth , idx + 1)
-#
-#             idx = 0
-#             for to_action in actions_graph.to_actions(action):
-#                 visit_action(actions_graph, to_action, properties, depth=depth + 1, idx=idx)
-#                 idx += 1
-#
-#         visit_action(actions_graph, root_action, action_properties, depth=0, idx=0)
-#
-#         print(action_properties)
-#
-#
-#         # TODO Also breath first!!!
-#
-#
-#         # action_properties[root_action] = Properties(0, 0)
-#
-#         # # Depth first visit of all actions
-#         # for to_action in actions_graph.to_actions(root_action):
-#         #     visit_action(actions_graph, to_action
-#
-#
-#         # for to_action in actions_graph.to_actions(root_action):
-#         #     visit_graph(actions_graph, root_action, to_action, (x, y), nodes)
-#         #     y += 1
-#
-#     return nodes
+def add_position(nodes, action, position):
+    nodes[action] = np.array(position, np.float64)
 
 
-def actions_graph_layout(actions_graph: ActionsGraph) -> dict[Action, np.ndarray]:
-    def visit_graph(
-        actions_graph: ActionsGraph,
-        from_action: Action,
-        to_action: Action,
-        coordinates: tuple[float, float],
-        nodes: dict[Action, np.ndarray],
+def distribute_horizontally(
+    sequence_graph: SequenceGraph,
+    from_action: Action,
+    nodes: dict[Action, np.ndarray],
+) -> None:
+    min_distance = 1.0
+    from_x = nodes[from_action][0]
+
+    for to_action in sequence_graph.to_actions(from_action):
+        to_x = from_x + min_distance
+
+        # Push action to the right if necessary
+        if to_action in nodes:
+            to_x = max(to_x, nodes[to_action][0])
+
+        add_position(nodes, to_action, (to_x, np.nan))
+
+    for to_action in sequence_graph.to_actions(from_action):
+        distribute_horizontally(sequence_graph, to_action, nodes)
+
+
+def sort_horizontally(
+    actions: list[Action], nodes: dict[Action, np.ndarray]
+) -> tuple[list[Action], list[float]]:
+    sorted_actions = []
+    x_coordinates = []
+
+    if len(actions) > 0:
+        x_coordinates = [nodes[action][0] for action in actions]
+        action_coordinate_pairs = sorted(
+            zip(actions, x_coordinates), key=lambda pair: pair[1]
+        )
+        sorted_actions, x_coordinates = zip(*action_coordinate_pairs)
+
+    return sorted_actions, x_coordinates
+
+
+def distribute_vertically(
+    sequence_graph: SequenceGraph,
+    from_action: Action,
+    nodes: dict[Action, np.ndarray],
+) -> None:
+    # Visit *all* actions in one go, in order of increasing x-coordinate
+    # - Group actions by x-coordinate. Within each group:
+    #     - For each action to position, take the mean y-coordinates of all from-actions
+    #       into account
+    #     - Take some minimum distance into account. Move nodes that are too close to each other.
+
+    min_distance = 1.0
+    actions = sequence_graph.all_to_actions(from_action)
+    sorted_actions, _ = sort_horizontally(actions, nodes)
+
+    # Iterate over to_action_coordinate_pairs, grouped by their x-coordinate
+    for _, grouped_sorted_actions in itertools.groupby(  # type: ignore
+        sorted_actions, lambda action: nodes[action][0]
     ):
-        x, y = coordinates
+        actions = list(grouped_sorted_actions)
 
-        if from_action not in nodes:
-            nodes[from_action] = np.array([x, y], dtype=np.float64)
+        # Initialize the y-coordinate with the mean of the y-coordinates of the from_actions
+        # that end in each action
+        for action in actions:
+            # Each action is only visited once
+            assert np.isnan(nodes[action][1])
 
-        x += 1
+            # Calculate the mean y-coordinate of actions that end in the to_action
+            from_actions = sequence_graph.from_actions(action)
 
-        if to_action not in nodes:
-            nodes[to_action] = np.array([x, y], dtype=np.float64)
+            # Only the root action does not have from_actions
+            assert len(from_actions) > 0
 
-        if actions_graph.nr_to_actions(to_action) > 0:
-            x += 1
+            y_coordinates = [nodes[action][1] for action in from_actions]
 
-            for to_action_new in actions_graph.to_actions(to_action):
-                visit_graph(actions_graph, to_action, to_action_new, (x, y), nodes)
-                y += 1
+            # All from_actions must already be positioned
+            assert all(not np.isnan(coordinate) for coordinate in y_coordinates)
 
+            mean_y = sum(nodes[action][1] for action in from_actions) / len(
+                from_actions
+            )
+            nodes[action][1] = mean_y
+
+        # If the previous loop resulted in same / similar y-coordinates, we spread them
+        # out some more
+        y_coordinates = [nodes[action][1] for action in actions]
+        y_coordinates = distribute(list(y_coordinates), min_distance)
+
+        # First (lowest) y_coordinate corresponds with the last to_action. Therefore,
+        # reverse 'm.
+        y_coordinates = list(reversed(y_coordinates))
+
+        for idx, action in enumerate(actions):
+            assert not np.isnan(nodes[action][1])
+            nodes[action][1] = y_coordinates[idx]
+
+
+def sequence_graph_layout(sequence_graph: SequenceGraph) -> dict[Action, np.ndarray]:
     nodes: dict[Action, np.ndarray] = {}
 
-    if not actions_graph.is_empty:
-        root_action = actions_graph.root_node
-        x, y = 0, 0
-
-        for to_action in actions_graph.to_actions(root_action):
-            visit_graph(actions_graph, root_action, to_action, (x, y), nodes)
-            y += 1
+    if sequence_graph.nr_actions() > 0:
+        from_action = sequence_graph.root_node
+        add_position(nodes, from_action, (0, 0))
+        distribute_horizontally(sequence_graph, from_action, nodes)
+        distribute_vertically(sequence_graph, from_action, nodes)
 
     return nodes
 
@@ -178,7 +154,7 @@ def pathways_graph_layout(pathways_graph: PathwaysGraph) -> dict[Action, np.ndar
 
     nodes: dict[Action, np.ndarray] = {}
 
-    if not pathways_graph.is_empty:
+    if pathways_graph.nr_nodes() > 0:
         root_tipping_point = pathways_graph.root_node
         x, y = 0, 0
 
@@ -224,7 +200,7 @@ def pathways_map_layout(pathways_map: PathwaysMap) -> dict[Action, np.ndarray]:
 
     nodes: dict[Action, np.ndarray] = {}
 
-    if not pathways_map.is_empty:
+    if pathways_map.nr_nodes() > 0:
         root_tipping_point = pathways_map.root_node
         x, y = 0, 0
 

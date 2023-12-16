@@ -7,7 +7,7 @@ import networkx as nx
 
 import adaptation_pathways as ap
 
-from .main import common_arguments, main_function
+from .main import main_function
 
 
 def condition_based_pathways() -> None:
@@ -22,21 +22,21 @@ def condition_based_pathways() -> None:
     medium_ships_and_small_dredging = ap.CombinedAction([medium_ships, small_dredging])
 
     # Create actions graph
-    actions_graph = ap.graph.ActionsGraph()
+    sequence_graph = ap.graph.SequenceGraph()
 
-    actions_graph.add_sequence(current_situation, small_ships)
-    actions_graph.add_sequence(current_situation, medium_ships)
-    actions_graph.add_sequence(current_situation, small_dredging)
-    actions_graph.add_sequence(current_situation, large_dredging)
-    actions_graph.add_sequence(medium_ships, small_ships)
-    actions_graph.add_sequence(medium_ships, small_dredging)
-    actions_graph.add_sequence(medium_ships, large_dredging)
-    actions_graph.add_sequence(small_dredging, small_ships)
-    actions_graph.add_sequence(small_dredging, medium_ships_and_small_dredging)
-    actions_graph.add_sequence(small_dredging, large_dredging)
+    sequence_graph.add_sequence(current_situation, small_ships)
+    sequence_graph.add_sequence(current_situation, medium_ships)
+    sequence_graph.add_sequence(current_situation, small_dredging)
+    sequence_graph.add_sequence(current_situation, large_dredging)
+    sequence_graph.add_sequence(medium_ships, small_ships)
+    sequence_graph.add_sequence(medium_ships, small_dredging)
+    sequence_graph.add_sequence(medium_ships, large_dredging)
+    sequence_graph.add_sequence(small_dredging, small_ships)
+    sequence_graph.add_sequence(small_dredging, medium_ships_and_small_dredging)
+    sequence_graph.add_sequence(small_dredging, large_dredging)
 
     # Create pathways graph
-    pathways_graph = ap.graph.actions_graph_to_pathways_graph(actions_graph)
+    pathways_graph = ap.graph.sequence_graph_to_pathways_graph(sequence_graph)
 
     # Define tipping points in terms of sedimentation rates
 
@@ -49,7 +49,7 @@ def condition_based_pathways() -> None:
     plt.clf()
     axis = plt.subplot(211)
     axis.set_title("Actions graph")
-    nx.draw_planar(actions_graph.graph, with_labels=True, font_size="xx-small")
+    nx.draw_planar(sequence_graph.graph, with_labels=True, font_size="xx-small")
     axis = plt.subplot(212)
     axis.set_title("Pathways graph")
     nx.draw_planar(pathways_graph.graph, with_labels=True, font_size="xx-small")
@@ -82,35 +82,35 @@ def time_based_pathways() -> None:
     )
 
     # Create actions graph
-    actions_graph = ap.graph.ActionsGraph()
+    sequence_graph = ap.graph.SequenceGraph()
 
-    actions_graph.add_sequence(current_situation, pump_capacity)
-    actions_graph.add_sequence(current_situation, discharge_capacity)
-    actions_graph.add_sequence(current_situation, increase_water_level_and_dikes1)
-    actions_graph.add_sequence(current_situation, increase_water_level_and_dikes2)
-    actions_graph.add_sequence(pump_capacity, discharge_capacity)
-    actions_graph.add_sequence(
+    sequence_graph.add_sequence(current_situation, pump_capacity)
+    sequence_graph.add_sequence(current_situation, discharge_capacity)
+    sequence_graph.add_sequence(current_situation, increase_water_level_and_dikes1)
+    sequence_graph.add_sequence(current_situation, increase_water_level_and_dikes2)
+    sequence_graph.add_sequence(pump_capacity, discharge_capacity)
+    sequence_graph.add_sequence(
         pump_capacity, pump_capacity_and_increase_water_level_and_dikes1
     )
-    actions_graph.add_sequence(
+    sequence_graph.add_sequence(
         discharge_capacity, discharge_capacity_and_increase_water_level_and_dikes1
     )
-    actions_graph.add_sequence(
+    sequence_graph.add_sequence(
         increase_water_level_and_dikes1,
         increase_water_level_and_dikes1_and_pump_capacity,
     )
-    actions_graph.add_sequence(
+    sequence_graph.add_sequence(
         increase_water_level_and_dikes1,
         increase_water_level_and_dikes1_and_discharge_capacity,
     )
 
     # Create pathways graph
-    pathways_graph = ap.graph.actions_graph_to_pathways_graph(actions_graph)
+    pathways_graph = ap.graph.sequence_graph_to_pathways_graph(sequence_graph)
 
     plt.clf()
     axis = plt.subplot(211)
     axis.set_title("Actions graph")
-    nx.draw_planar(actions_graph.graph, with_labels=True, font_size="xx-small")
+    nx.draw_planar(sequence_graph.graph, with_labels=True, font_size="xx-small")
     axis = plt.subplot(212)
     axis.set_title("Pathways graph")
     nx.draw_planar(pathways_graph.graph, with_labels=True, font_size="xx-small")
@@ -133,7 +133,8 @@ Usage:
     {command}
 
 Options:
-{common_arguments()}
+    -h --help          Show this screen and exit
+    --version          Show version and exit
 """
 
     arguments = sys.argv[1:]
