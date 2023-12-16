@@ -4,7 +4,7 @@ configure_file(
     @ONLY
 )
 
-foreach(name IN ITEMS index)
+foreach(name IN ITEMS glossary index)
     configure_file(
         ${name}.rst
         ${name}.rst
@@ -49,3 +49,14 @@ add_custom_target(
 )
 
 add_dependencies(documentation apidoc)
+
+add_custom_target(
+    documentation.zip
+    WORKING_DIRECTORY
+        ${CMAKE_BINARY_DIR}
+    COMMAND
+        ${CMAKE_COMMAND} -E tar "cf" "adaptation_pathways-${CMAKE_PROJECT_VERSION}-documentation.zip" --format=zip --
+            documentation/html
+)
+
+add_dependencies(documentation.zip documentation)

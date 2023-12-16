@@ -10,6 +10,7 @@ What do you want to do?
    Use the package <use/index>
    Test the package <test/index>
    Develop the package <develop/index>
+   Glossary <glossary>
 
 See also:
 
