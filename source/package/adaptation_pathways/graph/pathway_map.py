@@ -2,9 +2,9 @@ from ..action import Action
 from .rooted_graph import RootedGraph
 
 
-class PathwaysMap(RootedGraph):
+class PathwayMap(RootedGraph):
     """
-    A PathwaysMap represents a collection of adaptation pathways. These pathways are encoded
+    A PathwayMap represents a collection of adaptation pathways. These pathways are encoded
     in a directed rooted graph in which the nodes represent the tipping points, and the edges
     the period of time an action is active.
 

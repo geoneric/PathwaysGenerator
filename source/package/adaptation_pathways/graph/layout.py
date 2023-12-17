@@ -3,9 +3,10 @@ import itertools
 import numpy as np
 
 from ..action import Action
+from ..action_conversion import ActionConversion
 from .coordinate import distribute
-from .pathways_graph import PathwaysGraph
-from .pathways_map import PathwaysMap
+from .pathway_graph import PathwayGraph
+from .pathway_map import PathwayMap
 from .sequence_graph import SequenceGraph
 
 
@@ -119,57 +120,53 @@ def sequence_graph_layout(sequence_graph: SequenceGraph) -> dict[Action, np.ndar
     return nodes
 
 
-def pathways_graph_layout(pathways_graph: PathwaysGraph) -> dict[Action, np.ndarray]:
+def pathway_graph_layout(pathway_graph: PathwayGraph) -> dict[Action, np.ndarray]:
     def visit_graph(
-        pathways_graph: PathwaysGraph,
-        from_tipping_point: Action,
-        to_tipping_point: Action,
+        pathway_graph: PathwayGraph,
+        from_conversion: Action | ActionConversion,
+        to_conversion: ActionConversion | Action,
         coordinates: tuple[float, float],
         nodes: dict[Action, np.ndarray],
     ):
         x, y = coordinates
 
-        if from_tipping_point not in nodes:
-            nodes[from_tipping_point] = np.array([x, y], dtype=np.float64)
+        if from_conversion not in nodes:
+            add_position(nodes, from_conversion, (x, y))
 
         x += 1
 
-        if to_tipping_point not in nodes:
-            nodes[to_tipping_point] = np.array([x, y], dtype=np.float64)
+        if to_conversion not in nodes:
+            add_position(nodes, to_conversion, (x, y))
 
-        if pathways_graph.nr_to_tipping_points(to_tipping_point) > 0:
-            x += 1
+        if pathway_graph.nr_to_conversions(to_conversion) > 0:
+            # x += 1
 
-            for to_tipping_point_new in pathways_graph.to_tipping_points(
-                to_tipping_point
-            ):
+            for to_tipping_point_new in pathway_graph.to_conversions(to_conversion):
                 visit_graph(
-                    pathways_graph,
-                    to_tipping_point,
+                    pathway_graph,
+                    to_conversion,
                     to_tipping_point_new,
                     (x, y),
                     nodes,
                 )
-                y += 1
+                y -= 1
 
     nodes: dict[Action, np.ndarray] = {}
 
-    if pathways_graph.nr_nodes() > 0:
-        root_tipping_point = pathways_graph.root_node
+    if pathway_graph.nr_conversions() > 0:
+        root_action = pathway_graph.root_node
         x, y = 0, 0
 
-        for to_tipping_point in pathways_graph.to_tipping_points(root_tipping_point):
-            visit_graph(
-                pathways_graph, root_tipping_point, to_tipping_point, (x, y), nodes
-            )
-            y += 1
+        for to_conversion in pathway_graph.to_conversions(root_action):
+            visit_graph(pathway_graph, root_action, to_conversion, (x, y), nodes)
+            y -= 1
 
     return nodes
 
 
-def pathways_map_layout(pathways_map: PathwaysMap) -> dict[Action, np.ndarray]:
+def pathway_map_layout(pathway_map: PathwayMap) -> dict[Action, np.ndarray]:
     def visit_graph(
-        pathways_map: PathwaysMap,
+        pathway_map: PathwayMap,
         from_tipping_point: Action,
         coordinates: tuple[float, float],
         nodes: dict[Action, np.ndarray],
@@ -181,29 +178,27 @@ def pathways_map_layout(pathways_map: PathwaysMap) -> dict[Action, np.ndarray]:
 
         x += 1
 
-        to_tipping_point = pathways_map.to_tipping_point(from_tipping_point)
+        to_tipping_point = pathway_map.to_tipping_point(from_tipping_point)
 
         if to_tipping_point not in nodes:
             nodes[to_tipping_point] = np.array([x, y], dtype=np.float64)
 
-        for from_tipping_point_new in pathways_map.from_tipping_points(
-            to_tipping_point
-        ):
-            if pathways_map.nr_downstream_actions(from_tipping_point_new) == 0:
+        for from_tipping_point_new in pathway_map.from_tipping_points(to_tipping_point):
+            if pathway_map.nr_downstream_actions(from_tipping_point_new) == 0:
                 if from_tipping_point_new not in nodes:
                     nodes[from_tipping_point_new] = np.array(
                         [x + 1, y], dtype=np.float64
                     )
             else:
                 y += 1
-                visit_graph(pathways_map, from_tipping_point_new, (x, y), nodes)
+                visit_graph(pathway_map, from_tipping_point_new, (x, y), nodes)
 
     nodes: dict[Action, np.ndarray] = {}
 
-    if pathways_map.nr_nodes() > 0:
-        root_tipping_point = pathways_map.root_node
+    if pathway_map.nr_nodes() > 0:
+        root_tipping_point = pathway_map.root_node
         x, y = 0, 0
 
-        visit_graph(pathways_map, root_tipping_point, (x, y), nodes)
+        visit_graph(pathway_map, root_tipping_point, (x, y), nodes)
 
     return nodes

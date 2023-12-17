@@ -3,9 +3,9 @@ import networkx as nx
 import numpy as np
 
 from ..action import Action
-from .layout import pathways_graph_layout, pathways_map_layout, sequence_graph_layout
-from .pathways_graph import PathwaysGraph
-from .pathways_map import PathwaysMap
+from .layout import pathway_graph_layout, pathway_map_layout, sequence_graph_layout
+from .pathway_graph import PathwayGraph
+from .pathway_map import PathwayMap
 from .sequence_graph import SequenceGraph
 
 
@@ -37,7 +37,7 @@ def save_plot(pathname: str) -> None:
 
 def plot_sequence_graph(sequence_graph: SequenceGraph) -> None:
     init_plot(
-        "Sequences graph",
+        "Sequence graph",
         sequence_graph.graph,
         sequence_graph_layout(sequence_graph),
     )
@@ -48,15 +48,23 @@ def plot_and_save_sequence_graph(sequence_graph: SequenceGraph, pathname: str) -
     save_plot(pathname)
 
 
-def plot_pathways_graph(pathways_graph: PathwaysGraph, pathname: str) -> None:
+def plot_pathway_graph(pathway_graph: PathwayGraph) -> None:
     init_plot(
-        "Pathways graph",
-        pathways_graph.graph,
-        pathways_graph_layout(pathways_graph),
+        "Pathway graph",
+        pathway_graph.graph,
+        pathway_graph_layout(pathway_graph),
     )
+
+
+def plot_and_save_pathway_graph(pathway_graph: PathwayGraph, pathname: str) -> None:
+    plot_pathway_graph(pathway_graph)
     save_plot(pathname)
 
 
-def plot_pathways_map(pathways_map: PathwaysMap, pathname: str) -> None:
-    init_plot("Pathways map", pathways_map.graph, pathways_map_layout(pathways_map))
+def plot_pathway_map(pathway_map: PathwayMap) -> None:
+    init_plot("Pathway map", pathway_map.graph, pathway_map_layout(pathway_map))
+
+
+def plot_and_save_pathway_map(pathway_map: PathwayMap, pathname: str) -> None:
+    plot_pathway_map(pathway_map)
     save_plot(pathname)

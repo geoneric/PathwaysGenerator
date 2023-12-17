@@ -8,8 +8,8 @@ from adaptation_pathways.graph import SequenceGraph, sequence_graph_layout
 
 class SequenceGraphLayoutTest(unittest.TestCase):
     def test_empty(self):
-        graph = SequenceGraph()
-        positions = sequence_graph_layout(graph)
+        sequence_graph = SequenceGraph()
+        positions = sequence_graph_layout(sequence_graph)
 
         self.assertEqual(len(positions), 0)
 
@@ -17,13 +17,13 @@ class SequenceGraphLayoutTest(unittest.TestCase):
         """
         current
         """
-        graph = SequenceGraph()
+        sequence_graph = SequenceGraph()
         current = Action("current")
         actions = [current]
 
-        graph.add_action(current)
+        sequence_graph.add_action(current)
 
-        positions = sequence_graph_layout(graph)
+        positions = sequence_graph_layout(sequence_graph)
 
         self.assertEqual(len(positions), len(actions))
         self.assertTrue(all(action in positions for action in actions))
@@ -33,14 +33,14 @@ class SequenceGraphLayoutTest(unittest.TestCase):
         """
         current → a
         """
-        graph = SequenceGraph()
+        sequence_graph = SequenceGraph()
         current = Action("current")
         a = Action("a")
         actions = [current, a]
 
-        graph.add_sequence(current, a)
+        sequence_graph.add_sequence(current, a)
 
-        positions = sequence_graph_layout(graph)
+        positions = sequence_graph_layout(sequence_graph)
 
         self.assertEqual(len(positions), len(actions))
         self.assertTrue(all(action in positions for action in actions))
@@ -51,18 +51,18 @@ class SequenceGraphLayoutTest(unittest.TestCase):
         """
         current → a → b → c
         """
-        graph = SequenceGraph()
+        sequence_graph = SequenceGraph()
         current = Action("current")
         a = Action("a")
         b = Action("b")
         c = Action("c")
         actions = [current, a, b, c]
 
-        graph.add_sequence(current, a)
-        graph.add_sequence(a, b)
-        graph.add_sequence(b, c)
+        sequence_graph.add_sequence(current, a)
+        sequence_graph.add_sequence(a, b)
+        sequence_graph.add_sequence(b, c)
 
-        positions = sequence_graph_layout(graph)
+        positions = sequence_graph_layout(sequence_graph)
 
         self.assertEqual(len(positions), len(actions))
         self.assertTrue(all(action in positions for action in actions))
@@ -77,16 +77,16 @@ class SequenceGraphLayoutTest(unittest.TestCase):
         current
                 ↘ b
         """
-        graph = SequenceGraph()
+        sequence_graph = SequenceGraph()
         current = Action("current")
         a = Action("a")
         b = Action("b")
         actions = [current, a, b]
 
-        graph.add_sequence(current, a)
-        graph.add_sequence(current, b)
+        sequence_graph.add_sequence(current, a)
+        sequence_graph.add_sequence(current, b)
 
-        positions = sequence_graph_layout(graph)
+        positions = sequence_graph_layout(sequence_graph)
 
         self.assertEqual(len(positions), len(actions))
         self.assertTrue(all(action in positions for action in actions))
@@ -106,7 +106,7 @@ class SequenceGraphLayoutTest(unittest.TestCase):
         e has in-degree of two, f has in-degree of three, but since e follows f, it must be
         positioned to the right of it
         """
-        graph = SequenceGraph()
+        sequence_graph = SequenceGraph()
         current = Action("current")
         a = Action("a")
         b = Action("b")
@@ -116,7 +116,7 @@ class SequenceGraphLayoutTest(unittest.TestCase):
         f = Action("f")
         actions = [current, a, b, c, d, e, f]
 
-        graph.add_sequences(
+        sequence_graph.add_sequences(
             [
                 (current, a),
                 (a, e),
@@ -130,7 +130,7 @@ class SequenceGraphLayoutTest(unittest.TestCase):
             ]
         )
 
-        positions = sequence_graph_layout(graph)
+        positions = sequence_graph_layout(sequence_graph)
 
         self.assertEqual(len(positions), len(actions))
         self.assertTrue(all(action in positions for action in actions))
