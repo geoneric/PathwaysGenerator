@@ -1,7 +1,12 @@
-import copy
-
 from ..action import Action
-from .colour import default_edge_colours, default_node_colours  # noqa: F401
+from ..action_begin import ActionBegin
+from ..action_end import ActionEnd
+from .colour import (  # noqa: F401
+    default_edge_colours,
+    default_node_colours_pathway_graph,
+    default_node_colours_pathway_map,
+    default_node_colours_sequence_graph,
+)
 from .io import read_sequences  # noqa: F401
 from .pathway_graph import PathwayGraph
 from .pathway_graph_layout import pathway_graph_layout  # noqa: F401
@@ -49,32 +54,29 @@ def pathway_graph_to_pathway_map(pathway_graph: PathwayGraph) -> PathwayMap:
     def visit_graph(
         pathway_graph: PathwayGraph,
         pathway_map: PathwayMap,
-        from_tipping_point,
-    ):
-        pathway_graph_nx = pathway_graph.graph
+        action,
+    ) -> ActionBegin:
+        begin = ActionBegin(action)
+        end = ActionEnd(action)
 
-        # Collection of actions, defined by from/to tipping points
-        actions = list(pathway_graph_nx.out_edges(from_tipping_point))
+        pathway_map.add_period(begin, end)
 
-        if len(actions) == 1:
-            pathway_map.add_action(from_tipping_point, actions[0][1])
-            visit_graph(pathway_graph, pathway_map, actions[0][1])
-        elif len(actions) > 1:
-            # In case the action is followed by more than one pathway, we need to duplicate the
-            # tipping point. This will end up as the forking point on the vertical line in the
-            # pathways map.
-            to_tipping_point = copy.deepcopy(from_tipping_point)
-            pathway_map.add_action(from_tipping_point, to_tipping_point)
+        for conversion in pathway_graph.to_conversions(action):
+            begin_new = visit_graph(
+                pathway_graph, pathway_map, pathway_graph.to_action(conversion)
+            )
+            pathway_map.add_conversion(end, begin_new)
 
-            for action in actions:
-                pathway_map.add_action(to_tipping_point, action[1])
-                visit_graph(pathway_graph, pathway_map, action[1])
+        return begin
 
     pathway_map = PathwayMap()
 
     if pathway_graph.nr_nodes() > 0:
-        root_conversion = pathway_graph.root_node
-
-        visit_graph(pathway_graph, pathway_map, root_conversion)
+        action = pathway_graph.root_node
+        visit_graph(pathway_graph, pathway_map, action)
 
     return pathway_map
+
+
+def sequence_graph_to_pathway_map(sequence_graph: SequenceGraph) -> PathwayMap:
+    return pathway_graph_to_pathway_map(sequence_graph_to_pathway_graph(sequence_graph))

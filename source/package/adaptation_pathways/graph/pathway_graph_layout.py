@@ -8,34 +8,6 @@ from .layout import distribute, sort_horizontally
 from .pathway_graph import PathwayGraph
 
 
-# A pathway graph contains zero or more pathways: sequences of actions with conversions
-# between each pair of actions. Each of those sequences starts with an action and ends with an
-# action. All sequences start with the same action ("current"). Some of them may end with the
-# same action.
-
-# Think in terms of periods: sequences of action-conversion, action, action-conversion
-# - In the end, the position of conversions depend on tipping points
-# - Position actions just halfway between the conversions
-
-# A pathway graph is layed out as follow:
-#
-# Horizontally:
-# - The root action is located at 0
-# - Its to-conversions are located at x = x + 1
-# - Their actions are located at x = x + 1
-# - Their to-conversions are located at x = x + 1
-# - Recurse, similar to sequence graph. Push stuff to the right if necessary, depending on
-#   the in-degree.
-#
-# Vertically
-# - The root action is located at 0
-# - Its to-actions are vertically sorted, around y==0
-# - Their conversions are located halfway
-# - Their to-conversions are vertically sorted, around their action's y-coordinate
-# - Recurse, similar to sequence graph. Redistribute stuff vertically if necessary, depending
-#   on the distance between the y-coordinates at the same x-coordinate.
-
-
 def add_position(
     position_by_node: dict[Action | ActionConversion, np.ndarray],
     conversion: Action | ActionConversion,
@@ -131,45 +103,3 @@ def pathway_graph_layout(
         distribute_vertically(pathway_graph, from_conversion, position_by_node)
 
     return position_by_node
-
-    # def visit_graph(
-    #     pathway_graph: PathwayGraph,
-    #     from_conversion: Action | ActionConversion,
-    #     to_conversion: ActionConversion | Action,
-    #     coordinates: tuple[float, float],
-    #     position_by_node: dict[Action, np.ndarray],
-    # ):
-    #     x, y = coordinates
-
-    #     if from_conversion not in position_by_node:
-    #         add_position(position_by_node, from_conversion, (x, y))
-
-    #     x += 1
-
-    #     if to_conversion not in position_by_node:
-    #         add_position(position_by_node, to_conversion, (x, y))
-
-    #     if pathway_graph.nr_to_conversions(to_conversion) > 0:
-    #         # x += 1
-
-    #         for to_tipping_point_new in pathway_graph.to_conversions(to_conversion):
-    #             visit_graph(
-    #                 pathway_graph,
-    #                 to_conversion,
-    #                 to_tipping_point_new,
-    #                 (x, y),
-    #                 position_by_node,
-    #             )
-    #             y -= 1
-
-    # position_by_node: dict[Action, np.ndarray] = {}
-
-    # if pathway_graph.nr_conversions() > 0:
-    #     root_action = pathway_graph.root_node
-    #     x, y = 0, 0
-
-    #     for to_conversion in pathway_graph.to_conversions(root_action):
-    #         visit_graph(pathway_graph, root_action, to_conversion, (x, y), position_by_node)
-    #         y -= 1
-
-    # return position_by_node

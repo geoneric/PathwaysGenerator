@@ -1,5 +1,7 @@
 from ..action import Action
+from ..action_begin import ActionBegin
 from ..action_conversion import ActionConversion
+from ..action_end import ActionEnd
 from .pathway_graph import PathwayGraph
 from .pathway_map import PathwayMap
 from .sequence_graph import SequenceGraph
@@ -34,12 +36,37 @@ nord_palette_blue = [
 ]
 
 
-def default_node_colours(
-    graph: SequenceGraph | PathwayGraph | PathwayMap,
+def default_node_colours_sequence_graph(
+    graph: SequenceGraph,
 ) -> list[tuple[float, float, float, float]]:
     transparency = 0.75
     palette = [colour + (transparency,) for colour in nord_palette_nominal]
     palette.append(nord_palette_blue[0] + (transparency,))
+
+    palette_size = len(palette)
+    colour_by_action = {}
+    colours = []
+
+    # Colour each unique action unique
+    idx = 0
+
+    for node in graph._graph.nodes:
+        assert isinstance(node, Action)
+        if node not in colour_by_action:
+            colour_by_action[node] = palette[idx % palette_size]
+            idx += 1
+        colours.append(colour_by_action[node])
+
+    return colours
+
+
+def default_node_colours_pathway_graph(
+    graph: PathwayGraph,
+) -> list[tuple[float, float, float, float]]:
+    transparency = 0.75
+    palette = [colour + (transparency,) for colour in nord_palette_nominal]
+    palette.append(nord_palette_blue[0] + (transparency,))
+
     palette_size = len(palette)
     conversion_colour = nord_palette_light[0] + (transparency,)
 
@@ -47,10 +74,11 @@ def default_node_colours(
     colours = []
 
     # Use the same colour for conversions
-    # Colour each action unique
+    # Colour each unique action unique
     idx = 0
 
     for node in graph._graph.nodes:
+        assert type(node) in [Action, ActionConversion]
         if isinstance(node, Action):
             if node not in colour_by_action:
                 colour_by_action[node] = palette[idx % palette_size]
@@ -58,6 +86,32 @@ def default_node_colours(
             colours.append(colour_by_action[node])
         elif isinstance(node, ActionConversion):
             colours.append(conversion_colour)
+
+    return colours
+
+
+def default_node_colours_pathway_map(
+    graph: PathwayMap,
+) -> list[tuple[float, float, float, float]]:
+    transparency = 0.75
+    palette = [colour + (transparency,) for colour in nord_palette_nominal]
+    palette.append(nord_palette_blue[0] + (transparency,))
+
+    palette_size = len(palette)
+
+    colour_by_action = {}
+    colours = []
+
+    # Colour each action begin / end combo unique
+    idx = 0
+
+    for node in graph._graph.nodes:
+        assert type(node) in [ActionBegin, ActionEnd]
+
+        if node.action not in colour_by_action:
+            colour_by_action[node.action] = palette[idx % palette_size]
+            idx += 1
+        colours.append(colour_by_action[node.action])
 
     return colours
 

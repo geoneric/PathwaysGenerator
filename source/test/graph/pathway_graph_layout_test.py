@@ -97,24 +97,24 @@ class PathwayGraphLayoutTest(unittest.TestCase):
         npt.assert_almost_equal(
             positions[pathway_graph.conversion_by_name("current")], (0, 0)
         )
-        # npt.assert_almost_equal(
-        #     positions[pathway_graph.conversion_by_name("current | a")], (1, 1)
-        # )
-        # npt.assert_almost_equal(
-        #     positions[pathway_graph.conversion_by_name("a")], (2, 1)
-        # )
-        # npt.assert_almost_equal(
-        #     positions[pathway_graph.conversion_by_name("current | b")], (1, 0)
-        # )
-        # npt.assert_almost_equal(
-        #     positions[pathway_graph.conversion_by_name("b")], (2, 0)
-        # )
-        # npt.assert_almost_equal(
-        #     positions[pathway_graph.conversion_by_name("current | c")], (1, -1)
-        # )
-        # npt.assert_almost_equal(
-        #     positions[pathway_graph.conversion_by_name("c")], (2, -1)
-        # )
+        npt.assert_almost_equal(
+            positions[pathway_graph.conversion_by_name("current | a")], (1, 1)
+        )
+        npt.assert_almost_equal(
+            positions[pathway_graph.conversion_by_name("a")], (2, 1)
+        )
+        npt.assert_almost_equal(
+            positions[pathway_graph.conversion_by_name("current | b")], (1, 0)
+        )
+        npt.assert_almost_equal(
+            positions[pathway_graph.conversion_by_name("b")], (2, 0)
+        )
+        npt.assert_almost_equal(
+            positions[pathway_graph.conversion_by_name("current | c")], (1, -1)
+        )
+        npt.assert_almost_equal(
+            positions[pathway_graph.conversion_by_name("c")], (2, -1)
+        )
 
     def test_use_case_01(self):
         sequence_graph = SequenceGraph()
@@ -157,7 +157,6 @@ class PathwayGraphLayoutTest(unittest.TestCase):
         npt.assert_almost_equal(
             positions[pathway_graph.conversion_by_name("a | e")], (3, 1.5)
         )
-
         npt.assert_almost_equal(
             positions[pathway_graph.conversion_by_name("current | b")], (1, 0.5)
         )
@@ -167,7 +166,6 @@ class PathwayGraphLayoutTest(unittest.TestCase):
         npt.assert_almost_equal(
             positions[pathway_graph.conversion_by_name("b | f")], (3, 0.5)
         )
-
         npt.assert_almost_equal(
             positions[pathway_graph.conversion_by_name("current | c")], (1, -0.5)
         )
@@ -177,7 +175,6 @@ class PathwayGraphLayoutTest(unittest.TestCase):
         npt.assert_almost_equal(
             positions[pathway_graph.conversion_by_name("c | f")], (3, -0.5)
         )
-
         npt.assert_almost_equal(
             positions[pathway_graph.conversion_by_name("current | d")], (1, -1.5)
         )
@@ -187,7 +184,6 @@ class PathwayGraphLayoutTest(unittest.TestCase):
         npt.assert_almost_equal(
             positions[pathway_graph.conversion_by_name("d | f")], (3, -1.5)
         )
-
         npt.assert_almost_equal(
             positions[pathway_graph.conversion_by_name("f")], (4, -0.5)
         )
@@ -197,40 +193,3 @@ class PathwayGraphLayoutTest(unittest.TestCase):
         npt.assert_almost_equal(
             positions[pathway_graph.conversion_by_name("e")], (6, 0.5)
         )
-
-        # npt.assert_almost_equal(
-        #     positions[pathway_graph.conversion_by_name("current | b")], (1, 0)
-        # )
-        # npt.assert_almost_equal(
-        #     positions[pathway_graph.conversion_by_name("b")], (2, 0)
-        # )
-        # npt.assert_almost_equal(
-        #     positions[pathway_graph.conversion_by_name("current | c")], (1, 0)
-        # )
-        # npt.assert_almost_equal(
-        #     positions[pathway_graph.conversion_by_name("c")], (2, 0)
-        # )
-        # npt.assert_almost_equal(
-        #     positions[pathway_graph.conversion_by_name("current | d")], (1, 0)
-        # )
-        # npt.assert_almost_equal(
-        #     positions[pathway_graph.conversion_by_name("d")], (2, 0)
-        # )
-        # npt.assert_almost_equal(
-        #     positions[pathway_graph.conversion_by_name("b | f")], (3, 0)
-        # )
-        # npt.assert_almost_equal(
-        #     positions[pathway_graph.conversion_by_name("c | f")], (3, 0)
-        # )
-        # npt.assert_almost_equal(
-        #     positions[pathway_graph.conversion_by_name("d | f")], (3, 0)
-        # )
-        # npt.assert_almost_equal(
-        #     positions[pathway_graph.conversion_by_name("f")], (4, 0)
-        # )
-        # npt.assert_almost_equal(
-        #     positions[pathway_graph.conversion_by_name("f | e")], (5, 0)
-        # )
-        # npt.assert_almost_equal(
-        #     positions[pathway_graph.conversion_by_name("e")], (6, 0)
-        # )

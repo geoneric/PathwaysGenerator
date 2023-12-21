@@ -50,8 +50,13 @@ class PathwayGraph(RootedGraph):
 
     def to_conversions(
         self, from_conversion: ActionConversion | Action
-    ) -> list[Action]:
+    ) -> list[ActionConversion]:
         return list(self._graph.adj[from_conversion])
+
+    def to_action(self, conversion: ActionConversion) -> Action:
+        actions = list(self._graph.adj[conversion])
+        assert len(actions) == 1
+        return actions[0]
 
     def conversion_by_name(self, name: str) -> ActionConversion | Action:
         result = None
