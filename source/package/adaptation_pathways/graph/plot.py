@@ -4,7 +4,12 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 
-from .colour import default_edge_colours, default_node_colours
+from .colour import (
+    default_edge_colours,
+    default_node_colours_pathway_graph,
+    default_node_colours_pathway_map,
+    default_node_colours_sequence_graph,
+)
 from .pathway_graph import PathwayGraph
 from .pathway_graph_layout import pathway_graph_layout  # noqa: F401
 from .pathway_map import PathwayMap
@@ -53,7 +58,7 @@ def plot_sequence_graph(
     edge_colours: list[tuple[float, float, float, float]] | None = None,
 ) -> None:
     if colours is None:
-        colours = default_node_colours(sequence_graph)
+        colours = default_node_colours_sequence_graph(sequence_graph)
 
     if edge_colours is None:
         edge_colours = default_edge_colours(sequence_graph)
@@ -69,10 +74,11 @@ def plot_sequence_graph(
 
 def plot_and_save_sequence_graph(
     sequence_graph: SequenceGraph,
-    colours: list[tuple[float, float, float, float]],
     pathname: str,
+    colours: list[tuple[float, float, float, float]] | None = None,
+    edge_colours: list[tuple[float, float, float, float]] | None = None,
 ) -> None:
-    plot_sequence_graph(sequence_graph, colours)
+    plot_sequence_graph(sequence_graph, colours, edge_colours)
     save_plot(pathname)
 
 
@@ -82,7 +88,7 @@ def plot_pathway_graph(
     edge_colours: list[tuple[float, float, float, float]] | None = None,
 ) -> None:
     if colours is None:
-        colours = default_node_colours(pathway_graph)
+        colours = default_node_colours_pathway_graph(pathway_graph)
 
     if edge_colours is None:
         edge_colours = default_edge_colours(pathway_graph)
@@ -98,10 +104,11 @@ def plot_pathway_graph(
 
 def plot_and_save_pathway_graph(
     pathway_graph: PathwayGraph,
-    colours: list[tuple[float, float, float, float]],
     pathname: str,
+    colours: list[tuple[float, float, float, float]] | None = None,
+    edge_colours: list[tuple[float, float, float, float]] | None = None,
 ) -> None:
-    plot_pathway_graph(pathway_graph, colours)
+    plot_pathway_graph(pathway_graph, colours, edge_colours)
     save_plot(pathname)
 
 
@@ -111,7 +118,7 @@ def plot_pathway_map(
     edge_colours: list[tuple[float, float, float, float]] | None = None,
 ) -> None:
     if colours is None:
-        colours = default_node_colours(pathway_map)
+        colours = default_node_colours_pathway_map(pathway_map)
 
     if edge_colours is None:
         edge_colours = default_edge_colours(pathway_map)
@@ -125,6 +132,11 @@ def plot_pathway_map(
     )
 
 
-def plot_and_save_pathway_map(pathway_map: PathwayMap, pathname: str) -> None:
-    plot_pathway_map(pathway_map)
+def plot_and_save_pathway_map(
+    pathway_map: PathwayMap,
+    pathname: str,
+    colours: list[tuple[float, float, float, float]] | None = None,
+    edge_colours: list[tuple[float, float, float, float]] | None = None,
+) -> None:
+    plot_pathway_map(pathway_map, colours, edge_colours)
     save_plot(pathname)

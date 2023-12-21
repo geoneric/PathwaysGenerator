@@ -1,30 +1,56 @@
 from ..action import Action
+from ..action_begin import ActionBegin
+from ..action_end import ActionEnd
 from .rooted_graph import RootedGraph
 
 
 class PathwayMap(RootedGraph):
     """
     A PathwayMap represents a collection of adaptation pathways. These pathways are encoded
-    in a directed rooted graph in which the nodes represent the tipping points, and the edges
-    the period of time an action is active.
-
-    The information in this graph is very similar to the information in a pathways graph,
-    but for the sake of visualizing a pathways map, additional nodes are added to the graph.
+    in a directed rooted graph in which the nodes represent...
     """
 
-    def add_action(self, from_tipping_point: Action, to_tipping_point: Action) -> None:
-        """
-        Add an action, defined by two tipping points
-        """
-        self._graph.add_edge(from_tipping_point, to_tipping_point)
+    def add_period(self, begin: ActionBegin, end: ActionEnd) -> None:
+        self._graph.add_edge(begin, end)
 
-    def nr_downstream_actions(self, from_tipping_point: Action) -> int:
-        return self._graph.out_degree(from_tipping_point)
+    def add_conversion(self, end: ActionEnd, begin: ActionBegin) -> None:
+        self._graph.add_edge(end, begin)
 
-    def to_tipping_point(self, from_tipping_point: Action) -> Action:
-        out_edges = list(self._graph.out_edges(from_tipping_point))
-        assert len(out_edges) == 1, out_edges
-        return out_edges[0][1]
+    def action_begins(self, action_end: ActionEnd) -> list[ActionBegin]:
+        assert isinstance(action_end, ActionEnd)
+        return list(self._graph.adj[action_end])
 
-    def from_tipping_points(self, to_tipping_point: Action) -> list[Action]:
-        return list(self._graph.adj[to_tipping_point])
+    def action_end(self, action_begin: ActionBegin) -> ActionEnd:
+        assert isinstance(action_begin, ActionBegin)
+        ends = list(self._graph.adj[action_begin])
+        assert len(ends) == 1
+        return ends[0]
+
+    def all_action_begins_and_ends(
+        self, action_begin: ActionBegin
+    ) -> list[ActionBegin | ActionEnd]:
+        return self.all_to_nodes(action_begin)
+
+    def action_begin_by_action(self, action: Action) -> ActionBegin:
+        result = None
+
+        for node in self._graph.nodes:
+            if isinstance(node, ActionBegin) and node.action == action:
+                result = node
+                break
+
+        assert result is not None
+
+        return result
+
+    def action_end_by_action(self, action: Action) -> ActionEnd:
+        result = None
+
+        for node in self._graph.nodes:
+            if isinstance(node, ActionEnd) and node.action == action:
+                result = node
+                break
+
+        assert result is not None
+
+        return result

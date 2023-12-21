@@ -6,7 +6,6 @@ import docopt
 import adaptation_pathways as ap
 
 from ..graph import (
-    default_node_colours,
     plot_and_save_pathway_graph,
     plot_and_save_pathway_map,
     plot_and_save_sequence_graph,
@@ -20,9 +19,7 @@ def generate_graphs(
     sequences_pathname: str, plots_prefix_pathname: str, output_format: str
 ) -> int:
     sequence_graph = read_sequences(sequences_pathname)
-    sequence_graph_colours = default_node_colours(sequence_graph)
     pathway_graph = ap.graph.sequence_graph_to_pathway_graph(sequence_graph)
-    pathway_graph_colours = default_node_colours(pathway_graph)
     pathway_map = ap.graph.pathway_graph_to_pathway_map(pathway_graph)
 
     assert os.path.isdir(plots_prefix_pathname), plots_prefix_pathname
@@ -32,12 +29,12 @@ def generate_graphs(
     plot_pathname = os.path.join(
         plots_prefix_pathname, f"{basename}-sequence_graph.{output_format}"
     )
-    plot_and_save_sequence_graph(sequence_graph, sequence_graph_colours, plot_pathname)
+    plot_and_save_sequence_graph(sequence_graph, plot_pathname)
 
     plot_pathname = os.path.join(
         plots_prefix_pathname, f"{basename}-pathway_graph.{output_format}"
     )
-    plot_and_save_pathway_graph(pathway_graph, pathway_graph_colours, plot_pathname)
+    plot_and_save_pathway_graph(pathway_graph, plot_pathname)
 
     plot_pathname = os.path.join(
         plots_prefix_pathname, f"{basename}-pathway_map.{output_format}"
