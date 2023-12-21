@@ -1,5 +1,5 @@
 """
-Sequence graph for example 01
+Sequence graph for an example
 =============================
 Note that ``e`` has in-degree of two, ``f`` has in-degree of three, but since ``e`` follows
 ``f``, ``e`` it must be positioned to the right of ``f``.
@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from adaptation_pathways.graph import plot_sequence_graph, read_sequences
 
 
-graph = read_sequences(
+sequence_graph = read_sequences(
     StringIO(
         """
 current a
@@ -27,5 +27,5 @@ f e
     )
 )
 
-plot_sequence_graph(graph)
+plot_sequence_graph(sequence_graph)
 plt.show()

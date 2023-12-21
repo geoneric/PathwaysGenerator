@@ -1,5 +1,3 @@
-import networkx as nx
-
 from ..action import Action
 from .rooted_graph import RootedGraph
 
@@ -53,12 +51,7 @@ class SequenceGraph(RootedGraph):
         """
         :return: Collection of actions that end at the action passed in
         """
-        # TODO Can this be done more efficiently?
-        return [
-            action
-            for action in self._graph.nodes()
-            if to_action in self.to_actions(action)
-        ]
+        return self.from_nodes(to_action)
 
     def nr_to_actions(self, from_action: Action) -> int:
         """
@@ -72,7 +65,7 @@ class SequenceGraph(RootedGraph):
         """
         :return: Collection of actions that start at the action passed in
         """
-        return list(self._graph.adj[from_action])
+        return self.to_nodes(from_action)
 
     def nr_sequences(self) -> int:
         """
@@ -81,8 +74,4 @@ class SequenceGraph(RootedGraph):
         return len(self._graph.edges)
 
     def all_to_actions(self, from_action: Action) -> list[Action]:
-        # Use shortest_path to find all actions reachable from the action passed in
-        graph = self._graph.subgraph(nx.shortest_path(self._graph, from_action))
-
-        # Remove the from_action itself before returning the result
-        return list(graph.nodes)[1:]
+        return self.all_to_nodes(from_action)

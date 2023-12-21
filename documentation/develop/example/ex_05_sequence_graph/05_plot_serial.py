@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from adaptation_pathways.graph import plot_sequence_graph, read_sequences
 
 
-graph = read_sequences(
+sequence_graph = read_sequences(
     StringIO(
         """
 current a
@@ -19,5 +19,5 @@ b c
     )
 )
 
-plot_sequence_graph(graph)
+plot_sequence_graph(sequence_graph)
 plt.show()

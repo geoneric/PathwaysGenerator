@@ -3,17 +3,24 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+import os
+import re
+from sphinx_gallery.sorting import ExplicitOrder
+
+
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = '@CMAKE_PROJECT_NAME@'
-copyright = '2023, TODO'
-author = ", ".join([
-    "Marjolijn Haasnoot (Deltares, NL)",
-    "Willem van Deursen (Carthago Consultancy, NL)",
-    "Kor de Jong (Geoneric, NL)",
-])
-version = '@CMAKE_PROJECT_VERSION_MAJOR@.@CMAKE_PROJECT_VERSION_MINOR@'
+project = "@CMAKE_PROJECT_NAME@"
+copyright = "2023, TODO"
+author = ", ".join(
+    [
+        "Marjolijn Haasnoot (Deltares, NL)",
+        "Willem van Deursen (Carthago Consultancy, NL)",
+        "Kor de Jong (Geoneric, NL)",
+    ]
+)
+version = "@CMAKE_PROJECT_VERSION_MAJOR@.@CMAKE_PROJECT_VERSION_MINOR@"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -27,7 +34,7 @@ extensions = [
 ]
 
 templates_path = [
-    '@CMAKE_CURRENT_SOURCE_DIR@/_templates',
+    "@CMAKE_CURRENT_SOURCE_DIR@/_templates",
 ]
 exclude_patterns = []
 
@@ -39,7 +46,8 @@ modindex_common_prefix = ["adaptation_pathways."]
 
 # html_theme = 'alabaster'
 html_theme = "furo"
-html_static_path = ['@CMAKE_CURRENT_SOURCE_DIR@/_static']
+html_static_path = ["@CMAKE_CURRENT_SOURCE_DIR@/_static"]
+html_css_files = ["custom.css"]
 # html_sidebars = {
 #     "develop/**": [
 #         "localtoc.html",
@@ -63,9 +71,11 @@ intersphinx_mapping = {
 }
 
 sphinx_gallery_conf = {
+    "download_all_examples": False,
     "examples_dirs": [
         "@CMAKE_CURRENT_SOURCE_DIR@/develop/example",
     ],
+    "filename_pattern": f"{re.escape(os.sep)}.*_plot_",
     "gallery_dirs": [
         "develop/example",
     ],

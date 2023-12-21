@@ -1,5 +1,5 @@
 """
-Sequence graph for example 02
+Sequence graph for an example
 =============================
 This example is taken from the adaptation pathways documentation.
 
@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 from adaptation_pathways.graph import plot_sequence_graph, read_sequences
 
 
-graph = read_sequences(
+sequence_graph = read_sequences(
     StringIO(
         """
 current a
@@ -31,5 +31,5 @@ c d
     )
 )
 
-plot_sequence_graph(graph)
+plot_sequence_graph(sequence_graph)
 plt.show()

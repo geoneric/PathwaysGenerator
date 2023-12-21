@@ -36,7 +36,7 @@ def condition_based_pathways() -> None:
     sequence_graph.add_sequence(small_dredging, large_dredging)
 
     # Create pathways graph
-    pathways_graph = ap.graph.sequence_graph_to_pathways_graph(sequence_graph)
+    pathway_graph = ap.graph.sequence_graph_to_pathway_graph(sequence_graph)
 
     # Define tipping points in terms of sedimentation rates
 
@@ -52,7 +52,7 @@ def condition_based_pathways() -> None:
     nx.draw_planar(sequence_graph.graph, with_labels=True, font_size="xx-small")
     axis = plt.subplot(212)
     axis.set_title("Pathways graph")
-    nx.draw_planar(pathways_graph.graph, with_labels=True, font_size="xx-small")
+    nx.draw_planar(pathway_graph.graph, with_labels=True, font_size="xx-small")
     plt.savefig("condition_based_pathways.pdf", bbox_inches="tight")
 
 
@@ -105,7 +105,7 @@ def time_based_pathways() -> None:
     )
 
     # Create pathways graph
-    pathways_graph = ap.graph.sequence_graph_to_pathways_graph(sequence_graph)
+    pathway_graph = ap.graph.sequence_graph_to_pathway_graph(sequence_graph)
 
     plt.clf()
     axis = plt.subplot(211)
@@ -113,7 +113,7 @@ def time_based_pathways() -> None:
     nx.draw_planar(sequence_graph.graph, with_labels=True, font_size="xx-small")
     axis = plt.subplot(212)
     axis.set_title("Pathways graph")
-    nx.draw_planar(pathways_graph.graph, with_labels=True, font_size="xx-small")
+    nx.draw_planar(pathway_graph.graph, with_labels=True, font_size="xx-small")
     plt.savefig("time_based_pathways.pdf", bbox_inches="tight")
 
 
