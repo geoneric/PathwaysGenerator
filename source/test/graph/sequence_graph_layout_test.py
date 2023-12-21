@@ -71,7 +71,7 @@ class SequenceGraphLayoutTest(unittest.TestCase):
         npt.assert_almost_equal(positions[b], (2, 0))
         npt.assert_almost_equal(positions[c], (3, 0))
 
-    def test_divergent_sequence(self):
+    def test_diverging_sequence(self):
         """
                 ↗ a
         current

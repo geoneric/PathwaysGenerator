@@ -1,10 +1,12 @@
 import copy
 
-from ..action_conversion import ActionConversion
+from ..action import Action
+from .colour import default_edge_colours, default_node_colours  # noqa: F401
 from .io import read_sequences  # noqa: F401
-from .layout import pathway_graph_layout, sequence_graph_layout  # noqa: F401
 from .pathway_graph import PathwayGraph
+from .pathway_graph_layout import pathway_graph_layout  # noqa: F401
 from .pathway_map import PathwayMap
+from .pathway_map_layout import pathway_map_layout  # noqa: F401
 from .plot import (  # noqa: F401
     plot_and_save_pathway_graph,
     plot_and_save_pathway_map,
@@ -14,35 +16,23 @@ from .plot import (  # noqa: F401
     plot_sequence_graph,
 )
 from .sequence_graph import SequenceGraph
+from .sequence_graph_layout import sequence_graph_layout  # noqa: F401
 
 
 def sequence_graph_to_pathway_graph(sequence_graph: SequenceGraph) -> PathwayGraph:
     def visit_graph(
         sequence_graph: SequenceGraph,
         pathway_graph: PathwayGraph,
-        from_action,
-        to_action,
-    ):
-        conversion = ActionConversion(from_action, to_action)
+        from_action: Action,
+        to_action: Action,
+    ) -> None:
+        to_action_seen_first = to_action not in pathway_graph._graph.nodes
 
-        if sequence_graph.nr_from_actions(from_action) == 0:
-            pathway_graph.start_pathway(from_action, conversion)
+        pathway_graph.add_conversion(from_action, to_action)
 
-        if sequence_graph.nr_to_actions(to_action) == 0:
-            pathway_graph.end_pathway(conversion, to_action)
-        else:
+        if to_action_seen_first:
             for to_action_new in sequence_graph.to_actions(to_action):
-                to_tipping_point = visit_graph(
-                    sequence_graph, pathway_graph, to_action, to_action_new
-                )
-                pathway_graph.add_period(conversion, to_tipping_point)
-
-        return conversion
-
-    # - The root node of the action graph must end up in the pathway graph as the root node
-    # - Each leaf node of the actions graph (that is not also a root node) must end up as a
-    #   leaf node in the pathway graph
-    # - Each edge in the actions graph must end up as a node in the pathway graph
+                visit_graph(sequence_graph, pathway_graph, to_action, to_action_new)
 
     pathway_graph = PathwayGraph()
 

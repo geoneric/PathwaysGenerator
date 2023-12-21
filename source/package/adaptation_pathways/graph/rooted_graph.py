@@ -1,3 +1,5 @@
+import typing
+
 import networkx as nx
 
 
@@ -51,3 +53,23 @@ class RootedGraph:
         # print(self._graph.in_degree())
         # print([node for node, degree in self._graph.in_degree()])
         # return [node for node, degree in self._graph.in_degree() if degree == 0][0]
+
+    def all_to_nodes(self, from_node):
+        # Use shortest_path to find all nodes reachable from the node passed in
+        graph = self._graph.subgraph(nx.shortest_path(self._graph, from_node))
+
+        # Remove the from_node itself before returning the result
+        return list(graph.nodes)[1:]
+
+    def to_nodes(self, from_node) -> list[typing.Any]:
+        """
+        :return: Collection of nodes that start at the node passed in
+        """
+        return list(self._graph.adj[from_node])
+
+    def from_nodes(self, to_node):
+        """
+        :return: Collection of nodes that end at the node passed in
+        """
+        # TODO Can this be done more efficiently?
+        return [node for node in self._graph.nodes() if to_node in self.to_nodes(node)]

@@ -19,13 +19,13 @@ class PathwayGraph(RootedGraph):
         """
         self._graph.add_edge(from_action, to_conversion)
 
-    def add_period(
-        self, from_conversion: ActionConversion, to_conversion: ActionConversion
-    ) -> None:
+    def add_conversion(self, from_action: Action, to_action: Action) -> None:
         """
-        Add a period, defined by two conversions
+        Add a conversion, defined by two actions
         """
-        self._graph.add_edge(from_conversion, to_conversion)
+        conversion = ActionConversion(from_action, to_action)
+        self._graph.add_edge(from_action, conversion)
+        self._graph.add_edge(conversion, to_action)
 
     def end_pathway(self, from_conversion: ActionConversion, to_action: Action) -> None:
         """
@@ -64,3 +64,8 @@ class PathwayGraph(RootedGraph):
         assert result is not None
 
         return result
+
+    def all_to_actions_and_conversions(
+        self, from_action: Action
+    ) -> list[Action | ActionConversion]:
+        return self.all_to_nodes(from_action)

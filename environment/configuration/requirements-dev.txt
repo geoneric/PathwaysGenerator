@@ -1,0 +1,7 @@
+build
+cmake
+furo
+ninja
+sphinx
+sphinxcontrib-mermaid
+sphinx-gallery

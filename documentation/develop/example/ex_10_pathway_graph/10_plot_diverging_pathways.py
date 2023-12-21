@@ -1,10 +1,6 @@
 """
-Pathway graph for single period
-===============================
-The simplest pathway is defined by the period between two actions. Given two actions (current
-policy and action "a"), the pathway graph contains three nodes: the ``current`` Action, the
-``current|a`` ActionConversion, and the ``a`` Action. The edges between them represent the
-amount of time between the conversions.
+Pathway graph for diverging pathways
+====================================
 """
 from io import StringIO
 
@@ -21,6 +17,8 @@ sequence_graph = read_sequences(
     StringIO(
         """
 current a
+current b
+current c
 """
     )
 )
