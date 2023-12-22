@@ -26,8 +26,7 @@ if(Quarto_FOUND)
 endif()
 add_subdirectory(source)
 
-add_custom_target(
-    package
+add_custom_target(package
     COMMAND
         ${CMAKE_COMMAND} -E env "PYTHONPATH=${PROJECT_SOURCE_DIR}/source/package:$ENV{PYTHONPATH}"
             ${Python3_EXECUTABLE}
@@ -37,12 +36,21 @@ add_custom_target(
                 ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-add_custom_target(
-    release
+add_custom_target(release
     COMMAND
-        ${CMAKE_COMMAND} -E tar "cf" "adaptation_pathways-${CMAKE_PROJECT_VERSION}.zip" --format=zip --
-            "dist/*-${CMAKE_PROJECT_VERSION}-*.whl"
-            documentation/html
+        ${CMAKE_COMMAND} -E rm -rf adaptation_pathways-${CMAKE_PROJECT_VERSION}
+    COMMAND
+        ${CMAKE_COMMAND} -E make_directory
+            adaptation_pathways-${CMAKE_PROJECT_VERSION}/dist
+            adaptation_pathways-${CMAKE_PROJECT_VERSION}/documentation/html
+    COMMAND
+        ${CMAKE_COMMAND} -E copy "dist/*-${CMAKE_PROJECT_VERSION}-*.whl" adaptation_pathways-${CMAKE_PROJECT_VERSION}/dist
+    COMMAND
+        ${CMAKE_COMMAND} -E copy_directory documentation/html adaptation_pathways-${CMAKE_PROJECT_VERSION}/documentation/html
+    COMMAND
+        ${CMAKE_COMMAND} -E tar "cf" "adaptation_pathways-${CMAKE_PROJECT_VERSION}.zip" --format=zip -- adaptation_pathways-${CMAKE_PROJECT_VERSION}
+    COMMAND
+        ${CMAKE_COMMAND} -E rm -rf adaptation_pathways-${CMAKE_PROJECT_VERSION}
 )
 
 add_dependencies(release
