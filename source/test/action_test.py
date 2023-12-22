@@ -1,6 +1,6 @@
 import unittest
 
-from adaptation_pathways.action import Action
+from adaptation_pathways.graph.node.action import Action
 
 
 class ActionTest(unittest.TestCase):

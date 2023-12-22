@@ -1,5 +1,4 @@
-from ..action import Action
-from ..action_conversion import ActionConversion
+from .node import Action, ActionConversion
 from .rooted_graph import RootedGraph
 
 

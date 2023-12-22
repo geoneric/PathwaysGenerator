@@ -3,9 +3,9 @@ import typing
 
 import numpy as np
 
-from ..action_begin import ActionBegin
-from .layout import distribute, sort_horizontally
-from .pathway_map import PathwayMap
+from ..node import ActionBegin
+from ..pathway_map import PathwayMap
+from .util import distribute, sort_horizontally
 
 
 def add_position(

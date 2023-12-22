@@ -1,6 +1,4 @@
-from ..action import Action
-from ..action_begin import ActionBegin
-from ..action_end import ActionEnd
+from .node import Action, ActionBegin, ActionEnd
 from .rooted_graph import RootedGraph
 
 

@@ -2,7 +2,7 @@ import io
 
 import networkx as nx
 
-from ..action import Action
+from .node import Action
 from .sequence_graph import SequenceGraph
 
 

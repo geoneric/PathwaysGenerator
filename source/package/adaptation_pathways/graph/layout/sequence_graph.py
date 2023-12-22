@@ -2,9 +2,9 @@ import itertools
 
 import numpy as np
 
-from ..action import Action
-from .layout import distribute, sort_horizontally
-from .sequence_graph import SequenceGraph
+from ..node import Action
+from ..sequence_graph import SequenceGraph
+from .util import distribute, sort_horizontally
 
 
 def add_position(

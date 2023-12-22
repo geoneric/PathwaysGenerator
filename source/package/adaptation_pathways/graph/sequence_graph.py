@@ -1,4 +1,4 @@
-from ..action import Action
+from .node import Action
 from .rooted_graph import RootedGraph
 
 

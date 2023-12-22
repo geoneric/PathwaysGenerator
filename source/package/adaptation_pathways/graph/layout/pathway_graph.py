@@ -2,10 +2,9 @@ import itertools
 
 import numpy as np
 
-from ..action import Action
-from ..action_conversion import ActionConversion
-from .layout import distribute, sort_horizontally
-from .pathway_graph import PathwayGraph
+from ..node import Action, ActionConversion
+from ..pathway_graph import PathwayGraph
+from .util import distribute, sort_horizontally
 
 
 def add_position(

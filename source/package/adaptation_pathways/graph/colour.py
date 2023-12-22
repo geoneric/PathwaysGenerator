@@ -1,7 +1,4 @@
-from ..action import Action
-from ..action_begin import ActionBegin
-from ..action_conversion import ActionConversion
-from ..action_end import ActionEnd
+from .node import Action, ActionBegin, ActionConversion, ActionEnd
 from .pathway_graph import PathwayGraph
 from .pathway_map import PathwayMap
 from .sequence_graph import SequenceGraph
