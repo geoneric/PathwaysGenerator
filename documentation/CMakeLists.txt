@@ -24,8 +24,7 @@ set(AP_SPHINX_SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR})
 set(AP_SPHINX_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/html)
 
 # https://www.sphinx-doc.org/en/master/man/sphinx-apidoc.html
-add_custom_target(
-    apidoc
+add_custom_target(apidoc
     COMMAND
         ${CMAKE_COMMAND} -E env "SPHINX_APIDOC_OPTIONS=members,undoc-members,show-inheritance,inherited-members"
             ${SPHINX_APIDOC_EXECUTABLE}
@@ -33,13 +32,12 @@ add_custom_target(
                 --separate
                 --module-first
                 -d 1
-                -o ${CMAKE_CURRENT_BINARY_DIR}
+                -o ${CMAKE_CURRENT_BINARY_DIR}/api
                 ${PROJECT_SOURCE_DIR}/source/package/adaptation_pathways
 )
 
 # https://www.sphinx-doc.org/en/master/man/sphinx-build.html
-add_custom_target(
-    documentation
+add_custom_target(documentation
     COMMAND
         ${CMAKE_COMMAND} -E env "PYTHONPATH=${PROJECT_SOURCE_DIR}/source/package:$ENV{PYTHONPATH}"
             ${SPHINX_BUILD_EXECUTABLE}
@@ -50,8 +48,7 @@ add_custom_target(
 
 add_dependencies(documentation apidoc)
 
-add_custom_target(
-    documentation.zip
+add_custom_target(documentation.zip
     WORKING_DIRECTORY
         ${CMAKE_BINARY_DIR}
     COMMAND
@@ -60,3 +57,17 @@ add_custom_target(
 )
 
 add_dependencies(documentation.zip documentation)
+
+set_property(
+    DIRECTORY
+        ${CMAKE_CURRENT_SOURCE_DIR}
+    PROPERTY
+        ADDITIONAL_CLEAN_FILES
+            api  # apidoc
+            _downloads  # sphinx-gallery
+            _images  # sphinx-gallery
+            _sources  # sphinx-gallery
+            _static  # sphinx-build
+            develop/example  # sphinx-gallery
+            html  # sphinx-build
+)

@@ -7,7 +7,7 @@ Code
 .. toctree::
    :maxdepth: 1
 
-   API <../modules>
+   API <../api/modules>
    Index <../genindex>
    Examples <example/index>
 
