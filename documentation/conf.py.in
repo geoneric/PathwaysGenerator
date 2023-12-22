@@ -5,7 +5,6 @@
 
 import os
 import re
-from sphinx_gallery.sorting import ExplicitOrder
 
 
 # -- Project information -----------------------------------------------------
