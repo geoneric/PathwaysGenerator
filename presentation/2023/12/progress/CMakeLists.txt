@@ -9,22 +9,40 @@ add_custom_command(
                 ${CMAKE_CURRENT_SOURCE_DIR}/pathways-1.txt ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-add_custom_target(
-    presentation.2023.12.progress
-    COMMAND
-        ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/presentation.qmd ${CMAKE_CURRENT_BINARY_DIR}
+configure_file(presentation.qmd presentation.qmd COPYONLY)
+
+add_custom_target(presentation.2023.12.progress
     COMMAND
         ${QUARTO_EXECUTABLE} render ${CMAKE_CURRENT_BINARY_DIR}/presentation.qmd --to html
     DEPENDS
         pathways-1-actions_graph.svg
         pathways-1-pathways_graph.svg
         pathways-1-pathways_map.svg
+    BYPRODUCTS
+        presentation.html
 )
 
-add_custom_target(
-    presentation.2023.12.graph
-    COMMAND
-        ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/graph.qmd ${CMAKE_CURRENT_BINARY_DIR}
+set_property(
+    DIRECTORY
+        ${CMAKE_CURRENT_SOURCE_DIR}
+    PROPERTY
+        ADDITIONAL_CLEAN_FILES
+            presentation_files
+)
+
+configure_file(graph.qmd graph.qmd COPYONLY)
+
+add_custom_target(presentation.2023.12.graph
     COMMAND
         ${QUARTO_EXECUTABLE} render ${CMAKE_CURRENT_BINARY_DIR}/graph.qmd --to html
+    BYPRODUCTS
+        graph.html
+)
+
+set_property(
+    DIRECTORY
+        ${CMAKE_CURRENT_SOURCE_DIR}
+    PROPERTY
+        ADDITIONAL_CLEAN_FILES
+            graph_files
 )
