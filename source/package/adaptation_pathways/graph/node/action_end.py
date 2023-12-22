@@ -1,15 +1,11 @@
 from .action import Action
+from .node import Node
 
 
-class ActionEnd:
-    _label: str
-
+class ActionEnd(Node):
     def __init__(self, action: Action) -> None:
+        super().__init__(f"{action.label}]")
         self._action = action
-        self._label = f"{action.label}]"
-
-    def __str__(self) -> str:
-        return self._label
 
     def __repr__(self) -> str:
         return f'ActionEnd("{self._label}")'
@@ -26,7 +22,3 @@ class ActionEnd:
     @property
     def action(self) -> Action:
         return self._action
-
-    @property
-    def label(self) -> str:
-        return self._label
