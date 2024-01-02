@@ -15,7 +15,7 @@ from .main import main_function
 
 
 @main_function
-def generate_graphs(
+def plot_graphs(
     sequences_pathname: str, plots_prefix_pathname: str, output_format: str
 ) -> int:
     sequence_graph = read_sequences(sequences_pathname)
@@ -47,7 +47,7 @@ def generate_graphs(
 def main() -> int:
     command = os.path.basename(sys.argv[0])
     usage = f"""\
-Plot sequence and pathways graphs
+Plot sequence and pathway graphs
 
 Usage:
     {command} [--format=<format>] <sequences> <prefix>
@@ -87,4 +87,4 @@ c d
     plots_prefix_pathname = arguments["<prefix>"]  # type: ignore
     output_format = arguments["--format"]  # type: ignore
 
-    return generate_graphs(sequences_pathname, plots_prefix_pathname, output_format)
+    return plot_graphs(sequences_pathname, plots_prefix_pathname, output_format)

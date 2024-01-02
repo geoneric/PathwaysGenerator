@@ -1,3 +1,4 @@
+import enum
 import typing
 
 import matplotlib.pyplot as plt
@@ -11,11 +12,15 @@ from .colour import (
     default_node_colours_sequence_graph,
 )
 from .layout.pathway_graph import default_layout as pathway_graph_layout
-from .layout.pathway_map import default_layout as pathway_map_layout
+from .layout.pathway_map import classic_layout as classic_pathway_map_layout
+from .layout.pathway_map import default_layout as default_pathway_map_layout
 from .layout.sequence_graph import default_layout as sequence_graph_layout
 from .pathway_graph import PathwayGraph
 from .pathway_map import PathwayMap
 from .sequence_graph import SequenceGraph
+
+
+PathwayMapLayout = enum.Enum("PathwayMapLayout", ["DEFAULT", "CLASSIC"])
 
 
 def init_plot(
@@ -114,9 +119,15 @@ def plot_and_save_pathway_graph(
 
 def plot_pathway_map(
     pathway_map: PathwayMap,
+    layout: PathwayMapLayout = PathwayMapLayout.DEFAULT,
     colours: list[tuple[float, float, float, float]] | None = None,
     edge_colours: list[tuple[float, float, float, float]] | None = None,
 ) -> None:
+    if layout == PathwayMapLayout.CLASSIC:
+        pathway_map_layout = classic_pathway_map_layout
+    else:
+        pathway_map_layout = default_pathway_map_layout
+
     if colours is None:
         colours = default_node_colours_pathway_map(pathway_map)
 
@@ -135,8 +146,9 @@ def plot_pathway_map(
 def plot_and_save_pathway_map(
     pathway_map: PathwayMap,
     pathname: str,
+    layout: PathwayMapLayout = PathwayMapLayout.DEFAULT,
     colours: list[tuple[float, float, float, float]] | None = None,
     edge_colours: list[tuple[float, float, float, float]] | None = None,
 ) -> None:
-    plot_pathway_map(pathway_map, colours, edge_colours)
+    plot_pathway_map(pathway_map, layout, colours, edge_colours)
     save_plot(pathname)

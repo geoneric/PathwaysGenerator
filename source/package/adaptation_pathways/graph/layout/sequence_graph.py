@@ -82,6 +82,14 @@ def _distribute_vertically(
 
 
 def default_layout(sequence_graph: SequenceGraph) -> dict[Action, np.ndarray]:
+    """
+    Layout for visualizing sequence graphs
+
+    :param sequence_graph: Sequence graph
+    :return: Node positions
+
+    The goal of this layout is to be able to visualize the contents of the graph.
+    """
     nodes: dict[Action, np.ndarray] = {}
 
     if sequence_graph.nr_actions() > 0:

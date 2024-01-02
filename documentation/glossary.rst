@@ -43,8 +43,8 @@ Adaptation Pathways
    tipping point
       A moment in time or a condition that will render an :term:`action` or a :term:`sequence
       of actions <sequence>` as ineffective. Tipping points are unique per :term:`study`. Under the
-      same scenario and applying the same actions often different tipping points have to be used,
-      when applied to different regions of the world.
+      same :term:`scenario` and applying the same actions often different tipping points have
+      to be used, when applied to different regions of the world.
 
       Examples:
 

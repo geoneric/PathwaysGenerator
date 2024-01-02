@@ -85,6 +85,14 @@ def _distribute_vertically(
 def default_layout(
     pathway_graph: PathwayGraph,
 ) -> dict[Action | ActionConversion, np.ndarray]:
+    """
+    Layout for visualizing pathway graphs
+
+    :param pathway_graph: Pathway graph
+    :return: Node positions
+
+    The goal of this layout is to be able to visualize the contents of the graph.
+    """
     position_by_node: dict[Action | ActionConversion, np.ndarray] = {}
 
     if pathway_graph.nr_conversions() > 0:

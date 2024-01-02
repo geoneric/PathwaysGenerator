@@ -2,9 +2,9 @@ import unittest
 
 import numpy.testing as npt
 
-from adaptation_pathways.graph import SequenceGraph
 from adaptation_pathways.graph.layout.sequence_graph import default_layout
 from adaptation_pathways.graph.node import Action
+from adaptation_pathways.graph.sequence_graph import SequenceGraph
 
 
 class SequenceGraphLayoutTest(unittest.TestCase):

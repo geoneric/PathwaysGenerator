@@ -8,7 +8,7 @@ class ActionBegin(Node):
         self._action = action
 
     def __repr__(self) -> str:
-        return f'ActionBegin("{self._label}")'
+        return f'ActionBegin("{self._action}")'
 
     def __hash__(self):
         return hash((self._action, self._label))

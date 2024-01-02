@@ -29,6 +29,14 @@ class PathwayMap(RootedGraph):
     ) -> list[ActionBegin | ActionEnd]:
         return self.all_to_nodes(action_begin)
 
+    def actions(self) -> set[Action]:
+        actions: set[Action] = set()
+
+        for node in self._graph.nodes():
+            actions.add(node.action)
+
+        return actions
+
     def action_begin_by_action(self, action: Action) -> ActionBegin:
         result = None
 
@@ -42,6 +50,12 @@ class PathwayMap(RootedGraph):
         return result
 
     def action_end_by_action(self, action: Action) -> ActionEnd:
+        """
+        Return ``ActionEnd`` node associated with the action passed in
+
+        :raises LookupError: In case no ``ActionEnd`` node can be found that is associated with
+            the action
+        """
         result = None
 
         for node in self._graph.nodes:
@@ -49,6 +63,49 @@ class PathwayMap(RootedGraph):
                 result = node
                 break
 
-        assert result is not None
+        if result is None:
+            raise LookupError(f"Action {action} is not part of the pathway map")
 
         return result
+
+    def assign_tipping_points(
+        self, tipping_points: dict[Action, int], verify: bool = False
+    ) -> None:
+        """
+        Assign / update tipping points to ActionEnd nodes associated with the actions passed in
+
+        :param verify: Whether or not the tipping points should be checked for consistency,
+            using :py:func:`verify_tipping_points`
+        """
+        for action, tipping_point in tipping_points.items():
+            self.action_end_by_action(action).tipping_point = tipping_point
+
+        if verify:
+            verify_tipping_points(self)
+
+
+def verify_tipping_points(pathway_map: PathwayMap) -> None:
+    """
+    Verify all tipping points in the pathway map passed in are correctly set
+
+    :raises ValueError: In case one or more tipping points are not correctly set
+
+    Tipping points are correct if they strictly increase along the sequences of actions.
+    """
+
+    for paths in pathway_map.all_paths():
+        # [begin, end, begin, end, ...]
+
+        tipping_point_from = paths[1].tipping_point
+
+        for idx in range(3, len(paths), 2):
+            tipping_point_to = paths[idx].tipping_point
+
+            if tipping_point_to <= tipping_point_from:
+                raise ValueError(
+                    f"Given the sequences of actions, the tipping point of action "
+                    f"{paths[idx].action} ({tipping_point_to}) "
+                    f"must be at least larger than {tipping_point_from}"
+                )
+
+            tipping_point_from = tipping_point_to

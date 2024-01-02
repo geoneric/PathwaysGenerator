@@ -1,7 +1,7 @@
 import unittest
 
-from adaptation_pathways.graph import PathwayGraph
 from adaptation_pathways.graph.node import Action
+from adaptation_pathways.graph.pathway_graph import PathwayGraph
 
 
 class PathwayGraphTest(unittest.TestCase):

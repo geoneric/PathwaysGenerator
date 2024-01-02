@@ -100,6 +100,14 @@ def _distribute_vertically(
 def default_layout(
     pathway_map: PathwayMap,
 ) -> dict[typing.Any, np.ndarray]:
+    """
+    Layout for visualizing pathway maps
+
+    :param pathway_map: Pathway map
+    :return: Node positions
+
+    The goal of this layout is to be able to visualize the contents of the graph.
+    """
     position_by_node: dict[typing.Any, np.ndarray] = {}
 
     if pathway_map.nr_edges() > 0:
@@ -108,5 +116,29 @@ def default_layout(
 
         _distribute_horizontally(pathway_map, action_begin, position_by_node)
         _distribute_vertically(pathway_map, action_begin, position_by_node)
+
+    return position_by_node
+
+
+def classic_layout(
+    pathway_map: PathwayMap,
+) -> dict[typing.Any, np.ndarray]:
+    """
+    Layout that replicates the pathway map layout of the original (pre-2024) pathway generator
+
+    :param pathway_map: Pathway map
+    :return: Node positions
+
+    The layout has the following characteristics:
+
+    - A pathway map is a stack of horizontal lines representing actions
+    - Each action ends up at its own level in the stack
+    - Pathways jump from horizontal line to horizontal line, depending on the sequences of
+      actions that make up each pathway
+    """
+    position_by_node: dict[typing.Any, np.ndarray] = {}
+
+    # TODO
+    print(pathway_map)
 
     return position_by_node

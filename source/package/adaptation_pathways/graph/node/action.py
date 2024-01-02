@@ -9,8 +9,6 @@ from .node import Node
 class Action(Node):
     """
     Action instances represent ...
-
-    :param label: Label of the action
     """
 
     def __repr__(self) -> str:
