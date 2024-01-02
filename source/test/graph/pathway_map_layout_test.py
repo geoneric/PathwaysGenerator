@@ -3,7 +3,7 @@ import unittest
 import numpy.testing as npt
 
 from adaptation_pathways.graph import SequenceGraph, sequence_graph_to_pathway_map
-from adaptation_pathways.graph.layout import pathway_map_layout
+from adaptation_pathways.graph.layout.pathway_map import default_layout
 from adaptation_pathways.graph.node import Action
 
 
@@ -11,7 +11,7 @@ class PathwayMapLayoutTest(unittest.TestCase):
     def test_empty(self):
         sequence_graph = SequenceGraph()
         pathway_map = sequence_graph_to_pathway_map(sequence_graph)
-        positions = pathway_map_layout(pathway_map)
+        positions = default_layout(pathway_map)
 
         self.assertEqual(len(positions), 0)
 
@@ -23,7 +23,7 @@ class PathwayMapLayoutTest(unittest.TestCase):
         sequence_graph.add_sequence(current, a)
 
         pathway_map = sequence_graph_to_pathway_map(sequence_graph)
-        positions = pathway_map_layout(pathway_map)
+        positions = default_layout(pathway_map)
 
         self.assertEqual(len(positions), 4)
 
@@ -50,7 +50,7 @@ class PathwayMapLayoutTest(unittest.TestCase):
         sequence_graph.add_sequence(b, c)
 
         pathway_map = sequence_graph_to_pathway_map(sequence_graph)
-        positions = pathway_map_layout(pathway_map)
+        positions = default_layout(pathway_map)
 
         self.assertEqual(len(positions), 8)
 
@@ -85,7 +85,7 @@ class PathwayMapLayoutTest(unittest.TestCase):
         sequence_graph.add_sequence(current, c)
 
         pathway_map = sequence_graph_to_pathway_map(sequence_graph)
-        positions = pathway_map_layout(pathway_map)
+        positions = default_layout(pathway_map)
 
         self.assertEqual(len(positions), 8)
 
@@ -133,7 +133,7 @@ class PathwayMapLayoutTest(unittest.TestCase):
         )
 
         pathway_map = sequence_graph_to_pathway_map(sequence_graph)
-        positions = pathway_map_layout(pathway_map)
+        positions = default_layout(pathway_map)
 
         self.assertEqual(len(positions), 14)
 
@@ -183,7 +183,7 @@ class PathwayMapLayoutTest(unittest.TestCase):
         )
 
         pathway_map = sequence_graph_to_pathway_map(sequence_graph)
-        positions = pathway_map_layout(pathway_map)
+        positions = default_layout(pathway_map)
 
         self.assertEqual(len(positions), 6)
 

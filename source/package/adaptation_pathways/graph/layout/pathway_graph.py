@@ -4,18 +4,10 @@ import numpy as np
 
 from ..node import Action, ActionConversion
 from ..pathway_graph import PathwayGraph
-from .util import distribute, sort_horizontally
+from .util import add_position, distribute, sort_horizontally
 
 
-def add_position(
-    position_by_node: dict[Action | ActionConversion, np.ndarray],
-    conversion: Action | ActionConversion,
-    position: tuple[float, float],
-) -> None:
-    position_by_node[conversion] = np.array(position, np.float64)
-
-
-def distribute_horizontally(
+def _distribute_horizontally(
     pathway_graph: PathwayGraph,
     from_conversion: Action | ActionConversion,
     position_by_node: dict[Action | ActionConversion, np.ndarray],
@@ -33,10 +25,10 @@ def distribute_horizontally(
         add_position(position_by_node, to_conversion, (to_x, np.nan))
 
     for to_conversion in pathway_graph.to_conversions(from_conversion):
-        distribute_horizontally(pathway_graph, to_conversion, position_by_node)
+        _distribute_horizontally(pathway_graph, to_conversion, position_by_node)
 
 
-def distribute_vertically(
+def _distribute_vertically(
     pathway_graph: PathwayGraph,
     from_action: Action,
     position_by_node: dict[Action | ActionConversion, np.ndarray],
@@ -90,7 +82,7 @@ def distribute_vertically(
             position_by_node[node][1] = y_coordinates[idx]
 
 
-def pathway_graph_layout(
+def default_layout(
     pathway_graph: PathwayGraph,
 ) -> dict[Action | ActionConversion, np.ndarray]:
     position_by_node: dict[Action | ActionConversion, np.ndarray] = {}
@@ -98,7 +90,7 @@ def pathway_graph_layout(
     if pathway_graph.nr_conversions() > 0:
         from_conversion = pathway_graph.root_node
         add_position(position_by_node, from_conversion, (0, 0))
-        distribute_horizontally(pathway_graph, from_conversion, position_by_node)
-        distribute_vertically(pathway_graph, from_conversion, position_by_node)
+        _distribute_horizontally(pathway_graph, from_conversion, position_by_node)
+        _distribute_vertically(pathway_graph, from_conversion, position_by_node)
 
     return position_by_node

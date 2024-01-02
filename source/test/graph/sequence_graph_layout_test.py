@@ -3,14 +3,14 @@ import unittest
 import numpy.testing as npt
 
 from adaptation_pathways.graph import SequenceGraph
-from adaptation_pathways.graph.layout import sequence_graph_layout
+from adaptation_pathways.graph.layout.sequence_graph import default_layout
 from adaptation_pathways.graph.node import Action
 
 
 class SequenceGraphLayoutTest(unittest.TestCase):
     def test_empty(self):
         sequence_graph = SequenceGraph()
-        positions = sequence_graph_layout(sequence_graph)
+        positions = default_layout(sequence_graph)
 
         self.assertEqual(len(positions), 0)
 
@@ -24,7 +24,7 @@ class SequenceGraphLayoutTest(unittest.TestCase):
 
         sequence_graph.add_action(current)
 
-        positions = sequence_graph_layout(sequence_graph)
+        positions = default_layout(sequence_graph)
 
         self.assertEqual(len(positions), len(actions))
         self.assertTrue(all(action in positions for action in actions))
@@ -41,7 +41,7 @@ class SequenceGraphLayoutTest(unittest.TestCase):
 
         sequence_graph.add_sequence(current, a)
 
-        positions = sequence_graph_layout(sequence_graph)
+        positions = default_layout(sequence_graph)
 
         self.assertEqual(len(positions), len(actions))
         self.assertTrue(all(action in positions for action in actions))
@@ -63,7 +63,7 @@ class SequenceGraphLayoutTest(unittest.TestCase):
         sequence_graph.add_sequence(a, b)
         sequence_graph.add_sequence(b, c)
 
-        positions = sequence_graph_layout(sequence_graph)
+        positions = default_layout(sequence_graph)
 
         self.assertEqual(len(positions), len(actions))
         self.assertTrue(all(action in positions for action in actions))
@@ -87,7 +87,7 @@ class SequenceGraphLayoutTest(unittest.TestCase):
         sequence_graph.add_sequence(current, a)
         sequence_graph.add_sequence(current, b)
 
-        positions = sequence_graph_layout(sequence_graph)
+        positions = default_layout(sequence_graph)
 
         self.assertEqual(len(positions), len(actions))
         self.assertTrue(all(action in positions for action in actions))
@@ -131,7 +131,7 @@ class SequenceGraphLayoutTest(unittest.TestCase):
             ]
         )
 
-        positions = sequence_graph_layout(sequence_graph)
+        positions = default_layout(sequence_graph)
 
         self.assertEqual(len(positions), len(actions))
         self.assertTrue(all(action in positions for action in actions))

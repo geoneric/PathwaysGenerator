@@ -5,18 +5,10 @@ import numpy as np
 
 from ..node import ActionBegin
 from ..pathway_map import PathwayMap
-from .util import distribute, sort_horizontally
+from .util import add_position, distribute, sort_horizontally
 
 
-def add_position(
-    position_by_node: dict[typing.Any, np.ndarray],
-    node: typing.Any,
-    position: tuple[float, float],
-) -> None:
-    position_by_node[node] = np.array(position, np.float64)
-
-
-def distribute_horizontally(
+def _distribute_horizontally(
     pathway_map: PathwayMap,
     action_begin: ActionBegin,
     position_by_node: dict[typing.Any, np.ndarray],
@@ -45,10 +37,10 @@ def distribute_horizontally(
             begin_x = max(begin_x, position_by_node[action_begin_new][0])
 
         add_position(position_by_node, action_begin_new, (begin_x, np.nan))
-        distribute_horizontally(pathway_map, action_begin_new, position_by_node)
+        _distribute_horizontally(pathway_map, action_begin_new, position_by_node)
 
 
-def distribute_vertically(
+def _distribute_vertically(
     pathway_map: PathwayMap,
     action_begin: ActionBegin,
     position_by_node: dict[typing.Any, np.ndarray],
@@ -105,7 +97,7 @@ def distribute_vertically(
             position_by_node[node][1] = y_coordinates[idx]
 
 
-def pathway_map_layout(
+def default_layout(
     pathway_map: PathwayMap,
 ) -> dict[typing.Any, np.ndarray]:
     position_by_node: dict[typing.Any, np.ndarray] = {}
@@ -114,7 +106,7 @@ def pathway_map_layout(
         action_begin = pathway_map.root_node
         add_position(position_by_node, action_begin, (0, 0))
 
-        distribute_horizontally(pathway_map, action_begin, position_by_node)
-        distribute_vertically(pathway_map, action_begin, position_by_node)
+        _distribute_horizontally(pathway_map, action_begin, position_by_node)
+        _distribute_vertically(pathway_map, action_begin, position_by_node)
 
     return position_by_node

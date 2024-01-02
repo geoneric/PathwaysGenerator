@@ -10,7 +10,9 @@ from .colour import (
     default_node_colours_pathway_map,
     default_node_colours_sequence_graph,
 )
-from .layout import pathway_graph_layout, pathway_map_layout, sequence_graph_layout
+from .layout.pathway_graph import default_layout as pathway_graph_layout
+from .layout.pathway_map import default_layout as pathway_map_layout
+from .layout.sequence_graph import default_layout as sequence_graph_layout
 from .pathway_graph import PathwayGraph
 from .pathway_map import PathwayMap
 from .sequence_graph import SequenceGraph

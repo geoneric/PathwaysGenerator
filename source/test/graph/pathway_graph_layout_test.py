@@ -3,7 +3,7 @@ import unittest
 import numpy.testing as npt
 
 from adaptation_pathways.graph import SequenceGraph, sequence_graph_to_pathway_graph
-from adaptation_pathways.graph.layout import pathway_graph_layout
+from adaptation_pathways.graph.layout.pathway_graph import default_layout
 from adaptation_pathways.graph.node import Action
 
 
@@ -11,7 +11,7 @@ class PathwayGraphLayoutTest(unittest.TestCase):
     def test_empty(self):
         sequence_graph = SequenceGraph()
         pathway_graph = sequence_graph_to_pathway_graph(sequence_graph)
-        positions = pathway_graph_layout(pathway_graph)
+        positions = default_layout(pathway_graph)
 
         self.assertEqual(len(positions), 0)
 
@@ -23,7 +23,7 @@ class PathwayGraphLayoutTest(unittest.TestCase):
         sequence_graph.add_sequence(current, a)
 
         pathway_graph = sequence_graph_to_pathway_graph(sequence_graph)
-        positions = pathway_graph_layout(pathway_graph)
+        positions = default_layout(pathway_graph)
 
         self.assertEqual(len(positions), 3)
 
@@ -49,7 +49,7 @@ class PathwayGraphLayoutTest(unittest.TestCase):
         sequence_graph.add_sequence(b, c)
 
         pathway_graph = sequence_graph_to_pathway_graph(sequence_graph)
-        positions = pathway_graph_layout(pathway_graph)
+        positions = default_layout(pathway_graph)
 
         self.assertEqual(len(positions), 7)
 
@@ -87,7 +87,7 @@ class PathwayGraphLayoutTest(unittest.TestCase):
         sequence_graph.add_sequence(current, c)
 
         pathway_graph = sequence_graph_to_pathway_graph(sequence_graph)
-        positions = pathway_graph_layout(pathway_graph)
+        positions = default_layout(pathway_graph)
 
         self.assertEqual(len(positions), 7)
 
@@ -138,7 +138,7 @@ class PathwayGraphLayoutTest(unittest.TestCase):
         )
 
         pathway_graph = sequence_graph_to_pathway_graph(sequence_graph)
-        positions = pathway_graph_layout(pathway_graph)
+        positions = default_layout(pathway_graph)
 
         self.assertEqual(len(positions), 16)
 
