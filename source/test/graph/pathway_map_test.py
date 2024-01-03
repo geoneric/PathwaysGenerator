@@ -40,16 +40,20 @@ class PathwayMapTest(unittest.TestCase):
         tipping_points = {}
 
         # Empty collection of tipping points
-        self.assertEqual(graph.action_end_by_action(action).tipping_point, 0)
+        for action_end in graph.action_ends_by_action(action):
+            self.assertEqual(action_end.tipping_point, 0)
         graph.assign_tipping_points(tipping_points)
-        self.assertEqual(graph.action_end_by_action(action).tipping_point, 0)
+        for action_end in graph.action_ends_by_action(action):
+            self.assertEqual(action_end.tipping_point, 0)
 
         # Non-empty collection of tipping points
         tipping_points[action] = 5
 
-        self.assertEqual(graph.action_end_by_action(action).tipping_point, 0)
+        for action_end in graph.action_ends_by_action(action):
+            self.assertEqual(action_end.tipping_point, 0)
         graph.assign_tipping_points(tipping_points)
-        self.assertEqual(graph.action_end_by_action(action).tipping_point, 5)
+        for action_end in graph.action_ends_by_action(action):
+            self.assertEqual(action_end.tipping_point, 5)
 
 
 class VerifyTippingPointsTest(unittest.TestCase):

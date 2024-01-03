@@ -2,13 +2,13 @@ from .action import Action
 from .node import Node
 
 
-class ActionBegin(Node):
+class ActionPeriod(Node):
     def __init__(self, action: Action) -> None:
-        super().__init__(f"[{action.label}")
+        super().__init__(f"{action.label}")
         self._action = action
 
     def __repr__(self) -> str:
-        return f'ActionBegin("{self._action}")'
+        return f'ActionPeriod("{self._action}")'
 
     @property
     def action(self) -> Action:

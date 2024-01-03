@@ -1,8 +1,10 @@
 """
 Sequence graph for an example
 =============================
-Note that ``e`` has in-degree of two, ``f`` has in-degree of three, but since ``e`` follows
-``f``, ``e`` it must be positioned to the right of ``f``.
+This example is taken from the adaptation pathways documentation.
+
+The same action ``b`` is used in different pathways. Therefore, in the specification of the
+sequences, ``b1`` and ``b2`` are used, even though these two are the same action.
 """
 from io import StringIO
 
@@ -15,14 +17,16 @@ sequence_graph = read_sequences(
     StringIO(
         """
 current a
-a e
-current b
-b f
+current b1
 current c
-c f
 current d
-d f
-f e
+b1 a
+b1 c
+b1 d
+c b2
+b2 a
+c a
+c d
 """
     )
 )

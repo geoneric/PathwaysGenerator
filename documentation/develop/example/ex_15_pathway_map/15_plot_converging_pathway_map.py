@@ -1,6 +1,6 @@
 """
-Pathway map for an example
-==========================
+Pathway map for converging pathways
+===================================
 """
 from io import StringIO
 
@@ -17,14 +17,11 @@ sequence_graph = read_sequences(
     StringIO(
         """
 current a
-a e
 current b
-b f
 current c
-c f
-current d
-d f
-f e
+a d
+b d
+c d
 """
     )
 )

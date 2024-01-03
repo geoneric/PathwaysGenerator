@@ -1,17 +1,16 @@
 import itertools
-import typing
 
 import numpy as np
 
-from ..node import ActionBegin
+from ..node import ActionBegin, Node
 from ..pathway_map import PathwayMap
 from .util import add_position, distribute, sort_horizontally
 
 
-def _distribute_horizontally(
+def _default_distribute_horizontally(
     pathway_map: PathwayMap,
     action_begin: ActionBegin,
-    position_by_node: dict[typing.Any, np.ndarray],
+    position_by_node: dict[Node, np.ndarray],
 ) -> None:
     assert isinstance(action_begin, ActionBegin)
 
@@ -37,13 +36,15 @@ def _distribute_horizontally(
             begin_x = max(begin_x, position_by_node[action_begin_new][0])
 
         add_position(position_by_node, action_begin_new, (begin_x, np.nan))
-        _distribute_horizontally(pathway_map, action_begin_new, position_by_node)
+        _default_distribute_horizontally(
+            pathway_map, action_begin_new, position_by_node
+        )
 
 
-def _distribute_vertically(
+def _default_distribute_vertically(
     pathway_map: PathwayMap,
     action_begin: ActionBegin,
-    position_by_node: dict[typing.Any, np.ndarray],
+    position_by_node: dict[Node, np.ndarray],
 ) -> None:
     # Visit *all* action begins / ends in one go, in order of increasing x-coordinate
     # - Group action begins / ends by x-coordinate. Within each group:
@@ -51,6 +52,8 @@ def _distribute_vertically(
     #     - For each action begin to position, take the mean y-coordinate of all
     #       incoming actions ends into account
     #     - Take some minimum distance into account. Move nodes that are too close to each other.
+
+    assert isinstance(action_begin, ActionBegin)
 
     min_distance = 1.0
     nodes = pathway_map.all_action_begins_and_ends(action_begin)
@@ -99,7 +102,7 @@ def _distribute_vertically(
 
 def default_layout(
     pathway_map: PathwayMap,
-) -> dict[typing.Any, np.ndarray]:
+) -> dict[Node, np.ndarray]:
     """
     Layout for visualizing pathway maps
 
@@ -108,21 +111,77 @@ def default_layout(
 
     The goal of this layout is to be able to visualize the contents of the graph.
     """
-    position_by_node: dict[typing.Any, np.ndarray] = {}
+    position_by_node: dict[Node, np.ndarray] = {}
 
     if pathway_map.nr_edges() > 0:
         action_begin = pathway_map.root_node
         add_position(position_by_node, action_begin, (0, 0))
 
-        _distribute_horizontally(pathway_map, action_begin, position_by_node)
-        _distribute_vertically(pathway_map, action_begin, position_by_node)
+        _default_distribute_horizontally(pathway_map, action_begin, position_by_node)
+        _default_distribute_vertically(pathway_map, action_begin, position_by_node)
 
     return position_by_node
 
 
+def _classic_distribute_horizontally(
+    pathway_map: PathwayMap,
+    action_begin: ActionBegin,
+    position_by_node: dict[Node, np.ndarray],
+) -> None:
+    assert isinstance(action_begin, ActionBegin)
+
+    action_end = pathway_map.action_end(action_begin)
+    end_x = action_end.tipping_point
+
+    add_position(position_by_node, action_end, (end_x, np.nan))
+
+    for action_begin_new in pathway_map.action_begins(
+        pathway_map.action_end(action_begin)
+    ):
+        begin_x = end_x
+
+        add_position(position_by_node, action_begin_new, (begin_x, np.nan))
+        _classic_distribute_horizontally(
+            pathway_map, action_begin_new, position_by_node
+        )
+
+
+def _classic_distribute_vertically(
+    pathway_map: PathwayMap,
+    root_action_begin: ActionBegin,
+    position_by_node: dict[Node, np.ndarray],
+) -> None:
+    action_end = pathway_map.action_end(root_action_begin)
+    position_by_node[action_end][1] = position_by_node[root_action_begin][1]
+
+    min_distance = 1.0
+    actions = [
+        action for action in pathway_map.actions() if action != root_action_begin.action
+    ]
+    y_coordinates = [float(position_by_node[root_action_begin][1])] * len(actions)
+    y_coordinates = distribute(y_coordinates, min_distance)
+
+    if len(y_coordinates) % 2 == 1:
+        y_coordinates = [
+            coordinate + 0.5 * min_distance for coordinate in y_coordinates
+        ]
+
+    y_coordinate_by_action = dict(zip(actions, y_coordinates))
+
+    for action_begin in pathway_map.all_action_begins():
+        y_coordinate = y_coordinate_by_action[action_begin.action]
+
+        assert np.isnan(position_by_node[action_begin][1])
+        position_by_node[action_begin][1] = y_coordinate
+        action_end = pathway_map.action_end(action_begin)
+
+        assert np.isnan(position_by_node[action_end][1])
+        position_by_node[action_end][1] = y_coordinate
+
+
 def classic_layout(
     pathway_map: PathwayMap,
-) -> dict[typing.Any, np.ndarray]:
+) -> dict[Node, np.ndarray]:
     """
     Layout that replicates the pathway map layout of the original (pre-2024) pathway generator
 
@@ -135,10 +194,27 @@ def classic_layout(
     - Each action ends up at its own level in the stack
     - Pathways jump from horizontal line to horizontal line, depending on the sequences of
       actions that make up each pathway
-    """
-    position_by_node: dict[typing.Any, np.ndarray] = {}
 
-    # TODO
-    print(pathway_map)
+    The pathway map passed in must contain sane tipping points. When in doubt, call
+    ``verify_tipping_points()`` before calling this function.
+    """
+    position_by_node: dict[Node, np.ndarray] = {}
+
+    if pathway_map.nr_edges() > 0:
+        root_action_begin = pathway_map.root_node
+        root_action_end = pathway_map.action_end(root_action_begin)
+        tipping_point = root_action_end.tipping_point
+
+        min_tipping_point, max_tipping_point = pathway_map.tipping_point_range()
+        tipping_point_range = max_tipping_point - min_tipping_point
+        assert tipping_point_range > 0
+        x_coordinate = tipping_point - 0.1 * tipping_point_range
+
+        add_position(position_by_node, root_action_begin, (x_coordinate, 0))
+
+        _classic_distribute_horizontally(
+            pathway_map, root_action_begin, position_by_node
+        )
+        _classic_distribute_vertically(pathway_map, root_action_begin, position_by_node)
 
     return position_by_node

@@ -73,9 +73,11 @@ sphinx_gallery_conf = {
     "download_all_examples": False,
     "examples_dirs": [
         "@CMAKE_CURRENT_SOURCE_DIR@/develop/example",
+        "@CMAKE_CURRENT_SOURCE_DIR@/use/example",
     ],
     "filename_pattern": f"{re.escape(os.sep)}.*_plot_",
     "gallery_dirs": [
         "develop/example",
+        "use/example",
     ],
 }

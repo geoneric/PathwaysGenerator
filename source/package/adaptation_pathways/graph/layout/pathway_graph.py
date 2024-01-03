@@ -2,36 +2,38 @@ import itertools
 
 import numpy as np
 
-from ..node import Action, ActionConversion
+from ..node import Node
 from ..pathway_graph import PathwayGraph
 from .util import add_position, distribute, sort_horizontally
 
 
 def _distribute_horizontally(
     pathway_graph: PathwayGraph,
-    from_conversion: Action | ActionConversion,
-    position_by_node: dict[Action | ActionConversion, np.ndarray],
+    from_node: Node,
+    position_by_node: dict[Node, np.ndarray],
 ) -> None:
-    min_distance = 1.0
-    from_x = position_by_node[from_conversion][0]
+    assert isinstance(from_node, Node), type(from_node)
 
-    for to_conversion in pathway_graph.to_conversions(from_conversion):
+    min_distance = 1.0
+    from_x = position_by_node[from_node][0]
+
+    for to_node in pathway_graph.to_nodes(from_node):
         to_x = from_x + min_distance
 
         # Push conversion to the right if necessary
-        if to_conversion in position_by_node:
-            to_x = max(to_x, position_by_node[to_conversion][0])
+        if to_node in position_by_node:
+            to_x = max(to_x, position_by_node[to_node][0])
 
-        add_position(position_by_node, to_conversion, (to_x, np.nan))
+        add_position(position_by_node, to_node, (to_x, np.nan))
 
-    for to_conversion in pathway_graph.to_conversions(from_conversion):
-        _distribute_horizontally(pathway_graph, to_conversion, position_by_node)
+    for to_node in pathway_graph.to_nodes(from_node):
+        _distribute_horizontally(pathway_graph, to_node, position_by_node)
 
 
 def _distribute_vertically(
     pathway_graph: PathwayGraph,
-    from_action: Action,
-    position_by_node: dict[Action | ActionConversion, np.ndarray],
+    from_node: Node,
+    position_by_node: dict[Node, np.ndarray],
 ) -> None:
     # Visit *all* actions and conversions in one go, in order of increasing x-coordinate
     # - Group actions and conversions by x-coordinate. Within each group:
@@ -39,14 +41,16 @@ def _distribute_vertically(
     #       from-actions and from_conversions into account
     #     - Take some minimum distance into account. Move nodes that are too close to each other.
 
+    assert isinstance(from_node, Node), type(from_node)
+
     min_distance = 1.0
-    nodes = pathway_graph.all_to_actions_and_conversions(from_action)
+    nodes = pathway_graph.all_to_nodes(from_node)
     sorted_nodes, _ = sort_horizontally(nodes, position_by_node)
 
     # Iterate over sorted_nodes, grouped by their x-coordinate
     for _, grouped_sorted_nodes in itertools.groupby(  # type: ignore
         sorted_nodes,
-        lambda action_or_conversion: position_by_node[action_or_conversion][0],
+        lambda node: position_by_node[node][0],
     ):
         nodes = list(grouped_sorted_nodes)
 
@@ -82,9 +86,7 @@ def _distribute_vertically(
             position_by_node[node][1] = y_coordinates[idx]
 
 
-def default_layout(
-    pathway_graph: PathwayGraph,
-) -> dict[Action | ActionConversion, np.ndarray]:
+def default_layout(pathway_graph: PathwayGraph) -> dict[Node, np.ndarray]:
     """
     Layout for visualizing pathway graphs
 
@@ -93,12 +95,12 @@ def default_layout(
 
     The goal of this layout is to be able to visualize the contents of the graph.
     """
-    position_by_node: dict[Action | ActionConversion, np.ndarray] = {}
+    position_by_node: dict[Node, np.ndarray] = {}
 
-    if pathway_graph.nr_conversions() > 0:
-        from_conversion = pathway_graph.root_node
-        add_position(position_by_node, from_conversion, (0, 0))
-        _distribute_horizontally(pathway_graph, from_conversion, position_by_node)
-        _distribute_vertically(pathway_graph, from_conversion, position_by_node)
+    if pathway_graph.nr_nodes() > 0:
+        from_node = pathway_graph.root_node
+        add_position(position_by_node, from_node, (0, 0))
+        _distribute_horizontally(pathway_graph, from_node, position_by_node)
+        _distribute_vertically(pathway_graph, from_node, position_by_node)
 
     return position_by_node

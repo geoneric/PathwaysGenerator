@@ -5,7 +5,6 @@ import docopt
 
 from ..graph.conversion import sequence_graph_to_pathway_map
 from ..graph.io import read_sequences, read_tipping_points
-from ..graph.node.action import Action
 from ..graph.plot import PathwayMapLayout, plot_and_save_pathway_map
 from ..version import __version__ as version
 from .main import main_function
@@ -16,19 +15,9 @@ def plot_map(
     sequences_pathname: str, tipping_points_pathname: str, plot_pathname: str
 ) -> int:
     pathway_map = sequence_graph_to_pathway_map(read_sequences(sequences_pathname))
-    tipping_point_by_label = read_tipping_points(tipping_points_pathname)
+    tipping_points = read_tipping_points(tipping_points_pathname, pathway_map.actions())
 
-    action_by_label: dict[str, Action] = {}
-
-    for action in pathway_map.actions():
-        action_by_label[action.label] = action
-
-    tipping_point_by_action: dict[Action, int] = {}
-
-    for label, tipping_point in tipping_point_by_label.items():
-        tipping_point_by_action[action_by_label[label]] = tipping_point
-
-    pathway_map.assign_tipping_points(tipping_point_by_action, verify=True)
+    pathway_map.assign_tipping_points(tipping_points, verify=True)
 
     plot_and_save_pathway_map(
         pathway_map, plot_pathname, layout=PathwayMapLayout.CLASSIC

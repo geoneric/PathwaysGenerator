@@ -69,5 +69,6 @@ set_property(
             _sources  # sphinx-gallery
             _static  # sphinx-build
             develop/example  # sphinx-gallery
+            use/example  # sphinx-gallery
             html  # sphinx-build
 )

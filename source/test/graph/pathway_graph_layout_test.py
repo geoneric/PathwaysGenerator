@@ -9,34 +9,19 @@ from adaptation_pathways.graph.sequence_graph import SequenceGraph
 
 
 class PathwayGraphLayoutTest(unittest.TestCase):
+    def assert_equal_positions(self, positions_we_got, path, positions_we_want):
+        self.assertEqual(len(path), len(positions_we_want))
+
+        for idx, node in enumerate(path):
+            self.assertEqual(positions_we_want[idx][0], node.label)
+            npt.assert_almost_equal(positions_we_want[idx][1], positions_we_got[node])
+
     def test_empty(self):
         sequence_graph = SequenceGraph()
         pathway_graph = sequence_graph_to_pathway_graph(sequence_graph)
         positions = default_layout(pathway_graph)
 
         self.assertEqual(len(positions), 0)
-
-    def test_single_period(self):
-        sequence_graph = SequenceGraph()
-        current = Action("current")
-        a = Action("a")
-
-        sequence_graph.add_sequence(current, a)
-
-        pathway_graph = sequence_graph_to_pathway_graph(sequence_graph)
-        positions = default_layout(pathway_graph)
-
-        self.assertEqual(len(positions), 3)
-
-        npt.assert_almost_equal(
-            positions[pathway_graph.conversion_by_name("current")], (0, 0)
-        )
-        npt.assert_almost_equal(
-            positions[pathway_graph.conversion_by_name("current | a")], (1, 0)
-        )
-        npt.assert_almost_equal(
-            positions[pathway_graph.conversion_by_name("a")], (2, 0)
-        )
 
     def test_serial_pathway(self):
         sequence_graph = SequenceGraph()
@@ -50,30 +35,24 @@ class PathwayGraphLayoutTest(unittest.TestCase):
         sequence_graph.add_sequence(b, c)
 
         pathway_graph = sequence_graph_to_pathway_graph(sequence_graph)
-        positions = default_layout(pathway_graph)
+        paths = list(pathway_graph.all_paths())
+        self.assertEqual(len(paths), 1)
 
+        positions = default_layout(pathway_graph)
         self.assertEqual(len(positions), 7)
 
-        npt.assert_almost_equal(
-            positions[pathway_graph.conversion_by_name("current")], (0, 0)
-        )
-        npt.assert_almost_equal(
-            positions[pathway_graph.conversion_by_name("current | a")], (1, 0)
-        )
-        npt.assert_almost_equal(
-            positions[pathway_graph.conversion_by_name("a")], (2, 0)
-        )
-        npt.assert_almost_equal(
-            positions[pathway_graph.conversion_by_name("a | b")], (3, 0)
-        )
-        npt.assert_almost_equal(
-            positions[pathway_graph.conversion_by_name("b")], (4, 0)
-        )
-        npt.assert_almost_equal(
-            positions[pathway_graph.conversion_by_name("b | c")], (5, 0)
-        )
-        npt.assert_almost_equal(
-            positions[pathway_graph.conversion_by_name("c")], (6, 0)
+        self.assert_equal_positions(
+            positions,
+            paths[0],
+            [
+                ("current", (0, 0)),
+                ("current | a", (1, 0)),
+                ("a", (2, 0)),
+                ("a | b", (3, 0)),
+                ("b", (4, 0)),
+                ("b | c", (5, 0)),
+                ("c", (6, 0)),
+            ],
         )
 
     def test_diverging_pathways(self):
@@ -88,30 +67,94 @@ class PathwayGraphLayoutTest(unittest.TestCase):
         sequence_graph.add_sequence(current, c)
 
         pathway_graph = sequence_graph_to_pathway_graph(sequence_graph)
-        positions = default_layout(pathway_graph)
+        paths = list(pathway_graph.all_paths())
+        self.assertEqual(len(paths), 3)
 
+        positions = default_layout(pathway_graph)
         self.assertEqual(len(positions), 7)
 
-        npt.assert_almost_equal(
-            positions[pathway_graph.conversion_by_name("current")], (0, 0)
+        self.assert_equal_positions(
+            positions,
+            paths[0],
+            [
+                ("current", (0, 0)),
+                ("current | a", (1, 1)),
+                ("a", (2, 1)),
+            ],
         )
-        npt.assert_almost_equal(
-            positions[pathway_graph.conversion_by_name("current | a")], (1, 1)
+        self.assert_equal_positions(
+            positions,
+            paths[1],
+            [
+                ("current", (0, 0)),
+                ("current | b", (1, 0)),
+                ("b", (2, 0)),
+            ],
         )
-        npt.assert_almost_equal(
-            positions[pathway_graph.conversion_by_name("a")], (2, 1)
+        self.assert_equal_positions(
+            positions,
+            paths[2],
+            [
+                ("current", (0, 0)),
+                ("current | c", (1, -1)),
+                ("c", (2, -1)),
+            ],
         )
-        npt.assert_almost_equal(
-            positions[pathway_graph.conversion_by_name("current | b")], (1, 0)
+
+    def test_converging_pathways(self):
+        sequence_graph = SequenceGraph()
+        current = Action("current")
+        a = Action("a")
+        b = Action("b")
+        c = Action("c")
+        d = Action("d")
+
+        sequence_graph.add_sequence(current, a)
+        sequence_graph.add_sequence(current, b)
+        sequence_graph.add_sequence(current, c)
+        sequence_graph.add_sequence(a, d)
+        sequence_graph.add_sequence(b, d)
+        sequence_graph.add_sequence(c, d)
+
+        pathway_graph = sequence_graph_to_pathway_graph(sequence_graph)
+        paths = list(pathway_graph.all_paths())
+        self.assertEqual(len(paths), 3)
+
+        positions = default_layout(pathway_graph)
+        self.assertEqual(len(positions), 13)
+
+        self.assert_equal_positions(
+            positions,
+            paths[0],
+            [
+                ("current", (0, 0)),
+                ("current | a", (1, 1)),
+                ("a", (2, 1)),
+                ("a | d", (3, 1)),
+                ("d", (4, 1)),
+            ],
         )
-        npt.assert_almost_equal(
-            positions[pathway_graph.conversion_by_name("b")], (2, 0)
+        self.assert_equal_positions(
+            positions,
+            paths[1],
+            [
+                ("current", (0, 0)),
+                ("current | b", (1, 0)),
+                ("b", (2, 0)),
+                ("b | d", (3, 0)),
+                ("d", (4, 0)),
+            ],
         )
-        npt.assert_almost_equal(
-            positions[pathway_graph.conversion_by_name("current | c")], (1, -1)
-        )
-        npt.assert_almost_equal(
-            positions[pathway_graph.conversion_by_name("c")], (2, -1)
+        self.assert_equal_positions(
+            positions,
+            paths[2],
+            [
+                ("current", (0, 0)),
+                ("current | c", (1, -1)),
+                ("c", (2, -1)),
+                ("c | d", (3, -1)),
+                ("d", (4, -1)),
+            ],
         )
 
     def test_use_case_01(self):
@@ -139,55 +182,59 @@ class PathwayGraphLayoutTest(unittest.TestCase):
         )
 
         pathway_graph = sequence_graph_to_pathway_graph(sequence_graph)
+        paths = list(pathway_graph.all_paths())
+        self.assertEqual(len(paths), 4)
+
         positions = default_layout(pathway_graph)
+        self.assertEqual(len(positions), 23)
 
-        self.assertEqual(len(positions), 16)
-
-        npt.assert_almost_equal(
-            positions[pathway_graph.conversion_by_name("current")], (0, 0)
+        self.assert_equal_positions(
+            positions,
+            paths[0],
+            [
+                ("current", (0, 0)),
+                ("current | a", (1, 1.5)),
+                ("a", (2, 1.5)),
+                ("a | e", (3, 1.5)),
+                ("e", (4, 1.5)),
+            ],
         )
-        npt.assert_almost_equal(
-            positions[pathway_graph.conversion_by_name("current | a")], (1, 1.5)
+        self.assert_equal_positions(
+            positions,
+            paths[1],
+            [
+                ("current", (0, 0)),
+                ("current | b", (1, 0.5)),
+                ("b", (2, 0.5)),
+                ("b | f", (3, 0.5)),
+                ("f", (4, 0.5)),
+                ("f | e", (5, 0.5)),
+                ("e", (6, 0.5)),
+            ],
         )
-        npt.assert_almost_equal(
-            positions[pathway_graph.conversion_by_name("a")], (2, 1.5)
+        self.assert_equal_positions(
+            positions,
+            paths[2],
+            [
+                ("current", (0, 0)),
+                ("current | c", (1, -0.5)),
+                ("c", (2, -0.5)),
+                ("c | f", (3, -0.5)),
+                ("f", (4, -0.5)),
+                ("f | e", (5, -0.5)),
+                ("e", (6, -0.5)),
+            ],
         )
-        npt.assert_almost_equal(
-            positions[pathway_graph.conversion_by_name("a | e")], (3, 1.5)
-        )
-        npt.assert_almost_equal(
-            positions[pathway_graph.conversion_by_name("current | b")], (1, 0.5)
-        )
-        npt.assert_almost_equal(
-            positions[pathway_graph.conversion_by_name("b")], (2, 0.5)
-        )
-        npt.assert_almost_equal(
-            positions[pathway_graph.conversion_by_name("b | f")], (3, 0.5)
-        )
-        npt.assert_almost_equal(
-            positions[pathway_graph.conversion_by_name("current | c")], (1, -0.5)
-        )
-        npt.assert_almost_equal(
-            positions[pathway_graph.conversion_by_name("c")], (2, -0.5)
-        )
-        npt.assert_almost_equal(
-            positions[pathway_graph.conversion_by_name("c | f")], (3, -0.5)
-        )
-        npt.assert_almost_equal(
-            positions[pathway_graph.conversion_by_name("current | d")], (1, -1.5)
-        )
-        npt.assert_almost_equal(
-            positions[pathway_graph.conversion_by_name("d")], (2, -1.5)
-        )
-        npt.assert_almost_equal(
-            positions[pathway_graph.conversion_by_name("d | f")], (3, -1.5)
-        )
-        npt.assert_almost_equal(
-            positions[pathway_graph.conversion_by_name("f")], (4, -0.5)
-        )
-        npt.assert_almost_equal(
-            positions[pathway_graph.conversion_by_name("f | e")], (5, -0.5)
-        )
-        npt.assert_almost_equal(
-            positions[pathway_graph.conversion_by_name("e")], (6, 0.5)
+        self.assert_equal_positions(
+            positions,
+            paths[3],
+            [
+                ("current", (0, 0)),
+                ("current | d", (1, -1.5)),
+                ("d", (2, -1.5)),
+                ("d | f", (3, -1.5)),
+                ("f", (4, -1.5)),
+                ("f | e", (5, -1.5)),
+                ("e", (6, -1.5)),
+            ],
         )

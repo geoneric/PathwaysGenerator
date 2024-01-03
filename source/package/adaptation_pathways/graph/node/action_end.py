@@ -24,21 +24,7 @@ class ActionEnd(Node):
         self._tipping_point = tipping_point
 
     def __repr__(self) -> str:
-        return f'ActionEnd("{self._action}, {self._tipping_point}")'
-
-    def __hash__(self):
-        return hash((self._action, self._label))
-
-    def __eq__(self, other):
-        return isinstance(other, type(self)) and (
-            self._action,
-            self._label,
-            self._tipping_point,
-        ) == (
-            other._action,
-            other._label,
-            other._tipping_point,
-        )
+        return f'ActionEnd("{self._action}", {self._tipping_point})'
 
     @property
     def action(self) -> Action:

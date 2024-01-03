@@ -95,6 +95,32 @@ class SequenceGraphLayoutTest(unittest.TestCase):
         npt.assert_almost_equal(positions[a], (1, 0.5))
         npt.assert_almost_equal(positions[b], (1, -0.5))
 
+    def test_converging_sequence(self):
+        sequence_graph = SequenceGraph()
+        current = Action("current")
+        a = Action("a")
+        b = Action("b")
+        c = Action("c")
+        d = Action("d")
+        actions = [current, a, b, c, d]
+
+        sequence_graph.add_sequence(current, a)
+        sequence_graph.add_sequence(current, b)
+        sequence_graph.add_sequence(current, c)
+        sequence_graph.add_sequence(a, d)
+        sequence_graph.add_sequence(b, d)
+        sequence_graph.add_sequence(c, d)
+
+        positions = default_layout(sequence_graph)
+
+        self.assertEqual(len(positions), len(actions))
+        self.assertTrue(all(action in positions for action in actions))
+        npt.assert_almost_equal(positions[current], (0, 0))
+        npt.assert_almost_equal(positions[a], (1, 1))
+        npt.assert_almost_equal(positions[b], (1, 0))
+        npt.assert_almost_equal(positions[c], (1, -1))
+        npt.assert_almost_equal(positions[d], (2, 0))
+
     def test_use_case_01(self):
         """
         test_use_case_01
