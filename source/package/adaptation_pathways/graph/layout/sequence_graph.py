@@ -2,18 +2,12 @@ import itertools
 
 import numpy as np
 
-from ..action import Action
-from .layout import distribute, sort_horizontally
-from .sequence_graph import SequenceGraph
+from ..node import Action
+from ..sequence_graph import SequenceGraph
+from .util import add_position, distribute, sort_horizontally
 
 
-def add_position(
-    nodes: dict[Action, np.ndarray], action: Action, position: tuple[float, float]
-) -> None:
-    nodes[action] = np.array(position, np.float64)
-
-
-def distribute_horizontally(
+def _distribute_horizontally(
     sequence_graph: SequenceGraph,
     from_action: Action,
     nodes: dict[Action, np.ndarray],
@@ -31,10 +25,10 @@ def distribute_horizontally(
         add_position(nodes, to_action, (to_x, np.nan))
 
     for to_action in sequence_graph.to_actions(from_action):
-        distribute_horizontally(sequence_graph, to_action, nodes)
+        _distribute_horizontally(sequence_graph, to_action, nodes)
 
 
-def distribute_vertically(
+def _distribute_vertically(
     sequence_graph: SequenceGraph,
     from_action: Action,
     nodes: dict[Action, np.ndarray],
@@ -87,13 +81,21 @@ def distribute_vertically(
             nodes[action][1] = y_coordinates[idx]
 
 
-def sequence_graph_layout(sequence_graph: SequenceGraph) -> dict[Action, np.ndarray]:
+def default_layout(sequence_graph: SequenceGraph) -> dict[Action, np.ndarray]:
+    """
+    Layout for visualizing sequence graphs
+
+    :param sequence_graph: Sequence graph
+    :return: Node positions
+
+    The goal of this layout is to be able to visualize the contents of the graph.
+    """
     nodes: dict[Action, np.ndarray] = {}
 
     if sequence_graph.nr_actions() > 0:
         from_action = sequence_graph.root_node
         add_position(nodes, from_action, (0, 0))
-        distribute_horizontally(sequence_graph, from_action, nodes)
-        distribute_vertically(sequence_graph, from_action, nodes)
+        _distribute_horizontally(sequence_graph, from_action, nodes)
+        _distribute_vertically(sequence_graph, from_action, nodes)
 
     return nodes

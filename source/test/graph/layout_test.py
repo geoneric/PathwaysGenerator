@@ -2,7 +2,7 @@ import unittest
 
 import numpy.testing as npt
 
-from adaptation_pathways.graph.layout import distribute
+from adaptation_pathways.graph.layout.util import distribute
 
 
 class LayoutTest(unittest.TestCase):

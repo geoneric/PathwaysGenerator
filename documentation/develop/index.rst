@@ -1,9 +1,6 @@
 Develop
 =======
 
-Code
-----
-
 .. toctree::
    :maxdepth: 1
 

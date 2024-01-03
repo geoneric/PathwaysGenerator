@@ -4,7 +4,7 @@ import typing
 import numpy as np
 
 
-def unsort_idxs(values: list[typing.Any]) -> list[int]:
+def _unsort_idxs(values: list[typing.Any]) -> list[int]:
     # Actually, the type of value must be "Comparable" (not "Any") but there is no built-in
     # support for that yet in Python
     idxs = list(range(len(values)))
@@ -13,17 +13,25 @@ def unsort_idxs(values: list[typing.Any]) -> list[int]:
     return idxs
 
 
-def sort(values: list[float]) -> tuple[list[float], list[int]]:
-    return list(sorted(values, reverse=True)), unsort_idxs(values)
+def _sort(values: list[float]) -> tuple[list[float], list[int]]:
+    return list(sorted(values, reverse=True)), _unsort_idxs(values)
 
 
-def unsort(values: list[float], idxs: list[int]) -> list[float]:
+def _unsort(values: list[float], idxs: list[int]) -> list[float]:
     original_ordered_values = [0.0] * len(values)
 
     for idx, value in zip(idxs, values):
         original_ordered_values[idx] = value
 
     return original_ordered_values
+
+
+def add_position(
+    position_by_node: dict[typing.Any, np.ndarray],
+    node: typing.Any,
+    position: tuple[float, float],
+) -> None:
+    position_by_node[node] = np.array(position, np.float64)
 
 
 def sort_horizontally(
@@ -53,7 +61,7 @@ def distribute(coordinates: list[float], min_distance: float) -> list[float]:
         added between the coordinates, this is added evenly to both sides of the range of
         coordinates.
     """
-    coordinates, idxs = sort(coordinates)
+    coordinates, idxs = _sort(coordinates)
 
     assert sorted(coordinates, reverse=True) == coordinates, coordinates
     assert min_distance >= 0
@@ -88,6 +96,6 @@ def distribute(coordinates: list[float], min_distance: float) -> list[float]:
 
             distributed_coordinates.append(coordinates[-1] + offset)
 
-    distributed_coordinates = unsort(distributed_coordinates, idxs)
+    distributed_coordinates = _unsort(distributed_coordinates, idxs)
 
     return list(reversed(distributed_coordinates))

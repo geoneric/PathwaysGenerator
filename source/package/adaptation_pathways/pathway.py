@@ -4,7 +4,7 @@ pre-defined objectives under uncertain and changing future conditions.
 
 This module contains the implementation of the :py:class:`Pathway` class.
 """
-from .action import Action
+from .graph.node import Action
 
 
 class Pathway:

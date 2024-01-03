@@ -1,6 +1,4 @@
-from ..action import Action
-from ..action_begin import ActionBegin
-from ..action_end import ActionEnd
+from .node import Action, ActionBegin, ActionEnd
 from .rooted_graph import RootedGraph
 
 
@@ -11,46 +9,123 @@ class PathwayMap(RootedGraph):
     """
 
     def add_period(self, begin: ActionBegin, end: ActionEnd) -> None:
-        self._graph.add_edge(begin, end)
+        assert isinstance(begin, ActionBegin)
+        assert isinstance(end, ActionEnd)
+        self.graph.add_edge(begin, end)
 
     def add_conversion(self, end: ActionEnd, begin: ActionBegin) -> None:
-        self._graph.add_edge(end, begin)
+        assert isinstance(end, ActionEnd)
+        assert isinstance(begin, ActionBegin)
+        self.graph.add_edge(end, begin)
 
-    def action_begins(self, action_end: ActionEnd) -> list[ActionBegin]:
-        assert isinstance(action_end, ActionEnd)
-        return list(self._graph.adj[action_end])
+    def action_begins(self, end: ActionEnd) -> list[ActionBegin]:
+        assert isinstance(end, ActionEnd)
+        return list(self.graph.adj[end])
 
-    def action_end(self, action_begin: ActionBegin) -> ActionEnd:
-        assert isinstance(action_begin, ActionBegin)
-        ends = list(self._graph.adj[action_begin])
+    def action_end(self, begin: ActionBegin) -> ActionEnd:
+        assert isinstance(begin, ActionBegin)
+        ends = list(self.graph.adj[begin])
         assert len(ends) == 1
         return ends[0]
 
     def all_action_begins_and_ends(
-        self, action_begin: ActionBegin
+        self, begin: ActionBegin
     ) -> list[ActionBegin | ActionEnd]:
-        return self.all_to_nodes(action_begin)
+        assert isinstance(begin, ActionBegin)
+        return self.all_to_nodes(begin)
 
-    def action_begin_by_action(self, action: Action) -> ActionBegin:
-        result = None
+    def all_action_begins(self) -> list[ActionBegin]:
+        result = []
 
-        for node in self._graph.nodes:
-            if isinstance(node, ActionBegin) and node.action == action:
-                result = node
-                break
-
-        assert result is not None
+        for node in self.all_to_nodes(self.root_node):
+            if isinstance(node, ActionBegin):
+                result.append(node)
 
         return result
 
-    def action_end_by_action(self, action: Action) -> ActionEnd:
-        result = None
+    def actions(self) -> list[Action]:
+        actions: list[Action] = []
 
-        for node in self._graph.nodes:
+        for node in self.graph.nodes():
+            actions.append(node.action)
+
+        # Remove duplicates while maintaining order
+        return list(dict.fromkeys(actions))
+
+    def action_ends_by_action(self, action: Action) -> list[ActionEnd]:
+        """
+        Return ``ActionEnd`` nodes associated with the action passed in
+
+        :raises LookupError: In case no ``ActionEnd`` node can be found that is associated with
+            the action
+        """
+        assert isinstance(action, Action), type(action)
+        result = []
+
+        for node in self.graph.nodes:
             if isinstance(node, ActionEnd) and node.action == action:
-                result = node
-                break
+                result.append(node)
 
-        assert result is not None
+        if len(result) == 0:
+            raise LookupError(f"Action {action} is not part of the pathway map")
 
         return result
+
+    def assign_tipping_points(
+        self, tipping_points: dict[Action, int], verify: bool = False
+    ) -> None:
+        """
+        Assign / update tipping points to ActionEnd nodes associated with the actions passed in
+
+        :param verify: Whether or not the tipping points should be checked for consistency,
+            using :py:func:`verify_tipping_points`
+        """
+        for action, tipping_point in tipping_points.items():
+            for action_end in self.action_ends_by_action(action):
+                action_end.tipping_point = tipping_point
+
+        if verify:
+            verify_tipping_points(self)
+
+    def tipping_point_range(self) -> tuple[int, int]:
+        result = (0, 0)
+
+        if self.nr_nodes() > 0:
+            min_tipping_point = self.action_end(self.root_node).tipping_point
+            max_tipping_point = min_tipping_point
+
+            for end_node in self.leaf_nodes():
+                max_tipping_point = max(max_tipping_point, end_node.tipping_point)
+
+            result = (min_tipping_point, max_tipping_point)
+
+        assert result[0] <= result[1], result
+
+        return result
+
+
+def verify_tipping_points(pathway_map: PathwayMap) -> None:
+    """
+    Verify all tipping points in the pathway map passed in are correctly set
+
+    :raises ValueError: In case one or more tipping points are not correctly set
+
+    Tipping points are correct if they strictly increase along the sequences of actions.
+    """
+
+    for paths in pathway_map.all_paths():
+        # [begin, end, begin, end, ...]
+
+        tipping_point_from = paths[1].tipping_point
+
+        for idx in range(3, len(paths), 2):
+            tipping_point_to = paths[idx].tipping_point
+
+            if tipping_point_to <= tipping_point_from:
+                raise ValueError(
+                    f"Given the sequences of actions, the tipping point of action "
+                    f"{paths[idx].action} ({tipping_point_to}) "
+                    f"must be at least larger than {tipping_point_from}"
+                )
+
+            tipping_point_from = tipping_point_to

@@ -1,7 +1,4 @@
-from ..action import Action
-from ..action_begin import ActionBegin
-from ..action_conversion import ActionConversion
-from ..action_end import ActionEnd
+from .node import Action, ActionBegin, ActionConversion, ActionEnd, ActionPeriod
 from .pathway_graph import PathwayGraph
 from .pathway_map import PathwayMap
 from .sequence_graph import SequenceGraph
@@ -78,8 +75,9 @@ def default_node_colours_pathway_graph(
     idx = 0
 
     for node in graph._graph.nodes:
-        assert type(node) in [Action, ActionConversion]
-        if isinstance(node, Action):
+        # assert type(node) in [Action, ActionConversion]
+        assert type(node) in [ActionConversion, ActionPeriod]
+        if isinstance(node, ActionPeriod):
             if node not in colour_by_action:
                 colour_by_action[node] = palette[idx % palette_size]
                 idx += 1

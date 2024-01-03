@@ -17,14 +17,16 @@ sequence_graph = read_sequences(
     StringIO(
         """
 current a
-a e
-current b
-b f
+current b1
 current c
-c f
 current d
-d f
-f e
+b1 a
+b1 c
+b1 d
+c b2
+b2 a
+c a
+c d
 """
     )
 )

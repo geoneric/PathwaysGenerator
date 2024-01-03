@@ -1,8 +1,6 @@
 """
-Sequence graph for an example
-=============================
-Note that ``e`` has in-degree of two, ``f`` has in-degree of three, but since ``e`` follows
-``f``, ``e`` it must be positioned to the right of ``f``.
+Sequence graph for converging sequence
+======================================
 """
 from io import StringIO
 
@@ -15,17 +13,15 @@ sequence_graph = read_sequences(
     StringIO(
         """
 current a
-a e
 current b
-b f
 current c
-c f
-current d
-d f
-f e
+a d
+b d
+c d
 """
     )
 )
+
 
 plot_sequence_graph(sequence_graph)
 plt.show()

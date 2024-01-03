@@ -49,10 +49,10 @@ class RootedGraph:
         """
         :return: The root node
         """
+        if self.nr_nodes() == 0:
+            raise LookupError("Graph is empty")
+
         return next(nx.topological_sort(self._graph))
-        # print(self._graph.in_degree())
-        # print([node for node, degree in self._graph.in_degree()])
-        # return [node for node, degree in self._graph.in_degree() if degree == 0][0]
 
     def all_to_nodes(self, from_node):
         # Use shortest_path to find all nodes reachable from the node passed in
@@ -73,3 +73,25 @@ class RootedGraph:
         """
         # TODO Can this be done more efficiently?
         return [node for node in self._graph.nodes() if to_node in self.to_nodes(node)]
+
+    def leaf_nodes(self) -> typing.Iterable[typing.Any]:
+        """
+        :Return: Iterable for iterating over all leaf nodes
+        """
+        return [
+            node
+            for node in self._graph.nodes()
+            if self._graph.in_degree(node) != 0 and self._graph.out_degree(node) == 0
+        ]
+
+    def all_paths(self):
+        result = []
+
+        if self.nr_nodes() > 0:
+            graph = self._graph
+            source_node = self.root_node
+            target_nodes = self.leaf_nodes()
+            cutoff = None
+            result = nx.all_simple_paths(graph, source_node, target_nodes, cutoff)
+
+        return result
