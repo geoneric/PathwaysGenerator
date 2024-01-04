@@ -38,6 +38,30 @@ def create_release(build_directory_path: Path) -> Path:
     return release_zip_path
 
 
+def verify_no_unnecessary_contents(release_directory_path: Path) -> None:
+    """
+    Verify that the release does not contain files and directories that it should not contain
+    """
+    package_directory_path = release_directory_path.joinpath(
+        "venv",
+        "lib",
+        f"python{sys.version_info.major}.{sys.version_info.minor}",
+        "site-packages",
+        "adaptation_pathways",
+    )
+    documentation_directory_path = release_directory_path.joinpath("documentation")
+
+    unnecessary_filename_patterns = [
+        "CMakeLists.txt",
+    ]
+
+    for directory_path in [package_directory_path, documentation_directory_path]:
+        assert directory_path.exists(), directory_path
+
+        for pattern in unnecessary_filename_patterns:
+            assert len(list(directory_path.glob(f"**/{pattern}"))) == 0
+
+
 def verify_wheel(release_directory_path: Path) -> None:
     dist_directory_path = release_directory_path.joinpath("dist")
     assert dist_directory_path.exists()
@@ -46,10 +70,13 @@ def verify_wheel(release_directory_path: Path) -> None:
     venv.create(venv_directory_path, with_pip=True, upgrade_deps=True)
 
     commands = [
+        "set -e",  # Stop script when first command fails
         f"cd {release_directory_path}",
         "source venv/bin/activate",
-        "pip3 install -f dist adaptation_pathways",
+        "pip3 install -f dist adaptation_pathways --quiet",
         "ap_plot_graphs --version",
+        "ap_plot_pathway_map --version",
+        "pathways_generator --version",
         'python3 -c "'
         "import adaptation_pathways as ap;"
         f'assert ap.__version__ == \\"{ap.__version__}\\";'
@@ -61,7 +88,14 @@ def verify_wheel(release_directory_path: Path) -> None:
 def verify_documentation(release_directory_path: Path) -> None:
     html_directory_path = release_directory_path.joinpath("documentation", "html")
     assert html_directory_path.exists()
-    assert html_directory_path.joinpath("index.html").exists()
+
+    index_html = html_directory_path.joinpath("index.html")
+
+    assert index_html.exists()
+
+    command = f"linkchecker {index_html}"
+
+    subprocess.run(shlex.split(command), check=True)
 
 
 def verify_release_directory(release_directory_path: Path) -> None:
@@ -69,6 +103,7 @@ def verify_release_directory(release_directory_path: Path) -> None:
 
     verify_wheel(release_directory_path)
     verify_documentation(release_directory_path)
+    verify_no_unnecessary_contents(release_directory_path)
 
 
 def verify_release(release_zip_path: Path) -> None:
@@ -111,7 +146,7 @@ Options:
 
     release_zip_path = create_and_verify_release(build_directory_path)
 
-    print(f"Package {release_zip_path} is ready to be released!")
+    print(f"\nPackage {release_zip_path} is ready to be released!")
 
 
 if __name__ == "__main__":

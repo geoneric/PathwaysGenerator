@@ -88,6 +88,7 @@ Creating a package and inspecting its contents can be done as follows:
 
 .. code-block:: bash
 
+   # In build directory
    ninja
    ninja package
    tar -tf dist/adaptation_pathways-1.2.3.tar.gz
@@ -115,19 +116,22 @@ After testing the package, new versions of the package can be installed like thi
 Release a package
 -----------------
 
-Create zip with Python Wheel package and the documentation:
+Create zip with Python Wheel package and the documentation, and verify the contents are OK:
 
 .. code-block:: bash
 
-   ninja release
+   # In build directory
+   create_and_verify_release.py .
 
-Output is stored in ``adaptation_pathways-1.2.3.zip``.
+Do not release the package when this command fails. Output is stored in
+``adaptation_pathways-1.2.3.zip``.
 
 
 Create and push a tag.
 
 .. code-block:: bash
 
+   # In source directory
    git tag -a v1.2.3 -m"Release that solves all problems"
    git push origin v1.2.3
 
@@ -191,7 +195,7 @@ Background information
 * Build a package:
 
     * `Python Packaging User Guide <https://packaging.python.org/en/latest/>`_
-    * `build packaging frontend <https://pypa-build.readthedocs.io/en/stable/>`_
+    * `build packaging frontend <https://build.pypa.io/en/stable/>`_
     * `Hatch packaging backend <https://hatch.pypa.io/latest/>`_
     * `pip package installer <https://pip.pypa.io/en/stable/>`_
 
