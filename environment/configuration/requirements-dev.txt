@@ -1,6 +1,7 @@
 build
 cmake
 furo
+linkchecker
 ninja
 sphinx
 sphinxcontrib-mermaid
