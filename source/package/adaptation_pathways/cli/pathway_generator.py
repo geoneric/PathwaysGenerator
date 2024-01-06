@@ -5,6 +5,7 @@ import docopt
 import pandas as pd
 
 from ..browser import view_in_browser  # noqa: F401
+from ..desktop.application import application  # noqa: F401
 
 # from ..jupyter import view_in_jupyter  # noqa: F401
 from ..networkx import plot_pathways as plot_pathways_nx
@@ -48,6 +49,7 @@ Generate adaptation pathways
 Usage:
     {command} [--port=<port>] (browser | window)
     {command} <interventions> <pathways> <scenarios> <plot>
+    {command}
     {command} -h | --help
     {command} --version
 
@@ -75,7 +77,7 @@ Options:
         #     status = view_in_jupyter(mode=mode, url=url)
         elif arguments["window"]:  # type: ignore
             status = view_in_window(port_nr)
-    else:
+    elif arguments["<plot>"] is not None:  # type: ignore
         interventions_table_pathname = arguments["<interventions>"]  # type: ignore
         pathways_table_pathname = arguments["<pathways>"]  # type: ignore
         scenarios_table_pathname = arguments["<scenarios>"]  # type: ignore
@@ -87,6 +89,8 @@ Options:
             scenarios_table_pathname,
             pathways_plot_pathname,
         )
+    else:
+        status = application()
 
     return status
 

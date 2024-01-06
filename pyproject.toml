@@ -43,9 +43,9 @@ dependencies = [
 "Bug Tracker" = "https://todo"
 
 [project.scripts]
-pathways_generator = "adaptation_pathways.cli.plot_pathways:main"
 ap_plot_graphs = "adaptation_pathways.cli.plot_graphs:main"
 ap_plot_pathway_map = "adaptation_pathways.cli.plot_pathway_map:main"
+pathway_generator = "adaptation_pathways.cli.pathway_generator:main"
 
 [tool.hatch.build.targets.wheel]
 # include = [
