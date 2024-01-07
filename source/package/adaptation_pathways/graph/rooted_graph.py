@@ -28,7 +28,7 @@ class RootedGraph:
 
     # def is_empty(self) -> bool:
     #     """
-    #     :return: Wheter or not the tree is empty
+    #     :return: Whether or not the tree is empty
     #     """
     #     return nx.is_empty(self._graph)
 
