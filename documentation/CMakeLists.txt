@@ -26,24 +26,26 @@ set(AP_SPHINX_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/html)
 # https://www.sphinx-doc.org/en/master/man/sphinx-apidoc.html
 add_custom_target(apidoc
     COMMAND
-        ${CMAKE_COMMAND} -E env "SPHINX_APIDOC_OPTIONS=members,undoc-members,show-inheritance,inherited-members"
-            ${SPHINX_APIDOC_EXECUTABLE}
-                --force
-                --separate
-                --module-first
-                -d 1
-                -o ${CMAKE_CURRENT_BINARY_DIR}/api
-                ${PROJECT_SOURCE_DIR}/source/package/adaptation_pathways
+        ${CMAKE_COMMAND}
+            -E env "SPHINX_APIDOC_OPTIONS=members,undoc-members,show-inheritance,inherited-members"
+                ${SPHINX_APIDOC_EXECUTABLE}
+                    --force
+                    --separate
+                    --module-first
+                    -d 1
+                    -o ${CMAKE_CURRENT_BINARY_DIR}/api
+                    ${PROJECT_SOURCE_DIR}/source/package/adaptation_pathways
 )
 
 # https://www.sphinx-doc.org/en/master/man/sphinx-build.html
 add_custom_target(documentation
     COMMAND
-        ${CMAKE_COMMAND} -E env "PYTHONPATH=${PROJECT_SOURCE_DIR}/source/package:$ENV{PYTHONPATH}"
-            ${SPHINX_BUILD_EXECUTABLE}
-                -b html
-                -c ${CMAKE_CURRENT_BINARY_DIR}
-                ${CMAKE_CURRENT_BINARY_DIR} ${AP_SPHINX_BUILD_DIR}
+        ${CMAKE_COMMAND}
+            -E env "PYTHONPATH=${PROJECT_SOURCE_DIR}/source/package:$ENV{PYTHONPATH}"
+                ${SPHINX_BUILD_EXECUTABLE}
+                    -b html
+                    -c ${CMAKE_CURRENT_BINARY_DIR}
+                    ${CMAKE_CURRENT_BINARY_DIR} ${AP_SPHINX_BUILD_DIR}
 )
 
 add_dependencies(documentation apidoc)
@@ -52,7 +54,8 @@ add_custom_target(documentation.zip
     WORKING_DIRECTORY
         ${CMAKE_BINARY_DIR}
     COMMAND
-        ${CMAKE_COMMAND} -E tar "cf" "adaptation_pathways-${CMAKE_PROJECT_VERSION}-documentation.zip" --format=zip --
+        ${CMAKE_COMMAND} -E tar "cf"
+            "adaptation_pathways-${CMAKE_PROJECT_VERSION}-documentation.zip" --format=zip --
             documentation/html
 )
 

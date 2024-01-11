@@ -4,7 +4,7 @@ find_program(QUARTO_EXECUTABLE
 
 include(FindPackageHandleStandardArgs)
 
-find_package_handle_standard_args(Quarto DEFAULT_MSG
+find_package_handle_standard_args(QUARTO DEFAULT_MSG
     QUARTO_EXECUTABLE
 )
 
