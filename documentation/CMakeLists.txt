@@ -4,7 +4,7 @@ configure_file(
     @ONLY
 )
 
-foreach(name IN ITEMS glossary index)
+foreach(name IN ITEMS changelog glossary index)
     configure_file(
         ${name}.rst
         ${name}.rst

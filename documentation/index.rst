@@ -11,7 +11,8 @@ What do you want to do?
    Test the package <test/index>
    Develop the package <develop/index>
    Glossary <glossary>
+   Changelog <changelog>
 
 See also:
 
-* `Home <https://publicwiki.deltares.nl/display/AP/Adaptation+Pathways>`_
+* `Wiki <https://publicwiki.deltares.nl/display/AP/Adaptation+Pathways>`_
