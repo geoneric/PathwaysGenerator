@@ -28,7 +28,7 @@ add_custom_target(apidoc
     COMMAND
         ${CMAKE_COMMAND}
             -E env "SPHINX_APIDOC_OPTIONS=members,undoc-members,show-inheritance,inherited-members"
-                ${SPHINX_APIDOC_EXECUTABLE}
+                ${Sphinx_APIDOC_EXECUTABLE}
                     --force
                     --separate
                     --module-first
@@ -42,7 +42,7 @@ add_custom_target(documentation
     COMMAND
         ${CMAKE_COMMAND}
             -E env "PYTHONPATH=${PROJECT_SOURCE_DIR}/source/package:$ENV{PYTHONPATH}"
-                ${SPHINX_BUILD_EXECUTABLE}
+                ${Sphinx_BUILD_EXECUTABLE}
                     -b html
                     -c ${CMAKE_CURRENT_BINARY_DIR}
                     ${CMAKE_CURRENT_BINARY_DIR} ${AP_SPHINX_BUILD_DIR}

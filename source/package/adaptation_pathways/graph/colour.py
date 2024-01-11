@@ -36,7 +36,7 @@ nord_palette_blue = [
 def default_node_colours_sequence_graph(
     graph: SequenceGraph,
 ) -> list[tuple[float, float, float, float]]:
-    transparency = 0.75
+    transparency = 1.0  # 0.75
     palette = [colour + (transparency,) for colour in nord_palette_nominal]
     palette.append(nord_palette_blue[0] + (transparency,))
 
@@ -60,7 +60,7 @@ def default_node_colours_sequence_graph(
 def default_node_colours_pathway_graph(
     graph: PathwayGraph,
 ) -> list[tuple[float, float, float, float]]:
-    transparency = 0.75
+    transparency = 1.0  # 0.75
     palette = [colour + (transparency,) for colour in nord_palette_nominal]
     palette.append(nord_palette_blue[0] + (transparency,))
 
@@ -91,7 +91,7 @@ def default_node_colours_pathway_graph(
 def default_node_colours_pathway_map(
     graph: PathwayMap,
 ) -> list[tuple[float, float, float, float]]:
-    transparency = 0.75
+    transparency = 1.0  # 0.75
     palette = [colour + (transparency,) for colour in nord_palette_nominal]
     palette.append(nord_palette_blue[0] + (transparency,))
 
@@ -117,8 +117,13 @@ def default_node_colours_pathway_map(
 def default_edge_colours(
     graph: SequenceGraph | PathwayGraph | PathwayMap,
 ) -> list[tuple[float, float, float, float]]:
-    transparency = 0.75
+    transparency = 1.0  # 0.75
     edge_colour = nord_palette_dark[3] + (transparency,)
     edge_colours = [edge_colour] * len(list(graph.graph.edges))
 
     return edge_colours
+
+
+def default_font_colour():
+    transparency = 1.0  # 0.75
+    return nord_palette_dark[3] + (transparency,)

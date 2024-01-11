@@ -7,6 +7,7 @@ import numpy as np
 
 from .colour import (
     default_edge_colours,
+    default_font_colour,
     default_node_colours_pathway_graph,
     default_node_colours_pathway_map,
     default_node_colours_sequence_graph,
@@ -35,17 +36,41 @@ def init_plot(
     )
     # plt.clf()
 
-    draw_options = {
-        "with_labels": True,
-        "font_size": "small",
-        "font_weight": "bold",
-    }
+    # draw_options = {
+    #     "with_labels": True,
+    #     "font_size": "small",
+    #     "font_weight": "bold",
+    # }
 
     _, axis = plt.subplots()
 
     axis.set_title(title)
-    nx.draw_networkx(
-        graph, pos=layout, node_color=colours, edge_color=edge_colours, **draw_options
+    # nx.draw_networkx(
+    #     graph, pos=layout, node_color=colours, edge_color=edge_colours, **draw_options
+    # )
+    nx.draw_networkx_edges(
+        graph,
+        pos=layout,
+        edge_color=edge_colours,
+        width=1.0,
+        arrows=False,
+    )
+    nx.draw_networkx_nodes(
+        graph,
+        pos=layout,
+        node_color=colours,
+        node_size=100,
+        linewidths=0.25,
+        edgecolors=default_font_colour(),
+    )
+    nx.draw_networkx_labels(
+        graph,
+        pos=layout,
+        font_size="x-small",
+        font_weight="bold",
+        verticalalignment="bottom",
+        horizontalalignment="right",
+        font_color=default_font_colour(),
     )
 
 

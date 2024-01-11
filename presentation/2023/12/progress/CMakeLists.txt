@@ -14,7 +14,7 @@ configure_file(presentation.qmd presentation.qmd COPYONLY)
 
 add_custom_target(presentation.2023.12.progress
     COMMAND
-        ${QUARTO_EXECUTABLE}
+        ${Quarto_EXECUTABLE}
             render ${CMAKE_CURRENT_BINARY_DIR}/presentation.qmd --to html
     DEPENDS
         pathways-1-actions_graph.svg
@@ -36,7 +36,7 @@ configure_file(graph.qmd graph.qmd COPYONLY)
 
 add_custom_target(presentation.2023.12.graph
     COMMAND
-        ${QUARTO_EXECUTABLE}
+        ${Quarto_EXECUTABLE}
             render ${CMAKE_CURRENT_BINARY_DIR}/graph.qmd --to html
     BYPRODUCTS
         graph.html

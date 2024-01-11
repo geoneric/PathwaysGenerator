@@ -1,13 +1,13 @@
-find_program(QUARTO_EXECUTABLE
+find_program(Quarto_EXECUTABLE
     NAMES quarto
 )
 
 include(FindPackageHandleStandardArgs)
 
 find_package_handle_standard_args(QUARTO DEFAULT_MSG
-    QUARTO_EXECUTABLE
+    Quarto_EXECUTABLE
 )
 
 mark_as_advanced(
-    QUARTO_EXECUTABLE
+    Quarto_EXECUTABLE
 )

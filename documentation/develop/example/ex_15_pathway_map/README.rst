@@ -1,2 +1,2 @@
-Examples of pathway maps
-========================
+Examples of pathway maps (default layout)
+=========================================

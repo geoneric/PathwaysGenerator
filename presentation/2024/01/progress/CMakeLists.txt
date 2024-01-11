@@ -2,7 +2,7 @@ configure_file(presentation.qmd presentation.qmd COPYONLY)
 
 add_custom_target(presentation.2024.01.progress
     COMMAND
-        ${QUARTO_EXECUTABLE}
+        ${Quarto_EXECUTABLE}
             render ${CMAKE_CURRENT_BINARY_DIR}/presentation.qmd --to html
     BYPRODUCTS
         presentation.html

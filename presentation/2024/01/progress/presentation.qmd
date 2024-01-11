@@ -11,3 +11,74 @@ format:
     standalone: true
     embed-resources: true
 ---
+
+
+# Repository walkthrough
+
+- Contents
+- Documentation
+
+
+## Questions
+
+- Codereview?
+- Publish on [https://pypi.org](https://pypi.org)?
+- Final location for repository
+    - GitHub, GitLab, ...
+    - Set-up C/I
+- Long-term vision, maintenance, ...
+
+Repo naming: no caps, no dashes, ... E.g.:
+
+- `adaptation_pathways` (current name)
+- `pathway_generator`
+- ...
+
+
+# Pathway maps
+
+## Current status
+
+
+## Questions
+
+###  General
+
+- Tipping points represent time and condition, right?
+- How crucial is being able to order branches?
+- Are these figures published as is?
+
+
+---
+
+### Pathway map data model
+
+- See NL delta pathway map:
+    - transition time?
+    - Splitting actions: multiple tipping points? branch points?
+
+---
+
+### Pathway map style
+- There are multiple styles of pathway maps. Which one to focus on first?
+- Proposal:
+    - Settle on a style (classic)
+    - Replicate increasingly more complicated examples of pathway maps
+- What is the start point of the first action? Currently: tipping point range - 10%
+- How to separate overlapping nodes and edges (see IPCC example)? Required?
+
+
+# Project and planning
+
+- Definition of done
+- Let's list priorities
+
+# Your turn
+
+- From now on, releases will contain a command you can use to generate pathway maps
+- Please generate your favorite ones and provide feedback
+
+
+```bash
+ap_plot_pathway_map sequences.txt tipping_points.txt pathway_map.pdf
+```

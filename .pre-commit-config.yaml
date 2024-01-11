@@ -57,5 +57,5 @@ repos:
   - id: cmakelint
     args:
       [
-        "--filter=-linelength",
+        "--filter=-linelength,-convention/filename",
       ]

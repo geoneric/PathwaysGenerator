@@ -1,4 +1,5 @@
 import itertools
+import math
 
 import numpy as np
 
@@ -154,17 +155,20 @@ def _classic_distribute_vertically(
     action_end = pathway_map.action_end(root_action_begin)
     position_by_node[action_end][1] = position_by_node[root_action_begin][1]
 
-    min_distance = 1.0
-    actions = [
-        action for action in pathway_map.actions() if action != root_action_begin.action
-    ]
-    y_coordinates = [float(position_by_node[root_action_begin][1])] * len(actions)
-    y_coordinates = distribute(y_coordinates, min_distance)
+    # min_distance = 1.0
 
-    if len(y_coordinates) % 2 == 1:
-        y_coordinates = [
-            coordinate + 0.5 * min_distance for coordinate in y_coordinates
-        ]
+    # All unique actions in the graph
+    actions = pathway_map.actions()
+    y_coordinates = list(
+        range(math.floor(len(actions) / 2), -math.floor((len(actions) - 1) / 2) - 1, -1)
+    )
+
+    assert y_coordinates[math.floor(len(actions) / 2)] == 0.0
+    del y_coordinates[math.floor(len(actions) / 2)]
+
+    # Nodes related to the root action are already positioned
+    assert actions[0] == root_action_begin.action
+    del actions[0]
 
     y_coordinate_by_action = dict(zip(actions, y_coordinates))
 
