@@ -29,17 +29,17 @@ def plot_graphs(
     plot_pathname = os.path.join(
         plots_prefix_pathname, f"{basename}-sequence_graph.{output_format}"
     )
-    plot_and_save_sequence_graph(sequence_graph, plot_pathname)
+    plot_and_save_sequence_graph(sequence_graph, plot_pathname, title="Sequence graph")
 
     plot_pathname = os.path.join(
         plots_prefix_pathname, f"{basename}-pathway_graph.{output_format}"
     )
-    plot_and_save_pathway_graph(pathway_graph, plot_pathname)
+    plot_and_save_pathway_graph(pathway_graph, plot_pathname, title="Pathway graph")
 
     plot_pathname = os.path.join(
         plots_prefix_pathname, f"{basename}-pathway_map.{output_format}"
     )
-    plot_and_save_pathway_map(pathway_map, plot_pathname)
+    plot_and_save_pathway_map(pathway_map, plot_pathname, title="Pathway map")
 
     return 0
 

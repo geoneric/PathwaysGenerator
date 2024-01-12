@@ -126,4 +126,4 @@ def default_edge_colours(
 
 def default_font_colour():
     transparency = 1.0  # 0.75
-    return nord_palette_dark[3] + (transparency,)
+    return nord_palette_dark[0] + (transparency,)
