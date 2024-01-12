@@ -24,15 +24,15 @@ format:
 - Codereview?
 - Publish on [https://pypi.org](https://pypi.org)?
 - Final location for repository
-    - GitHub, GitLab, ...
+    - GitHub, GitLab, Codeberg, ...
     - Set-up C/I
 - Long-term vision, maintenance, ...
 
-Repo naming: no caps, no dashes, ... E.g.:
+Repo naming: no caps, no dashes, easy to remember, ... E.g.:
 
 - `adaptation_pathways` (current name)
 - `pathway_generator`
-- ...
+- `terp`, `<just_a_name>`
 
 
 # Pathway maps
@@ -44,7 +44,7 @@ Repo naming: no caps, no dashes, ... E.g.:
 
 ###  General
 
-- Tipping points represent time and condition, right?
+- Tipping points represent time or condition, right?
 - How crucial is being able to order branches?
 - Are these figures published as is?
 
@@ -53,6 +53,7 @@ Repo naming: no caps, no dashes, ... E.g.:
 
 ### Pathway map data model
 
+- Decision node?
 - See NL delta pathway map:
     - transition time?
     - Splitting actions: multiple tipping points? branch points?
@@ -62,21 +63,27 @@ Repo naming: no caps, no dashes, ... E.g.:
 ### Pathway map style
 - There are multiple styles of pathway maps. Which one to focus on first?
 - Proposal:
-    - Settle on a style (classic)
-    - Replicate increasingly more complicated examples of pathway maps
+    - Settle on a style ("classic")
+    - Reproduce increasingly more complicated examples of pathway maps
 - What is the start point of the first action? Currently: tipping point range - 10%
 - How to separate overlapping nodes and edges (see IPCC example)? Required?
 
 
 # Project and planning
 
+- Spent ~16 days, of 30
 - Definition of done
 - Let's list priorities
+    - What to focus on now?
+
+Classic pathway map layout, dashboard, desktop application, Mondriaan pathway map layout, ...
 
 # Your turn
 
 - From now on, releases will contain a command you can use to generate pathway maps
 - Please generate your favorite ones and provide feedback
+    - Description of bug / missing feature + their priority
+- Maybe do this (bi-)weekly? Release - test cycle.
 
 
 ```bash
