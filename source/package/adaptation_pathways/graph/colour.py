@@ -1,7 +1,17 @@
+from dataclasses import dataclass
+
 from .node import Action, ActionBegin, ActionConversion, ActionEnd, ActionPeriod
 from .pathway_graph import PathwayGraph
 from .pathway_map import PathwayMap
 from .sequence_graph import SequenceGraph
+
+
+@dataclass
+class PlotColours:
+    node_colours: list[tuple[float, float, float, float]] | None = None
+    edge_colours: list[tuple[float, float, float, float]] | None = None
+    node_edge_colours: list[tuple[float, float, float, float]] | None = None
+    label_colour: tuple[float, float, float, float] | None = None
 
 
 nord_palette_nominal = [
@@ -118,12 +128,49 @@ def default_edge_colours(
     graph: SequenceGraph | PathwayGraph | PathwayMap,
 ) -> list[tuple[float, float, float, float]]:
     transparency = 1.0  # 0.75
-    edge_colour = nord_palette_dark[3] + (transparency,)
-    edge_colours = [edge_colour] * len(list(graph.graph.edges))
+    colour = nord_palette_dark[3] + (transparency,)
+    colours = [colour] * len(list(graph.graph.edges))
 
-    return edge_colours
+    return colours
 
 
-def default_font_colour():
+def default_node_edge_colours(
+    graph: SequenceGraph | PathwayGraph | PathwayMap,
+) -> list[tuple[float, float, float, float]]:
+    transparency = 1.0  # 0.75
+    colour = nord_palette_dark[3] + (transparency,)
+    colours = [colour] * len(list(graph.graph.edges))
+
+    return colours
+
+
+def default_label_colour() -> tuple[float, float, float, float]:
     transparency = 1.0  # 0.75
     return nord_palette_dark[0] + (transparency,)
+
+
+def default_sequence_graph_colours(sequence_graph: SequenceGraph) -> PlotColours:
+    return PlotColours(
+        default_node_colours_sequence_graph(sequence_graph),
+        default_edge_colours(sequence_graph),
+        default_node_edge_colours(sequence_graph),
+        default_label_colour(),
+    )
+
+
+def default_pathway_graph_colours(pathway_graph: PathwayGraph) -> PlotColours:
+    return PlotColours(
+        default_node_colours_pathway_graph(pathway_graph),
+        default_edge_colours(pathway_graph),
+        default_node_edge_colours(pathway_graph),
+        default_label_colour(),
+    )
+
+
+def default_pathway_map_colours(pathway_map: PathwayMap) -> PlotColours:
+    return PlotColours(
+        default_node_colours_pathway_map(pathway_map),
+        default_edge_colours(pathway_map),
+        default_node_edge_colours(pathway_map),
+        default_label_colour(),
+    )

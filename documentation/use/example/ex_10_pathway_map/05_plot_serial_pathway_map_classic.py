@@ -40,4 +40,5 @@ c 2060
 pathway_map.assign_tipping_points(tipping_points)
 
 plot_pathway_map(pathway_map, layout=PathwayMapLayout.CLASSIC)
+plt.tight_layout()
 plt.show()
