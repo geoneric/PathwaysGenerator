@@ -1,8 +1,10 @@
 build
+cairosvg
 cmake
 furo
 linkchecker
 ninja
+pyinstaller
 sphinx
 sphinxcontrib-mermaid
 sphinx-gallery

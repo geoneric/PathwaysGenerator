@@ -1,0 +1,59 @@
+# -*- mode: python ; coding: utf-8 -*-
+
+# pyinstaller specification
+
+
+analysis = Analysis(
+    [
+        "@PROJECT_SOURCE_DIR@/source/script/pathway_generator.py",
+    ],
+    pathex=[],
+    binaries=[],
+    datas=[
+        ("@PROJECT_SOURCE_DIR@/source/package/adaptation_pathways/desktop/icon", "adaptation_pathways/desktop/icon"),
+        ("@PROJECT_SOURCE_DIR@/source/package/adaptation_pathways/desktop/ui", "adaptation_pathways/desktop/ui"),
+    ],
+    hiddenimports=[],
+    hookspath=[],
+    hooksconfig={},
+    runtime_hooks=[],
+    excludes=[],
+    noarchive=False,
+)
+pyz = PYZ(analysis.pure)
+
+exe = EXE(
+    pyz,
+    analysis.scripts,
+    [],
+    exclude_binaries=True,
+    name="pathway_generator",  # Name of executable file
+    icon="@AP_ICON@",
+    debug=False,
+    bootloader_ignore_signals=False,
+    strip=False,
+    upx=True,
+    console=False,
+    disable_windowed_traceback=False,
+    argv_emulation=False,
+    target_arch=None,
+    codesign_identity=None,
+    entitlements_file=None,
+)
+
+coll = COLLECT(
+    exe,
+    analysis.binaries,
+    analysis.datas,
+    strip=False,
+    upx=True,
+    upx_exclude=[],
+    name="pathway_generator",  # Name of output folder
+)
+
+app = BUNDLE(
+    coll,
+    name="Adaptation Pathway Generator.app",  # Name of bundle
+    icon="@AP_ICON@",
+    bundle_identifier=None,
+)

@@ -1,24 +1,3 @@
-# from PySide6.QtWidgets import QApplication, QMainWindow
-#
-# from main_window import Ui_MainWindow
-#
-#
-# class MainWindow(QMainWindow, Ui_MainWindow):
-#     def __init__(self, *args, obj=None, **kwargs):
-#         super(MainWindow, self).__init__(*args, **kwargs)
-#         self.setupUi(self)
-#
-#
-# def application():
-#     app = QApplication([])
-#     window = MainWindow()
-#     window.show()
-#     app.exec()
-#
-#     return 0
-
-
-import os
 import sys
 
 from PySide6.QtCore import QObject, Slot
@@ -28,9 +7,19 @@ from PySide6.QtWidgets import QApplication, QFileDialog
 
 import adaptation_pathways as ap
 
+from .path import Path
+
 
 loader = QUiLoader()
-basedir = os.path.dirname(__file__)
+
+
+try:
+    from ctypes import windll  # type: ignore
+
+    my_app_id = f"nl.adaptation_pathways.pathway_generator.{ap.__version__}"
+    windll.shell32.SetCurrentProcessExplicitAppUserModelID(my_app_id)
+except ImportError:
+    pass
 
 
 class MainUI(QObject):  # Not a widget.
@@ -39,12 +28,12 @@ class MainUI(QObject):  # Not a widget.
         self.name = "Adaptation Pathway Generator"
         self.version = f"{ap.__version__}"
 
-        self.ui = loader.load(os.path.join(basedir, "main_window.ui"), None)
+        self.ui = loader.load(Path.ui("main_window.ui"), None)
         self.ui.setWindowTitle(f"{self.name} - {self.version}")
         self.ui.show()
 
         open_sequences_action = QAction(
-            QIcon(os.path.join(basedir, "icon", "folder-open-table.png")),
+            QIcon(Path.icon("folder-open-table.png")),
             "&Open sequences table",
             self,
         )
@@ -77,7 +66,7 @@ class MainUI(QObject):  # Not a widget.
 
     @Slot()
     def show_about_dialog(self):
-        dialog = loader.load(os.path.join(basedir, "about_dialog.ui"), self.ui)
+        dialog = loader.load(Path.ui("about_dialog.ui"), self.ui)
         dialog.setWindowTitle(f"About {self.name}")
         dialog.text.setText("*Meh*!")
         dialog.show()
@@ -85,7 +74,8 @@ class MainUI(QObject):  # Not a widget.
 
 def application():
     app = QApplication(sys.argv)
-    MainUI()
+    app.setWindowIcon(QIcon(Path.icon("icon.svg")))
+    _ = MainUI()
     app.exec()
 
     return 0
