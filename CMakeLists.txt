@@ -21,6 +21,11 @@ find_package(Sphinx REQUIRED)
 set(AP_PLOT_GRAPHS
     "${CMAKE_CURRENT_SOURCE_DIR}/source/script/ap_plot_graphs.py"
 )
+set(AP_PYTHONPATH
+    "${PROJECT_SOURCE_DIR}/source/package"
+    "$ENV{PYTHONPATH}"
+)
+cmake_path(CONVERT "${AP_PYTHONPATH}" TO_NATIVE_PATH_LIST AP_PYTHONPATH)
 
 add_subdirectory(documentation)
 
@@ -32,16 +37,20 @@ add_subdirectory(source)
 add_custom_target(logo
     VERBATIM
     COMMAND
-        # Creates logo.{pdf,svg}
-        ap_create_logo.py logo
+        ${CMAKE_COMMAND} -E env "PYTHONPATH=${AP_PYTHONPATH}"
+            # Creates logo.{pdf,svg}
+            ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/source/script/ap_create_logo.py logo
 )
 
 add_custom_target(icon
     VERBATIM
     COMMAND
-        cairosvg logo.svg -o icon.png
+        # cairosvg logo.svg -o icon.png
+        ${CMAKE_COMMAND} -E env "PYTHONPATH=${AP_PYTHONPATH}"
+            ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/environment/script/ap_svg_to_png.py logo.svg icon.png
     COMMAND
-    ${Python3_EXECUTABLE} -c "from PIL import Image; img = Image.open('icon.png'); img.save('icon.ico'); img.save('icon.icns')"
+        ${Python3_EXECUTABLE} -c "from PIL import Image; img = Image.open('icon.png'); img.save('icon.ico'); img.save('icon.icns')"
     DEPENDS
         logo
 )
@@ -53,6 +62,7 @@ elseif(APPLE)
 else()
     set(AP_ICON icon.png)
 endif()
+set(AP_ICON ${CMAKE_CURRENT_SOURCE_DIR}/source/package/adaptation_pathways/desktop/icon/${AP_ICON})
 
 configure_file(
     adaptation_pathways.spec.in
@@ -63,25 +73,24 @@ configure_file(
 add_custom_target(package
     VERBATIM
     COMMAND
-        ${CMAKE_COMMAND}
-            -E env "PYTHONPATH=${PROJECT_SOURCE_DIR}/source/package:$ENV{PYTHONPATH}"
-                ${Python3_EXECUTABLE}
-                    -m build
-                    --wheel
-                    --outdir ${CMAKE_CURRENT_BINARY_DIR}/dist
-                    ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_COMMAND} -E env "PYTHONPATH=${AP_PYTHONPATH}"
+            ${Python3_EXECUTABLE}
+                -m build
+                --wheel
+                --outdir ${CMAKE_CURRENT_BINARY_DIR}/dist
+                ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 add_custom_target(installer
     VERBATIM
     COMMAND
-        ${CMAKE_COMMAND}
-            -E env "PYTHONPATH=${PROJECT_SOURCE_DIR}/source/package:$ENV{PYTHONPATH}"
-                ${PyInstaller_EXECUTABLE} --noconfirm
-                    adaptation_pathways.spec
+        ${CMAKE_COMMAND} -E env "PYTHONPATH=${AP_PYTHONPATH}"
+            ${PyInstaller_EXECUTABLE}
+                --noconfirm
+                adaptation_pathways.spec
     DEPENDS
         adaptation_pathways.spec
-        icon
+        # icon
 )
 
 add_custom_target(release
@@ -95,6 +104,10 @@ add_custom_target(release
     COMMAND
         ${CMAKE_COMMAND} -E copy
             "dist/*-${CMAKE_PROJECT_VERSION}-*.whl"
+            adaptation_pathways-${CMAKE_PROJECT_VERSION}/dist
+    COMMAND
+        ${CMAKE_COMMAND} -E copy_directory
+            "dist/pathway_generator"
             adaptation_pathways-${CMAKE_PROJECT_VERSION}/dist
     COMMAND
         ${CMAKE_COMMAND} -E copy_directory

@@ -42,12 +42,11 @@ add_custom_target(apidoc
 add_custom_target(documentation
     VERBATIM
     COMMAND
-        ${CMAKE_COMMAND}
-            -E env "PYTHONPATH=${PROJECT_SOURCE_DIR}/source/package:$ENV{PYTHONPATH}"
-                ${Sphinx_BUILD_EXECUTABLE}
-                    -b html
-                    -c ${CMAKE_CURRENT_BINARY_DIR}
-                    ${CMAKE_CURRENT_BINARY_DIR} ${AP_SPHINX_BUILD_DIR}
+        ${CMAKE_COMMAND} -E env "PYTHONPATH=${AP_PYTHONPATH}"
+            ${Sphinx_BUILD_EXECUTABLE}
+                -b html
+                -c ${CMAKE_CURRENT_BINARY_DIR}
+                ${CMAKE_CURRENT_BINARY_DIR} ${AP_SPHINX_BUILD_DIR}
 )
 
 add_dependencies(documentation apidoc)
