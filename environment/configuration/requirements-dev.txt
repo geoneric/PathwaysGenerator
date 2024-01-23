@@ -4,7 +4,9 @@ cmake
 furo
 linkchecker
 ninja
+pre-commit
 pyinstaller
+pylint
 sphinx
 sphinxcontrib-mermaid
 sphinx-gallery
