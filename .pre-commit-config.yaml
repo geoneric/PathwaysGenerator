@@ -51,11 +51,15 @@ repos:
   rev: v2.2.6
   hooks:
   - id: codespell
-- repo: https://github.com/cmake-lint/cmake-lint
-  rev: 1.4.2
-  hooks:
-  - id: cmakelint
-    args:
-      [
-        "--filter=-linelength,-convention/filename,-package/stdargs",
-      ]
+    exclude: |
+      (?x)^(
+        adaptation_pathways.spec.in|
+      )$
+# - repo: https://github.com/cmake-lint/cmake-lint
+#   rev: 1.4.2
+#   hooks:
+#   - id: cmakelint
+#     args:
+#       [
+#         "--filter=-linelength,-convention/filename,-package/stdargs",
+#       ]
