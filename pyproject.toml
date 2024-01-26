@@ -45,7 +45,7 @@ dependencies = [
 [project.scripts]
 ap_plot_graphs = "adaptation_pathways.cli.plot_graphs:main"
 ap_plot_pathway_map = "adaptation_pathways.cli.plot_pathway_map:main"
-pathway_generator = "adaptation_pathways.cli.pathway_generator:main"
+ap_pathway_generator = "adaptation_pathways.cli.pathway_generator:main"
 
 [tool.hatch.build.targets.wheel]
 # include = [
@@ -53,8 +53,9 @@ pathway_generator = "adaptation_pathways.cli.pathway_generator:main"
 packages = [
     "source/package/adaptation_pathways",
 ]
-# exclude = [
-# ]
+exclude = [
+    "CMakeLists.txt",
+]
 
 # [tool.hatch.version]
 # path = "adaptation_pathways/version.py"

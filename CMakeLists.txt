@@ -26,6 +26,7 @@ set(AP_PYTHONPATH
     "$ENV{PYTHONPATH}"
 )
 cmake_path(CONVERT "${AP_PYTHONPATH}" TO_NATIVE_PATH_LIST AP_PYTHONPATH)
+string(TOLOWER ${CMAKE_HOST_SYSTEM_NAME} AP_HOST_SYSTEM_NAME_LOWER_CASE)
 
 add_subdirectory(documentation)
 
@@ -94,7 +95,7 @@ add_custom_target(installer
 )
 
 add_custom_target(release
-    VERBATIM
+    # VERBATIM
     COMMAND
         ${CMAKE_COMMAND} -E rm -rf adaptation_pathways-${CMAKE_PROJECT_VERSION}
     COMMAND
@@ -104,10 +105,6 @@ add_custom_target(release
     COMMAND
         ${CMAKE_COMMAND} -E copy
             "dist/*-${CMAKE_PROJECT_VERSION}-*.whl"
-            adaptation_pathways-${CMAKE_PROJECT_VERSION}/dist
-    COMMAND
-        ${CMAKE_COMMAND} -E copy_directory
-            "dist/pathway_generator"
             adaptation_pathways-${CMAKE_PROJECT_VERSION}/dist
     COMMAND
         ${CMAKE_COMMAND} -E copy_directory
@@ -125,4 +122,22 @@ add_dependencies(release
     test
     documentation
     package
+)
+
+add_custom_target(installer_release
+    VERBATIM
+    COMMAND
+        ${CMAKE_COMMAND} -E rm -rf pathway_generator-${CMAKE_PROJECT_VERSION}
+    COMMAND
+        ${CMAKE_COMMAND} -E copy_directory
+            "dist/pathway_generator"
+            pathway_generator-${CMAKE_PROJECT_VERSION}
+    COMMAND
+        ${CMAKE_COMMAND} -E tar "cf"
+            "pathway_generator-${AP_HOST_SYSTEM_NAME_LOWER_CASE}-${CMAKE_PROJECT_VERSION}.zip" --format=zip --
+            pathway_generator-${CMAKE_PROJECT_VERSION}
+)
+
+add_dependencies(installer_release
+    installer
 )

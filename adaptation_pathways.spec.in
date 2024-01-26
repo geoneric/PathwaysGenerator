@@ -5,7 +5,7 @@
 
 analysis = Analysis(
     [
-        "@PROJECT_SOURCE_DIR@/source/script/pathway_generator.py",
+        "@PROJECT_SOURCE_DIR@/source/script/ap_pathway_generator.py",
     ],
     pathex=[],
     binaries=[],

@@ -59,7 +59,8 @@ def verify_no_unnecessary_contents(release_directory_path: Path) -> None:
         assert directory_path.exists(), directory_path
 
         for pattern in unnecessary_filename_patterns:
-            assert len(list(directory_path.glob(f"**/{pattern}"))) == 0
+            pathnames = list(directory_path.glob(f"**/{pattern}"))
+            assert len(pathnames) == 0, pathnames
 
 
 def verify_wheel(release_directory_path: Path) -> None:
@@ -67,7 +68,10 @@ def verify_wheel(release_directory_path: Path) -> None:
     assert dist_directory_path.exists()
 
     venv_directory_path = release_directory_path.joinpath("venv")
+    assert not venv_directory_path.exists()
+
     venv.create(venv_directory_path, with_pip=True, upgrade_deps=True)
+    assert venv_directory_path.exists()
 
     commands = [
         "set -e",  # Stop script when first command fails
@@ -76,7 +80,7 @@ def verify_wheel(release_directory_path: Path) -> None:
         "pip3 install -f dist adaptation_pathways --quiet",
         "ap_plot_graphs --version",
         "ap_plot_pathway_map --version",
-        "pathways_generator --version",
+        "ap_pathway_generator --version",
         'python3 -c "'
         "import adaptation_pathways as ap;"
         f'assert ap.__version__ == \\"{ap.__version__}\\";'

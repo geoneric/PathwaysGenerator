@@ -116,6 +116,9 @@ After testing the package, new versions of the package can be installed like thi
 Release a package
 -----------------
 
+Python package
+~~~~~~~~~~~~~~
+
 #. Create zip with Python Wheel package and the documentation, and verify the contents are OK:
 
    .. code-block:: bash
@@ -128,6 +131,34 @@ Release a package
       Do not release the package when this command fails.
 
    Output is stored in ``adaptation_pathways-1.2.3.zip``.
+
+#. Copy the zip to a location users can find it.
+
+
+Pathway generator
+~~~~~~~~~~~~~~~~~
+
+#. On all platforms the users care about, create a zip containing the pathway generator. This
+   zip contains a directory with all requirements needed to use the software. It is portable:
+   users can install multiple versions, anywhere they like.
+
+   .. code-block:: bash
+
+      # In build directory
+      ninja installer_release
+
+   Output is stored in ``pathway_generator-<system>-<version>.zip``
+
+#. Copy the zip to a location users can find it.
+
+.. note::
+
+  On Windows, executing the pathway generator executable may fail because the virus scanner
+  thinks it contains a virus. The virus scanner is wrong.
+
+
+Wrap-up
+~~~~~~~
 
 #. Create and push a tag.
 
