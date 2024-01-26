@@ -35,7 +35,9 @@ class PathwayMap(RootedGraph):
         return self.all_to_nodes(begin)
 
     def all_action_begins(self) -> list[ActionBegin]:
-        result = []
+        assert isinstance(self.root_node, ActionBegin)
+
+        result = [self.root_node]
 
         for node in self.all_to_nodes(self.root_node):
             if isinstance(node, ActionBegin):
@@ -44,13 +46,7 @@ class PathwayMap(RootedGraph):
         return result
 
     def actions(self) -> list[Action]:
-        actions: list[Action] = []
-
-        for node in self.graph.nodes():
-            actions.append(node.action)
-
-        # Remove duplicates while maintaining order
-        return list(dict.fromkeys(actions))
+        return list(dict.fromkeys(begin.action for begin in self.all_action_begins()))
 
     def action_ends_by_action(self, action: Action) -> list[ActionEnd]:
         """

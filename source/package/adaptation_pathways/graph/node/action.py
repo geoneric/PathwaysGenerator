@@ -13,3 +13,6 @@ class Action(Node):
 
     def __repr__(self) -> str:
         return f'Action("{self._label}")'
+
+    def __lt__(self, other) -> bool:
+        return hash(self) < hash(other)

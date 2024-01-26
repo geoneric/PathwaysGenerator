@@ -1,7 +1,7 @@
 import io
 import re
 
-from .node import Action
+from .node import Action, ActionCombination
 from .sequence_graph import SequenceGraph
 
 
@@ -42,6 +42,7 @@ def read_tipping_points(
     return tipping_point_by_action
 
 
+# pylint: disable-next=too-many-locals
 def read_sequences(sequences_pathname: str | io.IOBase) -> SequenceGraph:
     """
     Read sequences from a stream and return the resulting graph
@@ -59,7 +60,13 @@ def read_sequences(sequences_pathname: str | io.IOBase) -> SequenceGraph:
     """
     stream = _open_stream(sequences_pathname)
     sequence_graph = SequenceGraph()
-    sequence_pattern = r"(?P<from_action>\w+) (?P<to_action>\w+)"
+
+    from_action_pattern = r"(?P<from_action>\w+)"
+    to_action_pattern = (
+        r"(?P<to_action>\w+)(\(\s*(?P<action1>\w+)\s*&\s*(?P<action2>\w+)\s*\))?"
+    )
+    sequence_pattern = rf"{from_action_pattern}\s+{to_action_pattern}"
+
     action_by_name: dict[str, Action] = {}
 
     with stream:
@@ -72,19 +79,50 @@ def read_sequences(sequences_pathname: str | io.IOBase) -> SequenceGraph:
                 match = re.fullmatch(sequence_pattern, line_as_string)
 
                 if match is None:
-                    raise ValueError("Could not parse sequence: {line_as_string}")
+                    raise ValueError(f"Cannot parse sequence: {line_as_string}")
 
-                from_action_specification = match.group("from_action")
-                to_action_specification = match.group("to_action")
-
-                from_action_name = from_action_specification
-                to_action_name = to_action_specification
+                from_action_name = match.group("from_action")
 
                 if from_action_name not in action_by_name:
                     action_by_name[from_action_name] = Action(from_action_name)
 
+                to_action_name = match.group("to_action")
+                action1_name = match.group("action1")
+                action2_name = match.group("action2")
+
+                assert (action1_name is None and action2_name is None) or (
+                    action1_name is not None and action2_name is not None
+                )
+                combine_actions = action1_name is not None
+
                 if to_action_name not in action_by_name:
-                    action_by_name[to_action_name] = Action(to_action_name)
+                    if not combine_actions:
+                        action_by_name[to_action_name] = Action(to_action_name)
+                    else:
+                        if action1_name not in action_by_name:
+                            raise ValueError(
+                                f"(Unknown action {action1_name}: "
+                                "actions to be combined must be read first"
+                            )
+                        if action2_name not in action_by_name:
+                            raise ValueError(
+                                f"(Unknown action {action2_name}: "
+                                "actions to be combined must be read first"
+                            )
+
+                        action1 = action_by_name[action1_name]
+                        action2 = action_by_name[action2_name]
+
+                        action_by_name[to_action_name] = ActionCombination(
+                            to_action_name, action1, action2
+                        )
+                else:
+                    # In case of action combinations, the first occurrence of the action must
+                    # define which actions are combined
+                    if combine_actions:
+                        raise ValueError(
+                            "Action combinations must be defined ASAP and only once"
+                        )
 
                 from_action = action_by_name[from_action_name]
                 to_action = action_by_name[to_action_name]

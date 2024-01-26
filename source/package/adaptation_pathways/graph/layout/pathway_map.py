@@ -172,7 +172,7 @@ def _classic_distribute_vertically(
 
     y_coordinate_by_action = dict(zip(actions, y_coordinates))
 
-    for action_begin in pathway_map.all_action_begins():
+    for action_begin in pathway_map.all_action_begins()[1:]:  # Skip root node
         y_coordinate = y_coordinate_by_action[action_begin.action]
 
         assert np.isnan(position_by_node[action_begin][1])

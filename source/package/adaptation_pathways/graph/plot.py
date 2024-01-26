@@ -56,6 +56,7 @@ def init_plot(
         edge_color=plot_colours.edge_colours,
         width=1.0,
         arrows=False,
+        # style="dashed",
     )
 
     nx.draw_networkx_nodes(
