@@ -40,6 +40,8 @@ def _distribute_vertically(
     #     - For each action or conversion to position, take the mean y-coordinates of all
     #       from-actions and from_conversions into account
     #     - Take some minimum distance into account. Move nodes that are too close to each other.
+    # This approach results in layouts that are wide if needed and small when possible. Paths
+    # are not necessarily horizontal.
 
     assert isinstance(from_node, Node), type(from_node)
 

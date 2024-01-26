@@ -87,28 +87,22 @@ def read_sequences(sequences_pathname: str | io.IOBase) -> SequenceGraph:
                     action_by_name[from_action_name] = Action(from_action_name)
 
                 to_action_name = match.group("to_action")
-                action1_name = match.group("action1")
-                action2_name = match.group("action2")
+                action1_name = match.group("action1") or ""
+                action2_name = match.group("action2") or ""
 
-                assert (action1_name is None and action2_name is None) or (
-                    action1_name is not None and action2_name is not None
+                assert (action1_name == "" and action2_name == "") or (
+                    action1_name != "" and action2_name != ""
                 )
-                combine_actions = action1_name is not None
+                combine_actions = action1_name != ""
 
                 if to_action_name not in action_by_name:
                     if not combine_actions:
                         action_by_name[to_action_name] = Action(to_action_name)
                     else:
                         if action1_name not in action_by_name:
-                            raise ValueError(
-                                f"(Unknown action {action1_name}: "
-                                "actions to be combined must be read first"
-                            )
+                            action_by_name[action1_name] = Action(action1_name)
                         if action2_name not in action_by_name:
-                            raise ValueError(
-                                f"(Unknown action {action2_name}: "
-                                "actions to be combined must be read first"
-                            )
+                            action_by_name[action2_name] = Action(action2_name)
 
                         action1 = action_by_name[action1_name]
                         action2 = action_by_name[action2_name]

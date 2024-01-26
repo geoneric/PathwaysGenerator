@@ -1,4 +1,4 @@
-from .node import Action, ActionBegin, ActionEnd
+from .node import Action, ActionBegin, ActionCombination, ActionEnd
 from .rooted_graph import RootedGraph
 
 
@@ -47,6 +47,27 @@ class PathwayMap(RootedGraph):
 
     def actions(self) -> list[Action]:
         return list(dict.fromkeys(begin.action for begin in self.all_action_begins()))
+
+    def continued_actions(self, action_combination: ActionCombination) -> list[Action]:
+        """
+        Return the actions that are continued by the ``action_combination``, if any
+        """
+        result = []
+
+        # Find node in map containing the action combination passed in
+
+        action_begin: ActionBegin | None = None
+
+        for action_begin in self.all_action_begins():
+            if action_begin.action == action_combination:
+                # Current action begin contains the action combination
+
+                for action_end, _ in self.graph.in_edges(action_begin):
+                    assert isinstance(action_end, ActionEnd)
+                    if action_end.action in action_combination.actions:
+                        result.append(action_end.action)
+
+        return result
 
     def action_ends_by_action(self, action: Action) -> list[ActionEnd]:
         """
