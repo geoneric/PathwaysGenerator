@@ -59,7 +59,10 @@ class RootedGraph:
         graph = self._graph.subgraph(nx.shortest_path(self._graph, from_node))
 
         # Remove the from_node itself before returning the result
-        return list(graph.nodes)[1:]
+        result = list(graph.nodes)
+        result.remove(from_node)
+
+        return result
 
     def to_nodes(self, from_node) -> list[typing.Any]:
         """

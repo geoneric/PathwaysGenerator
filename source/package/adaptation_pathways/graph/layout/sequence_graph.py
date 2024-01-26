@@ -53,7 +53,7 @@ def _distribute_vertically(
         # that end in each action
         for action in actions:
             # Each action is only visited once
-            assert np.isnan(nodes[action][1])
+            assert np.isnan(nodes[action][1]), f"action {action}: {nodes[action]}"
 
             # Calculate the mean y-coordinate of actions that end in the to_action
             from_actions = sequence_graph.from_actions(action)

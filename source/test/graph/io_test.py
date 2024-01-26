@@ -224,6 +224,81 @@ class ReadSequencesTest(unittest.TestCase):
                 )
             )
 
+    def test_action_combination(self):
+        sequence_graph = read_sequences(
+            StringIO(
+                """
+                current a
+                current b
+                a       c(a & b)  # c is a combination of a and c
+                b       c         # This is the same action combination c
+                """
+            )
+        )
+
+        self.assertEqual(sequence_graph.nr_actions(), 4)
+        self.assertEqual(sequence_graph.nr_sequences(), 4)
+
+        root_node = sequence_graph.root_node
+        self.assertEqual(str(root_node), "current")
+
+        a = sequence_graph.to_nodes(root_node)[0]
+        self.assertEqual(str(a), "a")
+
+        b = sequence_graph.to_nodes(root_node)[1]
+        self.assertEqual(str(b), "b")
+
+        c = sequence_graph.to_nodes(a)[0]
+        self.assertEqual(str(c), "c")
+        self.assertEqual(c.actions[0], a)
+        self.assertEqual(c.actions[1], b)
+
+        c = sequence_graph.to_nodes(b)[0]
+        self.assertEqual(str(c), "c")
+        self.assertEqual(c.actions[0], a)
+        self.assertEqual(c.actions[1], b)
+
+    def test_action_combination_non_existant(self):
+        sequence_graph = read_sequences(
+            StringIO(
+                """
+                current a
+                current b
+                a       c(d & e)
+                """
+            )
+        )
+
+        self.assertEqual(sequence_graph.nr_actions(), 4)
+        self.assertEqual(sequence_graph.nr_sequences(), 3)
+
+        root_node = sequence_graph.root_node
+        self.assertEqual(str(root_node), "current")
+
+        a = sequence_graph.to_nodes(root_node)[0]
+        self.assertEqual(str(a), "a")
+
+        b = sequence_graph.to_nodes(root_node)[1]
+        self.assertEqual(str(b), "b")
+
+        c = sequence_graph.to_nodes(a)[0]
+        self.assertEqual(str(c), "c")
+        self.assertEqual(str(c.actions[0]), "d")
+        self.assertEqual(str(c.actions[1]), "e")
+
+    def test_action_combination_different_order(self):
+        with self.assertRaises(ValueError):
+            read_sequences(
+                StringIO(
+                    """
+                    current a
+                    current b
+                    b       c         # c is a normal action
+                    a       c(a & b)  # c is a combination of a and b ...
+                    """
+                )
+            )
+
 
 class ReadTippingPointsTest(unittest.TestCase):
     pass

@@ -4,7 +4,7 @@ import numpy.testing as npt
 
 from adaptation_pathways.graph.conversion import sequence_graph_to_pathway_graph
 from adaptation_pathways.graph.layout.pathway_graph import default_layout
-from adaptation_pathways.graph.node import Action
+from adaptation_pathways.graph.node import Action, ActionCombination
 from adaptation_pathways.graph.sequence_graph import SequenceGraph
 
 
@@ -236,5 +236,116 @@ class PathwayGraphLayoutTest(unittest.TestCase):
                 ("f", (4, -1.5)),
                 ("f | e", (5, -1.5)),
                 ("e", (6, -1.5)),
+            ],
+        )
+
+    def test_action_combination_01(self):
+        sequence_graph = SequenceGraph()
+        current = Action("current")
+        a = Action("a")
+        b = Action("b")
+        c = Action("c")
+        d = ActionCombination("d", a, b)
+
+        sequence_graph.add_sequences(
+            [
+                (current, a),
+                (current, b),
+                (current, c),
+                (a, d),
+            ]
+        )
+
+        pathway_graph = sequence_graph_to_pathway_graph(sequence_graph)
+        paths = list(pathway_graph.all_paths())
+        self.assertEqual(len(paths), 3)
+
+        positions = default_layout(pathway_graph)
+        self.assertEqual(len(positions), 9)
+
+        self.assert_equal_positions(
+            positions,
+            paths[0],
+            [
+                ("current", (0, 0)),
+                ("current | a", (1, 1)),
+                ("a", (2, 1)),
+                ("a | d", (3, 1)),
+                ("d", (4, 1)),
+            ],
+        )
+        self.assert_equal_positions(
+            positions,
+            paths[1],
+            [
+                ("current", (0, 0)),
+                ("current | b", (1, 0)),
+                ("b", (2, 0)),
+            ],
+        )
+        self.assert_equal_positions(
+            positions,
+            paths[2],
+            [
+                ("current", (0, 0)),
+                ("current | c", (1, -1)),
+                ("c", (2, -1)),
+            ],
+        )
+
+    def test_action_combination_02(self):
+        sequence_graph = SequenceGraph()
+        current = Action("current")
+        a = Action("a")
+        b = Action("b")
+        c = Action("c")
+        d = ActionCombination("d", a, b)
+
+        sequence_graph.add_sequences(
+            [
+                (current, a),
+                (current, b),
+                (current, c),
+                (a, d),
+                (b, d),
+            ]
+        )
+
+        pathway_graph = sequence_graph_to_pathway_graph(sequence_graph)
+        paths = list(pathway_graph.all_paths())
+        self.assertEqual(len(paths), 3)
+
+        positions = default_layout(pathway_graph)
+        self.assertEqual(len(positions), 11)
+
+        self.assert_equal_positions(
+            positions,
+            paths[0],
+            [
+                ("current", (0, 0)),
+                ("current | a", (1, 1)),
+                ("a", (2, 1)),
+                ("a | d", (3, 1)),
+                ("d", (4, 1)),
+            ],
+        )
+        self.assert_equal_positions(
+            positions,
+            paths[1],
+            [
+                ("current", (0, 0)),
+                ("current | b", (1, 0)),
+                ("b", (2, 0)),
+                ("b | d", (3, 0)),
+                ("d", (4, 0)),
+            ],
+        )
+        self.assert_equal_positions(
+            positions,
+            paths[2],
+            [
+                ("current", (0, 0)),
+                ("current | c", (1, -1)),
+                ("c", (2, -1)),
             ],
         )
