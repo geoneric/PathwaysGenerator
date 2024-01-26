@@ -5,6 +5,10 @@ Changelog
 Description of of all notable changes made per version.
 
 
+0.0.6
+-----
+
+
 0.0.5
 -----
 - Added ``ap_plot_pathway_map`` command. See ``ap_plot_pathway_map --help`` for more information.

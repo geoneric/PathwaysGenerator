@@ -168,7 +168,12 @@ Wrap-up
       git tag -a v1.2.3 -m"Release that adds cool features and solves all problems"
       git push origin v1.2.3
 
-#. Bump the versions in ``CMakeLists.txt``, ``pyproject.toml``, and ``source/package/adaptation_pathways/version.py``.
+#. Bump the version number in these files:
+
+   - ``CMakeLists.txt``
+   - ``pyproject.toml``
+   - ``source/package/adaptation_pathways/version.py``
+
 #. Add a section for the upcoming version to the :ref:`changelog <sec-changelog>`.
 
 
