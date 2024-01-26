@@ -299,6 +299,62 @@ class ReadSequencesTest(unittest.TestCase):
                 )
             )
 
+    def test_versioned_action(self):
+        sequence_graph = read_sequences(
+            StringIO(
+                """
+                current a[1]
+                a[1] b[1]
+                b[1] c[1](a[1] & b[2])
+                """
+            )
+        )
+
+        self.assertEqual(sequence_graph.nr_actions(), 4)
+        self.assertEqual(sequence_graph.nr_sequences(), 3)
+
+        root_node = sequence_graph.root_node
+        self.assertEqual(str(root_node), "current")
+
+        a1 = sequence_graph.to_nodes(root_node)[0]
+        self.assertEqual(str(a1), "a")
+
+        b1 = sequence_graph.to_nodes(a1)[0]
+        self.assertEqual(str(b1), "b")
+
+        c1 = sequence_graph.to_nodes(b1)[0]
+        self.assertEqual(str(c1), "c")
+        self.assertEqual(str(c1.actions[0]), "a")
+        self.assertEqual(str(c1.actions[1]), "b")
+
+    def test_root_cannot_be_versioned(self):
+        with self.assertRaises(ValueError):
+            read_sequences(
+                StringIO(
+                    """
+                    current[1] a
+                    """
+                )
+            )
+
+    def test_error_combining_same_action_twice(self):
+        with self.assertRaises(ValueError):
+            read_sequences(
+                StringIO(
+                    """
+                    current a(b & b)
+                    """
+                )
+            )
+        with self.assertRaises(ValueError):
+            read_sequences(
+                StringIO(
+                    """
+                    current a(a[1] & a[2])
+                    """
+                )
+            )
+
 
 class ReadTippingPointsTest(unittest.TestCase):
     pass

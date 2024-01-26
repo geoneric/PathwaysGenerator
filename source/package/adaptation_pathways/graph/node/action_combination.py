@@ -2,8 +2,7 @@ from .action import Action
 
 
 # Although only two actions can be combined into a single ActionCombination instance, the
-# implementation allows this to be easily changed so that any large number of actions can
-# be combined.
+# implementation allows this to be easily changed so that any number of actions can be combined.
 
 
 class ActionCombination(Action):

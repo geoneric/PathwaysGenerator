@@ -61,9 +61,16 @@ def read_sequences(sequences_pathname: str | io.IOBase) -> SequenceGraph:
     stream = _open_stream(sequences_pathname)
     sequence_graph = SequenceGraph()
 
-    from_action_pattern = r"(?P<from_action>\w+)"
+    version_pattern = r"\[\d+\]"
+    action_pattern = r"\w+"
+
+    from_action_pattern = (
+        rf"(?P<from_action>{action_pattern})(?P<from_version>{version_pattern})?"
+    )
     to_action_pattern = (
-        r"(?P<to_action>\w+)(\(\s*(?P<action1>\w+)\s*&\s*(?P<action2>\w+)\s*\))?"
+        rf"(?P<to_action>{action_pattern})(?P<to_version>{version_pattern})?"
+        rf"(\(\s*(?P<action1>{action_pattern})(?P<version1>{version_pattern})?\s*&\s*"
+        rf"(?P<action2>{action_pattern})(?P<version2>{version_pattern})?\s*\))?"
     )
     sequence_pattern = rf"{from_action_pattern}\s+{to_action_pattern}"
 
@@ -82,13 +89,17 @@ def read_sequences(sequences_pathname: str | io.IOBase) -> SequenceGraph:
                     raise ValueError(f"Cannot parse sequence: {line_as_string}")
 
                 from_action_name = match.group("from_action")
+                # from_version = match.group("from_version")
 
                 if from_action_name not in action_by_name:
                     action_by_name[from_action_name] = Action(from_action_name)
 
                 to_action_name = match.group("to_action")
+                # to_version = match.group("to_version")
                 action1_name = match.group("action1") or ""
+                # version1 = match.group("version1")
                 action2_name = match.group("action2") or ""
+                # version2 = match.group("version2")
 
                 assert (action1_name == "" and action2_name == "") or (
                     action1_name != "" and action2_name != ""
