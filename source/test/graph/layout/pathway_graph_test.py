@@ -356,3 +356,51 @@ class PathwayGraphLayoutTest(unittest.TestCase):
                 ("c", (2, -1)),
             ],
         )
+
+    def test_action_edition_01(self):
+        sequence_graph = SequenceGraph()
+        current = Action("current")
+        a1 = Action("a", 1)
+        b = Action("b")
+        a2 = Action("a", 2)
+
+        current_node = ActionNode(current)
+        a1_node = ActionNode(a1)
+        b_node = ActionNode(b)
+        a2_node = ActionNode(a2)
+
+        sequence_graph.add_sequences(
+            [
+                (current_node, a1_node),
+                (current_node, b_node),
+                (b_node, a2_node),
+            ]
+        )
+
+        pathway_graph = sequence_graph_to_pathway_graph(sequence_graph)
+        paths = list(pathway_graph.all_paths())
+        self.assertEqual(len(paths), 2)
+
+        positions = default_layout(pathway_graph)
+        self.assertEqual(len(positions), 7)
+
+        self.assert_equal_positions(
+            positions,
+            paths[0],
+            [
+                ("current", (0, 0)),
+                ("current | a", (1, 1)),
+                ("a", (2, 1)),
+            ],
+        )
+        self.assert_equal_positions(
+            positions,
+            paths[1],
+            [
+                ("current", (0, 0)),
+                ("current | b", (1, -1)),
+                ("b", (2, -1)),
+                ("b | a", (3, -1)),
+                ("a", (4, -1)),
+            ],
+        )

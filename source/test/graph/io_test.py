@@ -299,7 +299,7 @@ class ReadSequencesTest(unittest.TestCase):
                 )
             )
 
-    def test_versioned_action(self):
+    def test_action_editions(self):
         sequence_graph = read_sequences(
             StringIO(
                 """
@@ -314,28 +314,26 @@ class ReadSequencesTest(unittest.TestCase):
         self.assertEqual(sequence_graph.nr_sequences(), 3)
 
         root_node = sequence_graph.root_node
-        self.assertEqual(str(root_node), "current")
+        self.assertEqual(root_node.action.name, "current")
+        self.assertEqual(root_node.action.edition, 0)
 
         a1 = sequence_graph.to_nodes(root_node)[0]
-        self.assertEqual(str(a1), "a")
+        self.assertEqual(a1.action.name, "a")
+        self.assertEqual(a1.action.edition, 1)
 
         b1 = sequence_graph.to_nodes(a1)[0]
-        self.assertEqual(str(b1), "b")
+        self.assertEqual(b1.action.name, "b")
+        self.assertEqual(b1.action.edition, 1)
 
         c1 = sequence_graph.to_nodes(b1)[0]
-        self.assertEqual(str(c1), "c")
-        self.assertEqual(c1.action.actions[0].name, "a")
-        self.assertEqual(c1.action.actions[1].name, "b")
+        self.assertEqual(c1.action.name, "c")
+        self.assertEqual(c1.action.edition, 1)
 
-    def test_root_cannot_be_versioned(self):
-        with self.assertRaises(ValueError):
-            read_sequences(
-                StringIO(
-                    """
-                    current[1] a
-                    """
-                )
-            )
+        self.assertEqual(c1.action.actions[0].name, "a")
+        self.assertEqual(c1.action.actions[0].edition, 1)
+
+        self.assertEqual(c1.action.actions[1].name, "b")
+        self.assertEqual(c1.action.actions[1].edition, 2)
 
     def test_error_combining_same_action_twice(self):
         with self.assertRaises(ValueError):
@@ -346,15 +344,21 @@ class ReadSequencesTest(unittest.TestCase):
                     """
                 )
             )
-        with self.assertRaises(ValueError):
-            read_sequences(
-                StringIO(
-                    """
-                    current a(a[1] & a[2])
-                    """
-                )
+
+        # This should not raise an exception:
+        # action a (default edition) is defined as a combination of action a (edition 1) and
+        # action a (edition 2). This seems silly, but conceptually OK, I think.
+        # - Raise dikes, combining raising dikes by 2 meters with raising them by 1 meter. The
+        #   combined actions may have different tipping points.
+        read_sequences(
+            StringIO(
+                """
+                current a(a[1] & a[2])
+                """
             )
+        )
 
 
 class ReadTippingPointsTest(unittest.TestCase):
+    # TODO
     pass

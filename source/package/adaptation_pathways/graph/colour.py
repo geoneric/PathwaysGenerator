@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 
-from ..action import Action
 from ..action_combination import ActionCombination
 from .node import Action as ActionNode
 from .node import ActionBegin, ActionConversion, ActionEnd, ActionPeriod
@@ -63,7 +62,7 @@ def default_node_colours_sequence_graph(
     palette = default_nominal_palette()
 
     palette_size = len(palette)
-    colour_by_action = {}
+    colour_by_action_name = {}
     colours = []
 
     # Colour each unique action unique
@@ -71,10 +70,10 @@ def default_node_colours_sequence_graph(
 
     for node in graph._graph.nodes:
         assert isinstance(node, ActionNode)
-        if node.action not in colour_by_action:
-            colour_by_action[node.action] = palette[idx % palette_size]
+        if node.action.name not in colour_by_action_name:
+            colour_by_action_name[node.action.name] = palette[idx % palette_size]
             idx += 1
-        colours.append(colour_by_action[node.action])
+        colours.append(colour_by_action_name[node.action.name])
 
     return colours
 
@@ -87,7 +86,7 @@ def default_node_colours_pathway_graph(
     palette_size = len(palette)
     conversion_colour = nord_palette_light[0] + (default_transparency(),)
 
-    colour_by_action = {}
+    colour_by_action_name = {}
     colours = []
 
     # Use the same colour for conversions
@@ -98,37 +97,37 @@ def default_node_colours_pathway_graph(
         # assert type(node) in [Action, ActionConversion]
         assert type(node) in [ActionConversion, ActionPeriod]
         if isinstance(node, ActionPeriod):
-            if node.action not in colour_by_action:
-                colour_by_action[node.action] = palette[idx % palette_size]
+            if node.action.name not in colour_by_action_name:
+                colour_by_action_name[node.action.name] = palette[idx % palette_size]
                 idx += 1
-            colours.append(colour_by_action[node.action])
+            colours.append(colour_by_action_name[node.action.name])
         elif isinstance(node, ActionConversion):
             colours.append(conversion_colour)
 
     return colours
 
 
-def colour_by_action_pathway_map(
+def colour_by_action_name_pathway_map(
     graph: PathwayMap, palette: list[tuple[float, float, float, float]]
-) -> dict[Action, tuple[float, float, float, float]]:
+) -> dict[str, tuple[float, float, float, float]]:
     palette_size = len(palette)
-    colour_by_action = {}
+    colour_by_action_name = {}
     idx = 0
 
     for action in graph.actions():
         if not isinstance(action, ActionCombination):
-            if action not in colour_by_action:
-                colour_by_action[action] = palette[idx % palette_size]
+            if action.name not in colour_by_action_name:
+                colour_by_action_name[action.name] = palette[idx % palette_size]
                 idx += 1
 
-    return colour_by_action
+    return colour_by_action_name
 
 
 def default_node_colours_pathway_map(
     graph: PathwayMap,
 ) -> list[tuple[float, float, float, float]]:
     palette = default_nominal_palette()
-    colour_by_action = colour_by_action_pathway_map(graph, palette)
+    colour_by_action_name = colour_by_action_name_pathway_map(graph, palette)
     colours = []
 
     # Colour each action begin / end combo unique
@@ -141,7 +140,7 @@ def default_node_colours_pathway_map(
         if isinstance(action, ActionCombination):
             colour = nord_palette_light[0] + (default_transparency(),)  # Placeholder
         else:
-            colour = colour_by_action[action]
+            colour = colour_by_action_name[action.name]
 
         colours.append(colour)
 
@@ -161,7 +160,7 @@ def default_edge_colours_pathway_map(
     graph: PathwayMap,
 ) -> list[tuple[float, float, float, float]]:
     palette = default_nominal_palette()
-    colour_by_action = colour_by_action_pathway_map(graph, palette)
+    colour_by_action_name = colour_by_action_name_pathway_map(graph, palette)
     colours = []
 
     # Iterate over all edges and use the colour associated with the action associated with the edge
@@ -172,7 +171,7 @@ def default_edge_colours_pathway_map(
             if isinstance(action, ActionCombination):
                 colour = nord_palette_dark[0] + (default_transparency(),)  # Placeholder
             else:
-                colour = colour_by_action[action]
+                colour = colour_by_action_name[action.name]
         else:
             colour = nord_palette_dark[0] + (
                 default_transparency(),

@@ -269,3 +269,30 @@ class SequenceGraphLayoutTest(unittest.TestCase):
         npt.assert_almost_equal(positions[b_node], (1, 0))
         npt.assert_almost_equal(positions[c_node], (1, -1))
         npt.assert_almost_equal(positions[d_node], (2, 0.5))
+
+    def test_action_edition_01(self):
+        sequence_graph = SequenceGraph()
+        current = Action("current")
+        a1 = Action("a", 1)
+        b = Action("b")
+        a2 = Action("a", 2)
+
+        current_node = ActionNode(current)
+        a1_node = ActionNode(a1)
+        b_node = ActionNode(b)
+        a2_node = ActionNode(a2)
+
+        action_nodes = [current_node, a1_node, b_node, a2_node]
+
+        sequence_graph.add_sequence(current_node, a1_node)
+        sequence_graph.add_sequence(current_node, b_node)
+        sequence_graph.add_sequence(b_node, a2_node)
+
+        positions = default_layout(sequence_graph)
+
+        self.assertEqual(len(positions), len(action_nodes))
+        self.assertTrue(all(action_node in positions for action_node in action_nodes))
+        npt.assert_almost_equal(positions[current_node], (0, 0))
+        npt.assert_almost_equal(positions[a1_node], (1, 1))
+        npt.assert_almost_equal(positions[b_node], (1, -1))
+        npt.assert_almost_equal(positions[a2_node], (2, -1))
