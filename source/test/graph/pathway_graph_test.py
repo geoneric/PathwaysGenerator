@@ -1,6 +1,7 @@
 import unittest
 
-from adaptation_pathways.graph.node import Action
+from adaptation_pathways import Action
+from adaptation_pathways.graph.node import ActionPeriod
 from adaptation_pathways.graph.pathway_graph import PathwayGraph
 
 
@@ -15,6 +16,6 @@ class PathwayGraphTest(unittest.TestCase):
         current = Action("current")
         a = Action("a")
 
-        graph.add_conversion(current, a)
+        graph.add_conversion(ActionPeriod(current), ActionPeriod(a))
 
         self.assertEqual(graph.nr_nodes(), 3)

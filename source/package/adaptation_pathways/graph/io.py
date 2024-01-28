@@ -1,7 +1,9 @@
 import io
 import re
 
-from .node import Action, ActionCombination
+from ..action import Action
+from ..action_combination import ActionCombination
+from .node import Action as ActionNode
 from .sequence_graph import SequenceGraph
 
 
@@ -36,7 +38,7 @@ def read_tipping_points(
     # Multiple actions can have the same label. Assign the same tipping point to all of them.
     for label, tipping_point in tipping_point_by_label.items():
         for action in actions:
-            if action.label == label:
+            if action.name == label:
                 tipping_point_by_action[action] = tipping_point
 
     return tipping_point_by_action
@@ -74,7 +76,7 @@ def read_sequences(sequences_pathname: str | io.IOBase) -> SequenceGraph:
     )
     sequence_pattern = rf"{from_action_pattern}\s+{to_action_pattern}"
 
-    action_by_name: dict[str, Action] = {}
+    action_by_name_and_edition: dict[tuple[str, int], ActionNode] = {}
 
     with stream:
         for line in stream:
@@ -91,8 +93,10 @@ def read_sequences(sequences_pathname: str | io.IOBase) -> SequenceGraph:
                 from_action_name = match.group("from_action")
                 # from_version = match.group("from_version")
 
-                if from_action_name not in action_by_name:
-                    action_by_name[from_action_name] = Action(from_action_name)
+                if (from_action_name, 0) not in action_by_name_and_edition:
+                    action_by_name_and_edition[(from_action_name, 0)] = ActionNode(
+                        Action(from_action_name)
+                    )
 
                 to_action_name = match.group("to_action")
                 # to_version = match.group("to_version")
@@ -106,20 +110,26 @@ def read_sequences(sequences_pathname: str | io.IOBase) -> SequenceGraph:
                 )
                 combine_actions = action1_name != ""
 
-                if to_action_name not in action_by_name:
+                if (to_action_name, 0) not in action_by_name_and_edition:
                     if not combine_actions:
-                        action_by_name[to_action_name] = Action(to_action_name)
+                        action_by_name_and_edition[(to_action_name, 0)] = ActionNode(
+                            Action(to_action_name)
+                        )
                     else:
-                        if action1_name not in action_by_name:
-                            action_by_name[action1_name] = Action(action1_name)
-                        if action2_name not in action_by_name:
-                            action_by_name[action2_name] = Action(action2_name)
+                        if (action1_name, 0) not in action_by_name_and_edition:
+                            action_by_name_and_edition[(action1_name, 0)] = ActionNode(
+                                Action(action1_name)
+                            )
+                        if (action2_name, 0) not in action_by_name_and_edition:
+                            action_by_name_and_edition[(action2_name, 0)] = ActionNode(
+                                Action(action2_name)
+                            )
 
-                        action1 = action_by_name[action1_name]
-                        action2 = action_by_name[action2_name]
+                        action1 = action_by_name_and_edition[(action1_name, 0)].action
+                        action2 = action_by_name_and_edition[(action2_name, 0)].action
 
-                        action_by_name[to_action_name] = ActionCombination(
-                            to_action_name, action1, action2
+                        action_by_name_and_edition[(to_action_name, 0)] = ActionNode(
+                            ActionCombination(to_action_name, [action1, action2])
                         )
                 else:
                     # In case of action combinations, the first occurrence of the action must
@@ -129,8 +139,8 @@ def read_sequences(sequences_pathname: str | io.IOBase) -> SequenceGraph:
                             "Action combinations must be defined ASAP and only once"
                         )
 
-                from_action = action_by_name[from_action_name]
-                to_action = action_by_name[to_action_name]
+                from_action = action_by_name_and_edition[(from_action_name, 0)]
+                to_action = action_by_name_and_edition[(to_action_name, 0)]
 
                 sequence_graph.add_sequence(from_action, to_action)
 

@@ -3,7 +3,9 @@ import math
 
 import numpy as np
 
-from ..node import Action, ActionBegin, ActionCombination, Node
+from ...action import Action
+from ...action_combination import ActionCombination
+from ..node import ActionBegin, Node
 from ..pathway_map import PathwayMap
 from .util import add_position, distribute, sort_horizontally
 

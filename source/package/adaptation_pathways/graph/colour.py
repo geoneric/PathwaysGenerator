@@ -1,13 +1,9 @@
 from dataclasses import dataclass
 
-from .node import (
-    Action,
-    ActionBegin,
-    ActionCombination,
-    ActionConversion,
-    ActionEnd,
-    ActionPeriod,
-)
+from ..action import Action
+from ..action_combination import ActionCombination
+from .node import Action as ActionNode
+from .node import ActionBegin, ActionConversion, ActionEnd, ActionPeriod
 from .pathway_graph import PathwayGraph
 from .pathway_map import PathwayMap
 from .sequence_graph import SequenceGraph
@@ -74,11 +70,11 @@ def default_node_colours_sequence_graph(
     idx = 0
 
     for node in graph._graph.nodes:
-        assert isinstance(node, Action)
-        if node not in colour_by_action:
-            colour_by_action[node] = palette[idx % palette_size]
+        assert isinstance(node, ActionNode)
+        if node.action not in colour_by_action:
+            colour_by_action[node.action] = palette[idx % palette_size]
             idx += 1
-        colours.append(colour_by_action[node])
+        colours.append(colour_by_action[node.action])
 
     return colours
 
@@ -102,10 +98,10 @@ def default_node_colours_pathway_graph(
         # assert type(node) in [Action, ActionConversion]
         assert type(node) in [ActionConversion, ActionPeriod]
         if isinstance(node, ActionPeriod):
-            if node not in colour_by_action:
-                colour_by_action[node] = palette[idx % palette_size]
+            if node.action not in colour_by_action:
+                colour_by_action[node.action] = palette[idx % palette_size]
                 idx += 1
-            colours.append(colour_by_action[node])
+            colours.append(colour_by_action[node.action])
         elif isinstance(node, ActionConversion):
             colours.append(conversion_colour)
 

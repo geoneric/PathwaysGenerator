@@ -1,8 +1,4 @@
-dash
 docopt
-jupyterlab
 matplotlib
 networkx[default]
-pandas
-plotly
 pyside6

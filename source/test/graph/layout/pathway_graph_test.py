@@ -2,9 +2,10 @@ import unittest
 
 import numpy.testing as npt
 
+from adaptation_pathways import Action, ActionCombination
 from adaptation_pathways.graph.conversion import sequence_graph_to_pathway_graph
 from adaptation_pathways.graph.layout.pathway_graph import default_layout
-from adaptation_pathways.graph.node import Action, ActionCombination
+from adaptation_pathways.graph.node import Action as ActionNode
 from adaptation_pathways.graph.sequence_graph import SequenceGraph
 
 
@@ -25,10 +26,10 @@ class PathwayGraphLayoutTest(unittest.TestCase):
 
     def test_serial_pathway(self):
         sequence_graph = SequenceGraph()
-        current = Action("current")
-        a = Action("a")
-        b = Action("b")
-        c = Action("c")
+        current = ActionNode(Action("current"))
+        a = ActionNode(Action("a"))
+        b = ActionNode(Action("b"))
+        c = ActionNode(Action("c"))
 
         sequence_graph.add_sequence(current, a)
         sequence_graph.add_sequence(a, b)
@@ -57,10 +58,10 @@ class PathwayGraphLayoutTest(unittest.TestCase):
 
     def test_diverging_pathways(self):
         sequence_graph = SequenceGraph()
-        current = Action("current")
-        a = Action("a")
-        b = Action("b")
-        c = Action("c")
+        current = ActionNode(Action("current"))
+        a = ActionNode(Action("a"))
+        b = ActionNode(Action("b"))
+        c = ActionNode(Action("c"))
 
         sequence_graph.add_sequence(current, a)
         sequence_graph.add_sequence(current, b)
@@ -103,11 +104,11 @@ class PathwayGraphLayoutTest(unittest.TestCase):
 
     def test_converging_pathways(self):
         sequence_graph = SequenceGraph()
-        current = Action("current")
-        a = Action("a")
-        b = Action("b")
-        c = Action("c")
-        d = Action("d")
+        current = ActionNode(Action("current"))
+        a = ActionNode(Action("a"))
+        b = ActionNode(Action("b"))
+        c = ActionNode(Action("c"))
+        d = ActionNode(Action("d"))
 
         sequence_graph.add_sequence(current, a)
         sequence_graph.add_sequence(current, b)
@@ -159,13 +160,13 @@ class PathwayGraphLayoutTest(unittest.TestCase):
 
     def test_use_case_01(self):
         sequence_graph = SequenceGraph()
-        current = Action("current")
-        a = Action("a")
-        b = Action("b")
-        c = Action("c")
-        d = Action("d")
-        e = Action("e")
-        f = Action("f")
+        current = ActionNode(Action("current"))
+        a = ActionNode(Action("a"))
+        b = ActionNode(Action("b"))
+        c = ActionNode(Action("c"))
+        d = ActionNode(Action("d"))
+        e = ActionNode(Action("e"))
+        f = ActionNode(Action("f"))
 
         sequence_graph.add_sequences(
             [
@@ -241,11 +242,14 @@ class PathwayGraphLayoutTest(unittest.TestCase):
 
     def test_action_combination_01(self):
         sequence_graph = SequenceGraph()
-        current = Action("current")
+        current = ActionNode(Action("current"))
         a = Action("a")
         b = Action("b")
-        c = Action("c")
-        d = ActionCombination("d", a, b)
+        c = ActionNode(Action("c"))
+        d = ActionNode(ActionCombination("d", [a, b]))
+
+        a = ActionNode(a)
+        b = ActionNode(b)
 
         sequence_graph.add_sequences(
             [
@@ -295,11 +299,14 @@ class PathwayGraphLayoutTest(unittest.TestCase):
 
     def test_action_combination_02(self):
         sequence_graph = SequenceGraph()
-        current = Action("current")
+        current = ActionNode(Action("current"))
         a = Action("a")
         b = Action("b")
-        c = Action("c")
-        d = ActionCombination("d", a, b)
+        c = ActionNode(Action("c"))
+        d = ActionNode(ActionCombination("d", [a, b]))
+
+        a = ActionNode(a)
+        b = ActionNode(b)
 
         sequence_graph.add_sequences(
             [

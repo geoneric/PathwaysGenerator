@@ -250,13 +250,13 @@ class ReadSequencesTest(unittest.TestCase):
 
         c = sequence_graph.to_nodes(a)[0]
         self.assertEqual(str(c), "c")
-        self.assertEqual(c.actions[0], a)
-        self.assertEqual(c.actions[1], b)
+        self.assertEqual(c.action.actions[0], a.action)
+        self.assertEqual(c.action.actions[1], b.action)
 
         c = sequence_graph.to_nodes(b)[0]
         self.assertEqual(str(c), "c")
-        self.assertEqual(c.actions[0], a)
-        self.assertEqual(c.actions[1], b)
+        self.assertEqual(c.action.actions[0], a.action)
+        self.assertEqual(c.action.actions[1], b.action)
 
     def test_action_combination_non_existant(self):
         sequence_graph = read_sequences(
@@ -283,8 +283,8 @@ class ReadSequencesTest(unittest.TestCase):
 
         c = sequence_graph.to_nodes(a)[0]
         self.assertEqual(str(c), "c")
-        self.assertEqual(str(c.actions[0]), "d")
-        self.assertEqual(str(c.actions[1]), "e")
+        self.assertEqual(c.action.actions[0].name, "d")
+        self.assertEqual(c.action.actions[1].name, "e")
 
     def test_action_combination_different_order(self):
         with self.assertRaises(ValueError):
@@ -324,8 +324,8 @@ class ReadSequencesTest(unittest.TestCase):
 
         c1 = sequence_graph.to_nodes(b1)[0]
         self.assertEqual(str(c1), "c")
-        self.assertEqual(str(c1.actions[0]), "a")
-        self.assertEqual(str(c1.actions[1]), "b")
+        self.assertEqual(c1.action.actions[0].name, "a")
+        self.assertEqual(c1.action.actions[1].name, "b")
 
     def test_root_cannot_be_versioned(self):
         with self.assertRaises(ValueError):

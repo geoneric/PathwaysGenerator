@@ -1,10 +1,10 @@
-from .action import Action
+from ...action import Action
 from .node import Node
 
 
 class ActionBegin(Node):
     def __init__(self, action: Action) -> None:
-        super().__init__(f"[{action.label}")
+        super().__init__(f"[{action.name}")
         self._action = action
 
     def __repr__(self) -> str:
