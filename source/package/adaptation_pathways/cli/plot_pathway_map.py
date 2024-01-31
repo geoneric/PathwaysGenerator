@@ -5,7 +5,8 @@ import docopt
 
 from ..graph.conversion import sequence_graph_to_pathway_map
 from ..graph.io import read_sequences, read_tipping_points
-from ..graph.plot import PathwayMapLayout, plot_and_save_pathway_map
+from ..graph.plot import PathwayMapLayout  # , plot_and_save_pathway_map
+from ..plot.pathway_map import plot_and_save_pathway_map
 from ..version import __version__ as version
 from .main import main_function
 
