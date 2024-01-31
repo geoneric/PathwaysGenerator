@@ -2,10 +2,15 @@ import unittest
 
 import numpy.testing as npt
 
+from adaptation_pathways.action import Action
+from adaptation_pathways.action_combination import ActionCombination
 from adaptation_pathways.graph.conversion import sequence_graph_to_pathway_map
 from adaptation_pathways.graph.layout.pathway_map import classic_layout, default_layout
-from adaptation_pathways.graph.node import Action, ActionCombination
+from adaptation_pathways.graph.node import Action as ActionNode
 from adaptation_pathways.graph.sequence_graph import SequenceGraph
+
+
+# pylint: disable=too-many-locals
 
 
 class PathwayLayoutTestBase(unittest.TestCase):
@@ -32,9 +37,14 @@ class PathwayMapDefaultLayoutTest(PathwayLayoutTestBase):
         b = Action("b")
         c = Action("c")
 
-        sequence_graph.add_sequence(current, a)
-        sequence_graph.add_sequence(a, b)
-        sequence_graph.add_sequence(b, c)
+        current_node = ActionNode(current)
+        a_node = ActionNode(a)
+        b_node = ActionNode(b)
+        c_node = ActionNode(c)
+
+        sequence_graph.add_sequence(current_node, a_node)
+        sequence_graph.add_sequence(a_node, b_node)
+        sequence_graph.add_sequence(b_node, c_node)
 
         pathway_map = sequence_graph_to_pathway_map(sequence_graph)
         paths = list(pathway_map.all_paths())
@@ -65,9 +75,14 @@ class PathwayMapDefaultLayoutTest(PathwayLayoutTestBase):
         b = Action("b")
         c = Action("c")
 
-        sequence_graph.add_sequence(current, a)
-        sequence_graph.add_sequence(current, b)
-        sequence_graph.add_sequence(current, c)
+        current_node = ActionNode(current)
+        a_node = ActionNode(a)
+        b_node = ActionNode(b)
+        c_node = ActionNode(c)
+
+        sequence_graph.add_sequence(current_node, a_node)
+        sequence_graph.add_sequence(current_node, b_node)
+        sequence_graph.add_sequence(current_node, c_node)
 
         pathway_map = sequence_graph_to_pathway_map(sequence_graph)
         paths = list(pathway_map.all_paths())
@@ -115,12 +130,18 @@ class PathwayMapDefaultLayoutTest(PathwayLayoutTestBase):
         c = Action("c")
         d = Action("d")
 
-        sequence_graph.add_sequence(current, a)
-        sequence_graph.add_sequence(current, b)
-        sequence_graph.add_sequence(current, c)
-        sequence_graph.add_sequence(a, d)
-        sequence_graph.add_sequence(b, d)
-        sequence_graph.add_sequence(c, d)
+        current_node = ActionNode(current)
+        a_node = ActionNode(a)
+        b_node = ActionNode(b)
+        c_node = ActionNode(c)
+        d_node = ActionNode(d)
+
+        sequence_graph.add_sequence(current_node, a_node)
+        sequence_graph.add_sequence(current_node, b_node)
+        sequence_graph.add_sequence(current_node, c_node)
+        sequence_graph.add_sequence(a_node, d_node)
+        sequence_graph.add_sequence(b_node, d_node)
+        sequence_graph.add_sequence(c_node, d_node)
 
         pathway_map = sequence_graph_to_pathway_map(sequence_graph)
         paths = list(pathway_map.all_paths())
@@ -176,17 +197,25 @@ class PathwayMapDefaultLayoutTest(PathwayLayoutTestBase):
         e = Action("e")
         f = Action("f")
 
+        current_node = ActionNode(current)
+        a_node = ActionNode(a)
+        b_node = ActionNode(b)
+        c_node = ActionNode(c)
+        d_node = ActionNode(d)
+        e_node = ActionNode(e)
+        f_node = ActionNode(f)
+
         sequence_graph.add_sequences(
             [
-                (current, a),
-                (a, e),
-                (current, b),
-                (b, f),
-                (current, c),
-                (c, f),
-                (current, d),
-                (d, f),
-                (f, e),
+                (current_node, a_node),
+                (a_node, e_node),
+                (current_node, b_node),
+                (b_node, f_node),
+                (current_node, c_node),
+                (c_node, f_node),
+                (current_node, d_node),
+                (d_node, f_node),
+                (f_node, e_node),
             ]
         )
 
@@ -261,19 +290,26 @@ class PathwayMapDefaultLayoutTest(PathwayLayoutTestBase):
         c = Action("c")
         d = Action("d")
 
+        current_node = ActionNode(current)
+        a_node = ActionNode(a)
+        b1_node = ActionNode(b1)
+        b2_node = ActionNode(b2)
+        c_node = ActionNode(c)
+        d_node = ActionNode(d)
+
         sequence_graph.add_sequences(
             [
-                (current, a),
-                (current, b1),
-                (current, c),
-                (current, d),
-                (b1, a),
-                (b1, c),
-                (b1, d),
-                (c, b2),
-                (b2, a),
-                (c, a),
-                (c, d),
+                (current_node, a_node),
+                (current_node, b1_node),
+                (current_node, c_node),
+                (current_node, d_node),
+                (b1_node, a_node),
+                (b1_node, c_node),
+                (b1_node, d_node),
+                (c_node, b2_node),
+                (b2_node, a_node),
+                (c_node, a_node),
+                (c_node, d_node),
             ]
         )
 
@@ -428,14 +464,20 @@ class PathwayMapDefaultLayoutTest(PathwayLayoutTestBase):
         a = Action("a")
         b = Action("b")
         c = Action("c")
-        d = ActionCombination("d", a, b)
+        d = ActionCombination("d", [a, b])
+
+        current_node = ActionNode(current)
+        a_node = ActionNode(a)
+        b_node = ActionNode(b)
+        c_node = ActionNode(c)
+        d_node = ActionNode(d)
 
         sequence_graph.add_sequences(
             [
-                (current, a),
-                (current, b),
-                (current, c),
-                (a, d),
+                (current_node, a_node),
+                (current_node, b_node),
+                (current_node, c_node),
+                (a_node, d_node),
             ]
         )
 
@@ -485,15 +527,21 @@ class PathwayMapDefaultLayoutTest(PathwayLayoutTestBase):
         a = Action("a")
         b = Action("b")
         c = Action("c")
-        d = ActionCombination("d", a, b)
+        d = ActionCombination("d", [a, b])
+
+        current_node = ActionNode(current)
+        a_node = ActionNode(a)
+        b_node = ActionNode(b)
+        c_node = ActionNode(c)
+        d_node = ActionNode(d)
 
         sequence_graph.add_sequences(
             [
-                (current, a),
-                (current, b),
-                (current, c),
-                (a, d),
-                (b, d),
+                (current_node, a_node),
+                (current_node, b_node),
+                (current_node, c_node),
+                (a_node, d_node),
+                (b_node, d_node),
             ]
         )
 
@@ -539,6 +587,56 @@ class PathwayMapDefaultLayoutTest(PathwayLayoutTestBase):
             ],
         )
 
+    def test_action_edition_01(self):
+        sequence_graph = SequenceGraph()
+        current = Action("current")
+        a1 = Action("a", 1)
+        b = Action("b")
+        a2 = Action("a", 2)
+
+        current_node = ActionNode(current)
+        a1_node = ActionNode(a1)
+        b_node = ActionNode(b)
+        a2_node = ActionNode(a2)
+
+        sequence_graph.add_sequences(
+            [
+                (current_node, a1_node),
+                (current_node, b_node),
+                (b_node, a2_node),
+            ]
+        )
+
+        pathway_map = sequence_graph_to_pathway_map(sequence_graph)
+        paths = list(pathway_map.all_paths())
+        self.assertEqual(len(paths), 2)
+
+        positions = default_layout(pathway_map)
+        self.assertEqual(len(positions), 7)
+
+        self.assert_equal_positions(
+            positions,
+            paths[0],
+            [
+                ("[current", (0, 0)),
+                ("current]", (1, 0)),
+                ("[a", (2, 1)),
+                ("a]", (3, 1)),
+            ],
+        )
+        self.assert_equal_positions(
+            positions,
+            paths[1],
+            [
+                ("[current", (0, 0)),
+                ("current]", (1, 0)),
+                ("[b", (2, -1)),
+                ("b]", (3, -1)),
+                ("[a", (4, -1)),
+                ("a]", (5, -1)),
+            ],
+        )
+
 
 class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
     def test_empty(self):
@@ -554,7 +652,10 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
         current = Action("current")
         a = Action("a")
 
-        sequence_graph.add_sequence(current, a)
+        current_node = ActionNode(current)
+        a_node = ActionNode(a)
+
+        sequence_graph.add_sequence(current_node, a_node)
 
         pathway_map = sequence_graph_to_pathway_map(sequence_graph)
         paths = list(pathway_map.all_paths())
@@ -588,9 +689,14 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
         b = Action("b")
         c = Action("c")
 
-        sequence_graph.add_sequence(current, a)
-        sequence_graph.add_sequence(a, b)
-        sequence_graph.add_sequence(b, c)
+        current_node = ActionNode(current)
+        a_node = ActionNode(a)
+        b_node = ActionNode(b)
+        c_node = ActionNode(c)
+
+        sequence_graph.add_sequence(current_node, a_node)
+        sequence_graph.add_sequence(a_node, b_node)
+        sequence_graph.add_sequence(b_node, c_node)
 
         pathway_map = sequence_graph_to_pathway_map(sequence_graph)
         paths = list(pathway_map.all_paths())
@@ -630,9 +736,14 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
         b = Action("b")
         c = Action("c")
 
-        sequence_graph.add_sequence(current, a)
-        sequence_graph.add_sequence(current, b)
-        sequence_graph.add_sequence(current, c)
+        current_node = ActionNode(current)
+        a_node = ActionNode(a)
+        b_node = ActionNode(b)
+        c_node = ActionNode(c)
+
+        sequence_graph.add_sequence(current_node, a_node)
+        sequence_graph.add_sequence(current_node, b_node)
+        sequence_graph.add_sequence(current_node, c_node)
 
         pathway_map = sequence_graph_to_pathway_map(sequence_graph)
         paths = list(pathway_map.all_paths())
@@ -691,17 +802,25 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
         e = Action("e")
         f = Action("f")
 
+        current_node = ActionNode(current)
+        a_node = ActionNode(a)
+        b_node = ActionNode(b)
+        c_node = ActionNode(c)
+        d_node = ActionNode(d)
+        e_node = ActionNode(e)
+        f_node = ActionNode(f)
+
         sequence_graph.add_sequences(
             [
-                (current, a),
-                (a, e),
-                (current, b),
-                (b, f),
-                (current, c),
-                (c, f),
-                (current, d),
-                (d, f),
-                (f, e),
+                (current_node, a_node),
+                (a_node, e_node),
+                (current_node, b_node),
+                (b_node, f_node),
+                (current_node, c_node),
+                (c_node, f_node),
+                (current_node, d_node),
+                (d_node, f_node),
+                (f_node, e_node),
             ]
         )
 
@@ -788,19 +907,26 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
         c = Action("c")
         d = Action("d")
 
+        current_node = ActionNode(current)
+        a_node = ActionNode(a)
+        b1_node = ActionNode(b1)
+        b2_node = ActionNode(b2)
+        c_node = ActionNode(c)
+        d_node = ActionNode(d)
+
         sequence_graph.add_sequences(
             [
-                (current, a),
-                (current, b1),
-                (current, c),
-                (current, d),
-                (b1, a),
-                (b1, c),
-                (b1, d),
-                (c, b2),
-                (b2, a),
-                (c, a),
-                (c, d),
+                (current_node, a_node),
+                (current_node, b1_node),
+                (current_node, c_node),
+                (current_node, d_node),
+                (b1_node, a_node),
+                (b1_node, c_node),
+                (b1_node, d_node),
+                (c_node, b2_node),
+                (b2_node, a_node),
+                (c_node, a_node),
+                (c_node, d_node),
             ]
         )
 
@@ -955,14 +1081,20 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
         a = Action("a")
         b = Action("b")
         c = Action("c")
-        d = ActionCombination("d", a, b)
+        d = ActionCombination("d", [a, b])
+
+        current_node = ActionNode(current)
+        a_node = ActionNode(a)
+        b_node = ActionNode(b)
+        c_node = ActionNode(c)
+        d_node = ActionNode(d)
 
         sequence_graph.add_sequences(
             [
-                (current, a),
-                (current, b),
-                (current, c),
-                (a, d),
+                (current_node, a_node),
+                (current_node, b_node),
+                (current_node, c_node),
+                (a_node, d_node),
             ]
         )
 
@@ -1021,15 +1153,21 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
         a = Action("a")
         b = Action("b")
         c = Action("c")
-        d = ActionCombination("d", a, b)
+        d = ActionCombination("d", [a, b])
+
+        current_node = ActionNode(current)
+        a_node = ActionNode(a)
+        b_node = ActionNode(b)
+        c_node = ActionNode(c)
+        d_node = ActionNode(d)
 
         sequence_graph.add_sequences(
             [
-                (current, a),
-                (current, b),
-                (current, c),
-                (a, d),
-                (b, d),
+                (current_node, a_node),
+                (current_node, b_node),
+                (current_node, c_node),
+                (a_node, d_node),
+                (b_node, d_node),
             ]
         )
 
@@ -1090,15 +1228,21 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
         a = Action("a")
         b = Action("b")
         c = Action("c")
-        d = ActionCombination("d", a, b)
+        d = ActionCombination("d", [a, b])
+
+        current_node = ActionNode(current)
+        a_node = ActionNode(a)
+        b_node = ActionNode(b)
+        c_node = ActionNode(c)
+        d_node = ActionNode(d)
 
         sequence_graph.add_sequences(
             [
-                (current, a),
-                (current, b),
-                (current, c),
-                (b, d),
-                (c, d),
+                (current_node, a_node),
+                (current_node, b_node),
+                (current_node, c_node),
+                (b_node, d_node),
+                (c_node, d_node),
             ]
         )
 
@@ -1160,14 +1304,20 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
         b = Action("b")
         c = Action("c")
         e = Action("e")
-        d = ActionCombination("d", a, e)
+        d = ActionCombination("d", [a, e])
+
+        current_node = ActionNode(current)
+        a_node = ActionNode(a)
+        b_node = ActionNode(b)
+        c_node = ActionNode(c)
+        d_node = ActionNode(d)
 
         sequence_graph.add_sequences(
             [
-                (current, a),
-                (current, b),
-                (current, c),
-                (a, d),
+                (current_node, a_node),
+                (current_node, b_node),
+                (current_node, c_node),
+                (a_node, d_node),
             ]
         )
 
@@ -1226,15 +1376,21 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
         a = Action("a")
         b = Action("b")
         c = Action("c")
-        d = ActionCombination("d", a, c)
+        d = ActionCombination("d", [a, c])
+
+        current_node = ActionNode(current)
+        a_node = ActionNode(a)
+        b_node = ActionNode(b)
+        c_node = ActionNode(c)
+        d_node = ActionNode(d)
 
         sequence_graph.add_sequences(
             [
-                (current, a),
-                (current, b),
-                (current, c),
-                (a, d),
-                (c, d),
+                (current_node, a_node),
+                (current_node, b_node),
+                (current_node, c_node),
+                (a_node, d_node),
+                (c_node, d_node),
             ]
         )
 
@@ -1286,5 +1442,63 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
                 ("c]", (2050, -2)),
                 ("[d", (2050, 1)),
                 ("d]", (2100, 1)),
+            ],
+        )
+
+    def test_action_edition_01(self):
+        sequence_graph = SequenceGraph()
+        current = Action("current")
+        a1 = Action("a", 1)
+        b = Action("b")
+        a2 = Action("a", 2)
+
+        current_node = ActionNode(current)
+        a1_node = ActionNode(a1)
+        b_node = ActionNode(b)
+        a2_node = ActionNode(a2)
+
+        sequence_graph.add_sequences(
+            [
+                (current_node, a1_node),
+                (current_node, b_node),
+                (b_node, a2_node),
+            ]
+        )
+
+        pathway_map = sequence_graph_to_pathway_map(sequence_graph)
+        paths = list(pathway_map.all_paths())
+        self.assertEqual(len(paths), 2)
+
+        pathway_map.assign_tipping_points(
+            {
+                current: 2030,
+                a1: 2040,
+                b: 2050,
+                a2: 2060,
+            }
+        )
+        positions = classic_layout(pathway_map)
+        self.assertEqual(len(positions), 7)
+
+        self.assert_equal_positions(
+            positions,
+            paths[0],
+            [
+                ("[current", (0, 0)),
+                ("current]", (2030, 0)),
+                ("[a", (2030, 1)),
+                ("a]", (2040, 1)),
+            ],
+        )
+        self.assert_equal_positions(
+            positions,
+            paths[1],
+            [
+                ("[current", (0, 0)),
+                ("current]", (2030, 0)),
+                ("[b", (2030, -1)),
+                ("b]", (2050, -1)),
+                ("[a", (2050, 1)),
+                ("a]", (2060, 1)),
             ],
         )

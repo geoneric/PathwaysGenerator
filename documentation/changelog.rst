@@ -7,6 +7,16 @@ Description of of all notable changes made per version.
 
 0.0.6
 -----
+- Added support for specifying action editions: the same action can occur at different horizontal
+  locations (at different periods in time or at ranges of conditions) in a pathway map. To make
+  this possible, such actions must be differentiated from each other. This can now be done using
+  editions, which are just integral values. Each action has one. When not specified, the edition
+  of an action is zero. Example::
+
+    # Action a occurs twice, but they are different editions
+    current a[1]
+    current b
+    b a[2]
 
 
 0.0.5

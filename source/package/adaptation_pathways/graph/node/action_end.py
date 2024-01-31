@@ -1,6 +1,6 @@
 from typing import TypeAlias
 
-from .action import Action
+from ...action import Action
 from .node import Node
 
 
@@ -19,7 +19,7 @@ class ActionEnd(Node):
     _tipping_point: TippingPoint
 
     def __init__(self, action: Action, tipping_point: TippingPoint = 0) -> None:
-        super().__init__(f"{action.label}]")
+        super().__init__(f"{action.name}]")
         self._action = action
         self._tipping_point = tipping_point
 

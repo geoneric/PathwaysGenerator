@@ -1,11 +1,15 @@
 import unittest
 
+from adaptation_pathways.action import Action
 from adaptation_pathways.graph.conversion import sequence_graph_to_pathway_map
-from adaptation_pathways.graph.node.action import Action
+from adaptation_pathways.graph.node.action import Action as ActionNode
 from adaptation_pathways.graph.node.action_begin import ActionBegin
 from adaptation_pathways.graph.node.action_end import ActionEnd
 from adaptation_pathways.graph.pathway_map import PathwayMap, verify_tipping_points
 from adaptation_pathways.graph.sequence_graph import SequenceGraph
+
+
+# pylint: disable=too-many-locals
 
 
 class PathwayMapTest(unittest.TestCase):
@@ -67,7 +71,10 @@ class VerifyTippingPointsTest(unittest.TestCase):
         current = Action("current")
         a = Action("a")
 
-        sequence_graph.add_sequence(current, a)
+        current_node = ActionNode(current)
+        a_node = ActionNode(a)
+
+        sequence_graph.add_sequence(current_node, a_node)
 
         pathway_map = sequence_graph_to_pathway_map(sequence_graph)
 
@@ -88,17 +95,25 @@ class VerifyTippingPointsTest(unittest.TestCase):
         e = Action("e")
         f = Action("f")
 
+        current_node = ActionNode(current)
+        a_node = ActionNode(a)
+        b_node = ActionNode(b)
+        c_node = ActionNode(c)
+        d_node = ActionNode(d)
+        e_node = ActionNode(e)
+        f_node = ActionNode(f)
+
         sequence_graph.add_sequences(
             [
-                (current, a),
-                (a, e),
-                (current, b),
-                (b, f),
-                (current, c),
-                (c, f),
-                (current, d),
-                (d, f),
-                (f, e),
+                (current_node, a_node),
+                (a_node, e_node),
+                (current_node, b_node),
+                (b_node, f_node),
+                (current_node, c_node),
+                (c_node, f_node),
+                (current_node, d_node),
+                (d_node, f_node),
+                (f_node, e_node),
             ]
         )
 

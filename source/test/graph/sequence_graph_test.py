@@ -1,6 +1,7 @@
 import unittest
 
-from adaptation_pathways.graph.node import Action
+from adaptation_pathways.action import Action
+from adaptation_pathways.graph.node import Action as ActionNode
 from adaptation_pathways.graph.sequence_graph import SequenceGraph
 
 
@@ -13,7 +14,7 @@ class SequenceGraphTest(unittest.TestCase):
 
     def test_root_node(self):
         graph = SequenceGraph()
-        current = Action("current")
+        current = ActionNode(Action("current"))
 
         graph.add_action(current)
 

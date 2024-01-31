@@ -3,7 +3,9 @@ import math
 
 import numpy as np
 
-from ..node import Action, ActionBegin, ActionCombination, Node
+from ...action import Action
+from ...action_combination import ActionCombination
+from ..node import ActionBegin, Node
 from ..pathway_map import PathwayMap
 from .util import add_position, distribute, sort_horizontally
 
@@ -164,19 +166,27 @@ def _classic_distribute_vertically(
     # must be positioned at the same y-coordinate as the existing action. These combined actions
     # must not interfere with the distribution of y-coordinates.
 
-    actions_sieved: dict[ActionCombination, Action] = {}
-    actions_to_distribute = []
+    # Sieve out actions that only differ with respect to the edition. These must be positioned
+    # at the same y-coordinate and must not interfere with the distribution of y-coordinates.
+
+    action_combinations_sieved: dict[ActionCombination, Action] = {}
+    action_names_distributed: list[str] = []
+    actions_to_distribute: list[str] = []
 
     for action in actions:
         if not isinstance(action, ActionCombination):
-            actions_to_distribute.append(action)
+            if action.name not in action_names_distributed:
+                action_names_distributed.append(action.name)
+                actions_to_distribute.append(action.name)
         else:
             continued_actions = pathway_map.continued_actions(action)
 
             if len(continued_actions) == 1:
-                actions_sieved[action] = continued_actions[0]
+                action_combinations_sieved[action] = continued_actions[0]
             else:
-                actions_to_distribute.append(action)
+                if action.name not in action_names_distributed:
+                    action_names_distributed.append(action.name)
+                    actions_to_distribute.append(action.name)
 
     y_coordinates = list(
         range(
@@ -190,7 +200,9 @@ def _classic_distribute_vertically(
     del y_coordinates[math.floor(len(actions_to_distribute) / 2)]
 
     # Nodes related to the root action are already positioned
-    assert actions_to_distribute[0] == root_action_begin.action
+    assert (
+        actions_to_distribute[0] == root_action_begin.action.name
+    ), actions_to_distribute[0]
     del actions_to_distribute[0]
 
     y_coordinate_by_action = dict(zip(actions_to_distribute, y_coordinates))
@@ -198,12 +210,15 @@ def _classic_distribute_vertically(
     for action_begin in pathway_map.all_action_begins()[1:]:  # Skip root node
         action = action_begin.action
 
-        if isinstance(action, ActionCombination) and action in actions_sieved:
+        if (
+            isinstance(action, ActionCombination)
+            and action in action_combinations_sieved
+        ):
             # In this case we want the combination to end up at the same y-coordinate as the
             # one action that is being continued
-            action = actions_sieved[action]
+            action = action_combinations_sieved[action]
 
-        y_coordinate = y_coordinate_by_action[action]
+        y_coordinate = y_coordinate_by_action[action.name]
 
         assert np.isnan(position_by_node[action_begin][1])
         position_by_node[action_begin][1] = y_coordinate

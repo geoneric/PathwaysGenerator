@@ -1,6 +1,7 @@
 import unittest
 
-from adaptation_pathways.graph.node import Action, ActionCombination
+from adaptation_pathways.action import Action
+from adaptation_pathways.action_combination import ActionCombination
 
 
 class ActionCombinationTest(unittest.TestCase):
@@ -8,18 +9,18 @@ class ActionCombinationTest(unittest.TestCase):
         a = Action("a")
         b = Action("b")
 
-        c = ActionCombination("c", a, b)
+        c = ActionCombination("c", [a, b])
 
-        self.assertEqual(str(c), "c")
+        self.assertEqual(c.name, "c")
         self.assertEqual(c.actions, [a, b])
 
-        c = ActionCombination("c", b, a)
+        c = ActionCombination("c", [b, a])
 
-        self.assertEqual(str(c), "c")
+        self.assertEqual(c.name, "c")
         self.assertEqual(c.actions, [b, a])
 
     def test_duplicates_are_removed(self):
         a = Action("a")
 
         with self.assertRaises(ValueError):
-            ActionCombination("b", a, a)
+            ActionCombination("b", [a, a])

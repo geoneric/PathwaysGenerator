@@ -1,18 +1,15 @@
-"""
-An action (AKA policy action, intervention, and measure) is ...
-
-This module contains the implementation of the :py:class:`Action` class.
-"""
+from ...action import Action as Action_
 from .node import Node
 
 
 class Action(Node):
-    """
-    Action instances represent ...
-    """
+    def __init__(self, action: Action_) -> None:
+        super().__init__(f"{action.name}")
+        self._action = action
 
     def __repr__(self) -> str:
-        return f'Action("{self._label}")'
+        return f'Action("{self._action}")'
 
-    def __lt__(self, other) -> bool:
-        return hash(self) < hash(other)
+    @property
+    def action(self) -> Action_:
+        return self._action

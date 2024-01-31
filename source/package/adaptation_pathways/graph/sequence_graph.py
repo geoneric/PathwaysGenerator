@@ -1,4 +1,4 @@
-from .node import Action
+from .node.action import Action as ActionNode
 from .rooted_graph import RootedGraph
 
 
@@ -8,15 +8,15 @@ class SequenceGraph(RootedGraph):
     and each edge the fact that one action follows another one.
     """
 
-    def add_action(self, action: Action) -> None:
+    def add_action(self, action: ActionNode) -> None:
         """
         Add an action
 
-        :param action: Action
+        :param action: ActionNode
         """
         self._graph.add_node(action)
 
-    def add_sequence(self, from_action: Action, to_action: Action) -> None:
+    def add_sequence(self, from_action: ActionNode, to_action: ActionNode) -> None:
         """
         Add a sequence of actions
 
@@ -25,7 +25,7 @@ class SequenceGraph(RootedGraph):
         """
         self._graph.add_edge(from_action, to_action)
 
-    def add_sequences(self, actions: list[tuple[Action, Action]]) -> None:
+    def add_sequences(self, actions: list[tuple[ActionNode, ActionNode]]) -> None:
         """
         Add sequences of actions
 
@@ -35,11 +35,11 @@ class SequenceGraph(RootedGraph):
 
     def nr_actions(self) -> int:
         """
-        :return: Number of actions
+        :return: Number of actions (nodes)
         """
         return self.nr_nodes()
 
-    def nr_from_actions(self, to_action: Action) -> int:
+    def nr_from_actions(self, to_action: ActionNode) -> int:
         """
         :return: Number of sequences that end at the action passed in
 
@@ -47,13 +47,13 @@ class SequenceGraph(RootedGraph):
         """
         return self._graph.in_degree(to_action)
 
-    def from_actions(self, to_action: Action) -> list[Action]:
+    def from_actions(self, to_action: ActionNode) -> list[ActionNode]:
         """
         :return: Collection of actions that end at the action passed in
         """
         return self.from_nodes(to_action)
 
-    def nr_to_actions(self, from_action: Action) -> int:
+    def nr_to_actions(self, from_action: ActionNode) -> int:
         """
         :return: Number of sequences that start at the action passed in
 
@@ -61,7 +61,7 @@ class SequenceGraph(RootedGraph):
         """
         return self._graph.out_degree(from_action)
 
-    def to_actions(self, from_action: Action) -> list[Action]:
+    def to_actions(self, from_action: ActionNode) -> list[ActionNode]:
         """
         :return: Collection of actions that start at the action passed in
         """
@@ -73,5 +73,5 @@ class SequenceGraph(RootedGraph):
         """
         return len(self._graph.edges)
 
-    def all_to_actions(self, from_action: Action) -> list[Action]:
+    def all_to_actions(self, from_action: ActionNode) -> list[ActionNode]:
         return self.all_to_nodes(from_action)
