@@ -109,8 +109,7 @@ After testing the package, new versions of the package can be installed like thi
 
 .. code-block:: bash
 
-   pip uninstall --yes adaptation_pathways
-   pip install --upgrade -f dist adaptation_pathways
+   pip install upgrade -f dist adaptation_pathways
 
 
 Release a package
