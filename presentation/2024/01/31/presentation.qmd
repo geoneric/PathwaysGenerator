@@ -1,0 +1,56 @@
+---
+title: "Adaptation pathways"
+subtitle: "Progress update"
+date: "20240131"
+format:
+  revealjs:
+    theme: moon
+    fontsize: 2em
+    code-line-numbers: false
+    highlight-style: nord
+    standalone: true
+    embed-resources: true
+---
+
+
+# Recent developments
+
+- ``ap_plot_pathway_map``
+- Combinations of actions: ``a & b``
+- Editions of actions: ``a[1] a[2]``
+
+
+# Upcoming developments
+
+- Work on a good pathway map
+- Together work on examples / typical use-cases
+
+
+# Pathway Generator
+
+- Portable installation
+
+
+# How to store information?
+
+- Information to store:
+
+    - actions: name, description, edition, ...
+    - action combinations
+    - sequences
+
+- Options:
+
+    - HDF5
+    - SQLite
+    - Bunch of text files (``.csv``, ``.json``, ``.yaml``, ...)
+
+- (Not a watershed moment)
+
+
+# Where to host the Git repository?
+
+
+# Project and planning
+
+- Spent ~20 days
