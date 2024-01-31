@@ -5,6 +5,10 @@ Changelog
 Description of of all notable changes made per version.
 
 
+0.0.7
+-----
+
+
 0.0.6
 -----
 - Added support for specifying action editions: the same action can occur at different horizontal
