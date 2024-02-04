@@ -15,7 +15,7 @@ from adaptation_pathways.graph import (
 )
 
 
-sequence_graph = read_sequences(
+sequence_graph, level_by_action = read_sequences(
     StringIO(
         """
 current a
@@ -48,6 +48,7 @@ b2 2070
 )
 
 pathway_map.assign_tipping_points(tipping_points)
+pathway_map.set_attribute("level", level_by_action)
 
 plot_pathway_map(pathway_map, layout=PathwayMapLayout.CLASSIC)
 plt.show()

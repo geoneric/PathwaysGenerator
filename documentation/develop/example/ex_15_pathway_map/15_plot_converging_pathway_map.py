@@ -13,7 +13,7 @@ from adaptation_pathways.graph import (
 )
 
 
-sequence_graph = read_sequences(
+sequence_graph, _ = read_sequences(
     StringIO(
         """
 current a
