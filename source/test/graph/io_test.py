@@ -6,7 +6,7 @@ from adaptation_pathways.graph.io import read_sequences
 
 class ReadSequencesTest(unittest.TestCase):
     def test_empty(self):
-        sequence_graph = read_sequences(
+        sequence_graph, _ = read_sequences(
             StringIO(
                 """
                 """
@@ -16,7 +16,7 @@ class ReadSequencesTest(unittest.TestCase):
         self.assertEqual(sequence_graph.nr_actions(), 0)
         self.assertEqual(sequence_graph.nr_sequences(), 0)
 
-        sequence_graph = read_sequences(
+        sequence_graph, _ = read_sequences(
             StringIO(
                 """
 
@@ -29,7 +29,7 @@ class ReadSequencesTest(unittest.TestCase):
         self.assertEqual(sequence_graph.nr_sequences(), 0)
 
     def test_single_sequence(self):
-        sequence_graph = read_sequences(
+        sequence_graph, _ = read_sequences(
             StringIO(
                 """
                 current a
@@ -47,7 +47,7 @@ class ReadSequencesTest(unittest.TestCase):
         self.assertEqual(str(a), "a")
 
     def test_comment(self):
-        sequence_graph = read_sequences(
+        sequence_graph, _ = read_sequences(
             StringIO(
                 """
                 # A comment
@@ -67,7 +67,7 @@ class ReadSequencesTest(unittest.TestCase):
         self.assertEqual(str(a), "a")
 
     def test_serial_sequence(self):
-        sequence_graph = read_sequences(
+        sequence_graph, _ = read_sequences(
             StringIO(
                 """
                 current a
@@ -93,7 +93,7 @@ class ReadSequencesTest(unittest.TestCase):
         self.assertEqual(str(c), "c")
 
     def test_diverging_sequence(self):
-        sequence_graph = read_sequences(
+        sequence_graph, _ = read_sequences(
             StringIO(
                 """
                 current a
@@ -119,7 +119,7 @@ class ReadSequencesTest(unittest.TestCase):
         self.assertEqual(str(c), "c")
 
     def test_converging_sequence(self):
-        sequence_graph = read_sequences(
+        sequence_graph, _ = read_sequences(
             StringIO(
                 """
                 current a
@@ -157,7 +157,7 @@ class ReadSequencesTest(unittest.TestCase):
         self.assertEqual(str(d), "d")
 
     def test_use_case_01(self):
-        sequence_graph = read_sequences(
+        sequence_graph, _ = read_sequences(
             StringIO(
                 """
                 current a
@@ -225,7 +225,7 @@ class ReadSequencesTest(unittest.TestCase):
             )
 
     def test_action_combination(self):
-        sequence_graph = read_sequences(
+        sequence_graph, _ = read_sequences(
             StringIO(
                 """
                 current a
@@ -259,7 +259,7 @@ class ReadSequencesTest(unittest.TestCase):
         self.assertEqual(c.action.actions[1], b.action)
 
     def test_action_combination_non_existant(self):
-        sequence_graph = read_sequences(
+        sequence_graph, _ = read_sequences(
             StringIO(
                 """
                 current a
@@ -300,7 +300,7 @@ class ReadSequencesTest(unittest.TestCase):
             )
 
     def test_action_editions(self):
-        sequence_graph = read_sequences(
+        sequence_graph, _ = read_sequences(
             StringIO(
                 """
                 current a[1]

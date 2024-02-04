@@ -1,3 +1,5 @@
+import typing
+
 from ..action import Action
 from ..action_combination import ActionCombination
 from .node import ActionBegin, ActionEnd
@@ -121,6 +123,31 @@ class PathwayMap(RootedGraph):
         assert result[0] <= result[1], result
 
         return result
+
+    def set_attribute(self, name: str, value: typing.Any) -> None:
+        """
+        Add / update attribute value to / of the graph
+
+        :param name: Name of attribute to set
+        :param value: Per action a value of the attribute to set
+
+        The caller is responsible of assuring that all actions get assigned an attribute value,
+        if that is necessary.
+        """
+        self.graph.graph[name] = value
+
+    # def set_node_attribute(self, name: str, value: dict[Action, typing.Any]) -> None:
+    #     """
+    #     Add / update attribute to / of those nodes that are associated with the actions passed in
+
+    #     :param name: Name of attribute to set
+    #     :param value: Per action a value of the attribute to set
+
+    #     The caller is responsible of assuring that all nodes get assigned an attribute value.
+    #     """
+    #     for node in self.graph.nodes:
+    #         if node.action in value:
+    #             self.graph.nodes[node][name] = value[node.action]
 
 
 def verify_tipping_points(pathway_map: PathwayMap) -> None:

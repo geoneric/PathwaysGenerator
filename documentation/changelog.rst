@@ -7,6 +7,8 @@ Description of of all notable changes made per version.
 
 0.0.7
 -----
+- Ordering of actions in a pathway map (classic layout) is now based on the ordering of actions
+  in the sequences file.
 
 
 0.0.6

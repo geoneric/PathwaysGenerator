@@ -149,6 +149,7 @@ def _classic_distribute_horizontally(
         )
 
 
+# pylint: disable-next=too-many-locals, too-many-branches
 def _classic_distribute_vertically(
     pathway_map: PathwayMap,
     root_action_begin: ActionBegin,
@@ -170,42 +171,86 @@ def _classic_distribute_vertically(
     # at the same y-coordinate and must not interfere with the distribution of y-coordinates.
 
     action_combinations_sieved: dict[ActionCombination, Action] = {}
-    action_names_distributed: list[str] = []
-    actions_to_distribute: list[str] = []
+    action_combinations_continuations: dict[ActionCombination, list[Action]] = {}
+    names_of_actions_to_distribute: list[str] = []
 
     for action in actions:
         if not isinstance(action, ActionCombination):
-            if action.name not in action_names_distributed:
-                action_names_distributed.append(action.name)
-                actions_to_distribute.append(action.name)
+            if action.name not in names_of_actions_to_distribute:
+                names_of_actions_to_distribute.append(action.name)
         else:
             continued_actions = pathway_map.continued_actions(action)
 
             if len(continued_actions) == 1:
+                # Action is a combination of a single existing action with a new one
                 action_combinations_sieved[action] = continued_actions[0]
             else:
-                if action.name not in action_names_distributed:
-                    action_names_distributed.append(action.name)
-                    actions_to_distribute.append(action.name)
+                if len(continued_actions) > 1:
+                    action_combinations_continuations[action] = continued_actions
 
+                if action.name not in names_of_actions_to_distribute:
+                    names_of_actions_to_distribute.append(action.name)
+
+    # We now have the names of the actions to distribute. What is important here is that the
+    # number of actions is correct.
     y_coordinates = list(
         range(
-            math.floor(len(actions_to_distribute) / 2),
-            -math.floor((len(actions_to_distribute) - 1) / 2) - 1,
+            math.floor(len(names_of_actions_to_distribute) / 2),
+            -math.floor((len(names_of_actions_to_distribute) - 1) / 2) - 1,
             -1,
         )
     )
 
-    assert y_coordinates[math.floor(len(actions_to_distribute) / 2)] == 0.0
-    del y_coordinates[math.floor(len(actions_to_distribute) / 2)]
-
     # Nodes related to the root action are already positioned
-    assert (
-        actions_to_distribute[0] == root_action_begin.action.name
-    ), actions_to_distribute[0]
-    del actions_to_distribute[0]
+    # Delete the y-coordinate of the root action
+    assert y_coordinates[math.floor(len(names_of_actions_to_distribute) / 2)] == 0.0
+    del y_coordinates[math.floor(len(names_of_actions_to_distribute) / 2)]
 
-    y_coordinate_by_action = dict(zip(actions_to_distribute, y_coordinates))
+    # Delete the name of the root action
+    assert (
+        names_of_actions_to_distribute[0] == root_action_begin.action.name
+    ), names_of_actions_to_distribute[0]
+    del names_of_actions_to_distribute[0]
+
+    # Now it is time to re-order the actions to distribute, based on their level, if any was set
+    level_by_action = (
+        pathway_map.graph.graph["level"] if "level" in pathway_map.graph.graph else {}
+    )
+
+    # Update the levels of action combinations that continue multiple existing actions. These
+    # must end up somewhere in between the continued actions.
+    if level_by_action:
+        for action, continued_actions in action_combinations_continuations.items():
+            assert action in level_by_action
+            level_by_action[action] = sum(
+                level_by_action[action] for action in continued_actions
+            ) / len(continued_actions)
+
+    levels_of_actions_to_distribute = []
+
+    for action_name in names_of_actions_to_distribute:
+        level = next(
+            (
+                level_by_action[action]
+                for action in actions
+                if action.name == action_name and action in level_by_action
+            ),
+            0,
+        )
+        levels_of_actions_to_distribute.append(level)
+
+    # Sort action names based on their individual level. Actions with lower levels must end up
+    # higher in the pathway map.
+    levels_of_actions_to_distribute, names_of_actions_to_distribute = (
+        list(t)
+        for t in zip(
+            *sorted(
+                zip(levels_of_actions_to_distribute, names_of_actions_to_distribute)
+            )
+        )
+    )
+
+    y_coordinate_by_action = dict(zip(names_of_actions_to_distribute, y_coordinates))
 
     for action_begin in pathway_map.all_action_begins()[1:]:  # Skip root node
         action = action_begin.action
@@ -246,6 +291,11 @@ def classic_layout(
 
     The pathway map passed in must contain sane tipping points. When in doubt, call
     ``verify_tipping_points()`` before calling this function.
+
+    The graph in the pathway map passed in must contain an attribute called "level", with a
+    numeric value per action, which corresponds with the position in the above mentioned stack.
+    Low numbers correspond with a high position in the stack (large y-coordinate). Such actions
+    will be positioned at the top of the pathway map.
     """
     position_by_node: dict[Node, np.ndarray] = {}
 

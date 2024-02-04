@@ -13,7 +13,7 @@ from .main import main_function
 
 @main_function
 def create_logo(plot_pathname: str) -> int:
-    sequence_graph = read_sequences(
+    sequence_graph, _ = read_sequences(
         StringIO(
             """
 a b

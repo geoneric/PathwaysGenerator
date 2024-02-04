@@ -18,7 +18,7 @@ from .main import main_function
 def plot_graphs(
     sequences_pathname: str, plots_prefix_pathname: str, output_format: str
 ) -> int:
-    sequence_graph = read_sequences(sequences_pathname)
+    sequence_graph, _ = read_sequences(sequences_pathname)
     pathway_graph = ap.graph.sequence_graph_to_pathway_graph(sequence_graph)
     pathway_map = ap.graph.pathway_graph_to_pathway_map(pathway_graph)
 

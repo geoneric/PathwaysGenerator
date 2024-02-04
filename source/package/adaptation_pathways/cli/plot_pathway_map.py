@@ -14,10 +14,12 @@ from .main import main_function
 def plot_map(
     sequences_pathname: str, tipping_points_pathname: str, plot_pathname: str
 ) -> int:
-    pathway_map = sequence_graph_to_pathway_map(read_sequences(sequences_pathname))
+    sequence_graph, level_by_action = read_sequences(sequences_pathname)
+    pathway_map = sequence_graph_to_pathway_map(sequence_graph)
     tipping_points = read_tipping_points(tipping_points_pathname, pathway_map.actions())
 
     pathway_map.assign_tipping_points(tipping_points, verify=True)
+    pathway_map.set_attribute("level", level_by_action)
 
     plot_and_save_pathway_map(
         pathway_map, plot_pathname, layout=PathwayMapLayout.CLASSIC
