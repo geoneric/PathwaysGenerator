@@ -1,16 +1,32 @@
 import unittest
+from io import StringIO
 
 import numpy.testing as npt
 
 from adaptation_pathways.action import Action
 from adaptation_pathways.action_combination import ActionCombination
 from adaptation_pathways.graph.conversion import sequence_graph_to_pathway_map
+from adaptation_pathways.graph.io import read_sequences, read_tipping_points
 from adaptation_pathways.graph.layout.pathway_map import classic_layout, default_layout
 from adaptation_pathways.graph.node import Action as ActionNode
+from adaptation_pathways.graph.pathway_map import PathwayMap
 from adaptation_pathways.graph.sequence_graph import SequenceGraph
 
 
 # pylint: disable=too-many-locals
+
+
+def configure_pathway_map(sequences_str: str, tipping_points_str: str) -> PathwayMap:
+    sequence_graph, level_by_action = read_sequences(StringIO(sequences_str))
+    pathway_map = sequence_graph_to_pathway_map(sequence_graph)
+    tipping_points = read_tipping_points(
+        StringIO(tipping_points_str), pathway_map.actions()
+    )
+
+    pathway_map.assign_tipping_points(tipping_points)
+    pathway_map.set_attribute("level", level_by_action)
+
+    return pathway_map
 
 
 class PathwayLayoutTestBase(unittest.TestCase):
@@ -612,7 +628,7 @@ class PathwayMapDefaultLayoutTest(PathwayLayoutTestBase):
         self.assertEqual(len(paths), 2)
 
         positions = default_layout(pathway_map)
-        self.assertEqual(len(positions), 7)
+        self.assertEqual(len(positions), 8)
 
         self.assert_equal_positions(
             positions,
@@ -620,8 +636,8 @@ class PathwayMapDefaultLayoutTest(PathwayLayoutTestBase):
             [
                 ("[current", (0, 0)),
                 ("current]", (1, 0)),
-                ("[a", (2, 1)),
-                ("a]", (3, 1)),
+                ("[a", (2, 0.5)),
+                ("a]", (3, 0.5)),
             ],
         )
         self.assert_equal_positions(
@@ -630,10 +646,10 @@ class PathwayMapDefaultLayoutTest(PathwayLayoutTestBase):
             [
                 ("[current", (0, 0)),
                 ("current]", (1, 0)),
-                ("[b", (2, -1)),
-                ("b]", (3, -1)),
-                ("[a", (4, -1)),
-                ("a]", (5, -1)),
+                ("[b", (2, -0.5)),
+                ("b]", (3, -0.5)),
+                ("[a", (4, -0.5)),
+                ("a]", (5, -0.5)),
             ],
         )
 
@@ -793,52 +809,29 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
         )
 
     def test_use_case_01(self):
-        sequence_graph = SequenceGraph()
-        current = Action("current")
-        a = Action("a")
-        b = Action("b")
-        c = Action("c")
-        d = Action("d")
-        e = Action("e")
-        f = Action("f")
-
-        current_node = ActionNode(current)
-        a_node = ActionNode(a)
-        b_node = ActionNode(b)
-        c_node = ActionNode(c)
-        d_node = ActionNode(d)
-        e_node = ActionNode(e)
-        f_node = ActionNode(f)
-
-        sequence_graph.add_sequences(
-            [
-                (current_node, a_node),
-                (a_node, e_node),
-                (current_node, b_node),
-                (b_node, f_node),
-                (current_node, c_node),
-                (c_node, f_node),
-                (current_node, d_node),
-                (d_node, f_node),
-                (f_node, e_node),
-            ]
-        )
-
-        pathway_map = sequence_graph_to_pathway_map(sequence_graph)
+        sequences = """
+            current a
+            a e
+            current b
+            b f
+            current c
+            c f
+            current d
+            d f
+            f e
+            """
+        tipping_points = """
+            current 2030
+            a 2040
+            b 2050
+            c 2060
+            d 2070
+            f 2080
+            e 2090
+            """
+        pathway_map = configure_pathway_map(sequences, tipping_points)
         paths = list(pathway_map.all_paths())
         self.assertEqual(len(paths), 4)
-
-        pathway_map.assign_tipping_points(
-            {
-                current: 2030,
-                a: 2040,
-                b: 2050,
-                c: 2060,
-                d: 2070,
-                f: 2080,
-                e: 2090,
-            }
-        )
 
         positions = classic_layout(pathway_map)
         self.assertEqual(len(positions), 24)
@@ -899,51 +892,30 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
         )
 
     def test_use_case_02(self):
-        sequence_graph = SequenceGraph()
-        current = Action("current")
-        a = Action("a")
-        b1 = Action("b1")
-        b2 = Action("b2")
-        c = Action("c")
-        d = Action("d")
-
-        current_node = ActionNode(current)
-        a_node = ActionNode(a)
-        b1_node = ActionNode(b1)
-        b2_node = ActionNode(b2)
-        c_node = ActionNode(c)
-        d_node = ActionNode(d)
-
-        sequence_graph.add_sequences(
-            [
-                (current_node, a_node),
-                (current_node, b1_node),
-                (current_node, c_node),
-                (current_node, d_node),
-                (b1_node, a_node),
-                (b1_node, c_node),
-                (b1_node, d_node),
-                (c_node, b2_node),
-                (b2_node, a_node),
-                (c_node, a_node),
-                (c_node, d_node),
-            ]
-        )
-
-        pathway_map = sequence_graph_to_pathway_map(sequence_graph)
+        sequences = """
+            current a
+            current b1
+            current c
+            current d
+            b1 a
+            b1 c
+            b1 d
+            c b2
+            b2 a
+            c a
+            c d
+            """
+        tipping_points = """
+            current 2030
+            a 2100
+            b1 2040
+            c 2050
+            d 2100
+            b2 2070
+            """
+        pathway_map = configure_pathway_map(sequences, tipping_points)
         paths = list(pathway_map.all_paths())
         self.assertEqual(len(paths), 10)
-
-        pathway_map.assign_tipping_points(
-            {
-                current: 2030,
-                a: 2100,
-                b1: 2040,
-                c: 2050,
-                d: 2100,
-                b2: 2070,
-            }
-        )
 
         positions = classic_layout(pathway_map)
         self.assertEqual(len(positions), 32)
@@ -980,8 +952,8 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
                 ("b1]", (2040, 2)),
                 ("[c", (2040, 1)),
                 ("c]", (2050, 1)),
-                ("[b2", (2050, -1)),
-                ("b2]", (2070, -1)),
+                ("[b2", (2050, -2)),
+                ("b2]", (2070, -2)),
                 ("[a", (2070, 3)),
                 ("a]", (2100, 3)),
             ],
@@ -1010,8 +982,8 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
                 ("b1]", (2040, 2)),
                 ("[c", (2040, 1)),
                 ("c]", (2050, 1)),
-                ("[d", (2050, -2)),
-                ("d]", (2100, -2)),
+                ("[d", (2050, -1)),
+                ("d]", (2100, -1)),
             ],
         )
         self.assert_equal_positions(
@@ -1022,8 +994,8 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
                 ("current]", (2030, 0)),
                 ("[b1", (2030, 2)),
                 ("b1]", (2040, 2)),
-                ("[d", (2040, -2)),
-                ("d]", (2100, -2)),
+                ("[d", (2040, -1)),
+                ("d]", (2100, -1)),
             ],
         )
         self.assert_equal_positions(
@@ -1034,8 +1006,8 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
                 ("current]", (2030, 0)),
                 ("[c", (2030, 1)),
                 ("c]", (2050, 1)),
-                ("[b2", (2050, -1)),
-                ("b2]", (2070, -1)),
+                ("[b2", (2050, -2)),
+                ("b2]", (2070, -2)),
                 ("[a", (2070, 3)),
                 ("a]", (2100, 3)),
             ],
@@ -1060,8 +1032,8 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
                 ("current]", (2030, 0)),
                 ("[c", (2030, 1)),
                 ("c]", (2050, 1)),
-                ("[d", (2050, -2)),
-                ("d]", (2100, -2)),
+                ("[d", (2050, -1)),
+                ("d]", (2100, -1)),
             ],
         )
         self.assert_equal_positions(
@@ -1070,8 +1042,8 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
             [
                 ("[current", (2023, 0)),
                 ("current]", (2030, 0)),
-                ("[d", (2030, -2)),
-                ("d]", (2100, -2)),
+                ("[d", (2030, -1)),
+                ("d]", (2100, -1)),
             ],
         )
 
@@ -1148,42 +1120,24 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
         )
 
     def test_action_combination02(self):
-        sequence_graph = SequenceGraph()
-        current = Action("current")
-        a = Action("a")
-        b = Action("b")
-        c = Action("c")
-        d = ActionCombination("d", [a, b])
-
-        current_node = ActionNode(current)
-        a_node = ActionNode(a)
-        b_node = ActionNode(b)
-        c_node = ActionNode(c)
-        d_node = ActionNode(d)
-
-        sequence_graph.add_sequences(
-            [
-                (current_node, a_node),
-                (current_node, b_node),
-                (current_node, c_node),
-                (a_node, d_node),
-                (b_node, d_node),
-            ]
-        )
-
-        pathway_map = sequence_graph_to_pathway_map(sequence_graph)
+        sequences = """
+            current a
+            current b
+            current c
+            a d(a & b)
+            b d
+            """
+        tipping_points = """
+            current 2020
+            a 2030
+            b 2040
+            c 2050
+            d 2100
+            """
+        pathway_map = configure_pathway_map(sequences, tipping_points)
         paths = list(pathway_map.all_paths())
         self.assertEqual(len(paths), 3)
 
-        pathway_map.assign_tipping_points(
-            {
-                current: 2020,
-                a: 2030,
-                b: 2040,
-                c: 2050,
-                d: 2100,
-            }
-        )
         positions = classic_layout(pathway_map)
         self.assertEqual(len(positions), 12)
 
@@ -1371,42 +1325,24 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
         )
 
     def test_action_combination05(self):
-        sequence_graph = SequenceGraph()
-        current = Action("current")
-        a = Action("a")
-        b = Action("b")
-        c = Action("c")
-        d = ActionCombination("d", [a, c])
-
-        current_node = ActionNode(current)
-        a_node = ActionNode(a)
-        b_node = ActionNode(b)
-        c_node = ActionNode(c)
-        d_node = ActionNode(d)
-
-        sequence_graph.add_sequences(
-            [
-                (current_node, a_node),
-                (current_node, b_node),
-                (current_node, c_node),
-                (a_node, d_node),
-                (c_node, d_node),
-            ]
-        )
-
-        pathway_map = sequence_graph_to_pathway_map(sequence_graph)
+        sequences = """
+            current a
+            current b
+            current c
+            a d(a & c)
+            c d
+            """
+        tipping_points = """
+            current 2020
+            a 2030
+            b 2040
+            c 2050
+            d 2100
+            """
+        pathway_map = configure_pathway_map(sequences, tipping_points)
         paths = list(pathway_map.all_paths())
         self.assertEqual(len(paths), 3)
 
-        pathway_map.assign_tipping_points(
-            {
-                current: 2020,
-                a: 2030,
-                b: 2040,
-                c: 2050,
-                d: 2100,
-            }
-        )
         positions = classic_layout(pathway_map)
         self.assertEqual(len(positions), 12)
 
@@ -1418,8 +1354,8 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
                 ("current]", (2020, 0)),
                 ("[a", (2020, 2)),
                 ("a]", (2030, 2)),
-                ("[d", (2030, 1)),
-                ("d]", (2100, 1)),
+                ("[d", (2030, -1)),
+                ("d]", (2100, -1)),
             ],
         )
         self.assert_equal_positions(
@@ -1428,8 +1364,8 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
             [
                 ("[current", (2012, 0)),
                 ("current]", (2020, 0)),
-                ("[b", (2020, -1)),
-                ("b]", (2040, -1)),
+                ("[b", (2020, 1)),
+                ("b]", (2040, 1)),
             ],
         )
         self.assert_equal_positions(
@@ -1440,8 +1376,8 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
                 ("current]", (2020, 0)),
                 ("[c", (2020, -2)),
                 ("c]", (2050, -2)),
-                ("[d", (2050, 1)),
-                ("d]", (2100, 1)),
+                ("[d", (2050, -1)),
+                ("d]", (2100, -1)),
             ],
         )
 
@@ -1478,13 +1414,13 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
             }
         )
         positions = classic_layout(pathway_map)
-        self.assertEqual(len(positions), 7)
+        self.assertEqual(len(positions), 8)
 
         self.assert_equal_positions(
             positions,
             paths[0],
             [
-                ("[current", (0, 0)),
+                ("[current", (2027, 0)),
                 ("current]", (2030, 0)),
                 ("[a", (2030, 1)),
                 ("a]", (2040, 1)),
@@ -1494,7 +1430,7 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
             positions,
             paths[1],
             [
-                ("[current", (0, 0)),
+                ("[current", (2027, 0)),
                 ("current]", (2030, 0)),
                 ("[b", (2030, -1)),
                 ("b]", (2050, -1)),
@@ -1502,3 +1438,94 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
                 ("a]", (2060, 1)),
             ],
         )
+
+    def assert_equal_y_coordinates(self, positions, y_coordinates_we_want):
+        for node, position in positions.items():
+            self.assertAlmostEqual(position[1], y_coordinates_we_want[node.action.name])
+
+    def test_vertical_action_order_01(self):
+        # c mentioned after b, so vertical ordering must be:
+        # - a
+        # - b
+        # - current
+        # - c
+        sequences = """
+            current a
+            current b
+            b c
+            """
+        tipping_points = """
+            current 2020
+            a 2030
+            b 2030
+            c 2040
+            """
+        pathway_map = configure_pathway_map(sequences, tipping_points)
+        positions = classic_layout(pathway_map)
+
+        y_coordinates_we_want = {
+            "current": 0,
+            "a": 2,
+            "b": 1,
+            "c": -1,
+        }
+        self.assert_equal_y_coordinates(positions, y_coordinates_we_want)
+
+    def test_vertical_action_order_02(self):
+        # c mentioned before b, so vertical ordering must be:
+        # - a
+        # - c
+        # - current
+        # - b
+        sequences = """
+            current a
+            b c
+            current b
+            """
+        tipping_points = """
+            current 2020
+            a 2030
+            b 2030
+            c 2040
+            """
+        pathway_map = configure_pathway_map(sequences, tipping_points)
+        positions = classic_layout(pathway_map)
+
+        y_coordinates_we_want = {
+            "current": 0,
+            "a": 2,
+            "b": -1,
+            "c": 1,
+        }
+
+        self.assert_equal_y_coordinates(positions, y_coordinates_we_want)
+
+    def test_vertical_action_order_03(self):
+        # b and c mentioned before a, and b is from node and c is to node, so vertical ordering
+        # must be:
+        # - c
+        # - b
+        # - current
+        # - a
+        sequences = """
+            b c
+            current a
+            current b
+            """
+        tipping_points = """
+            current 2020
+            a 2030
+            b 2030
+            c 2040
+            """
+        pathway_map = configure_pathway_map(sequences, tipping_points)
+        positions = classic_layout(pathway_map)
+
+        y_coordinates_we_want = {
+            "current": 0,
+            "a": -1,
+            "b": 1,
+            "c": 2,
+        }
+
+        self.assert_equal_y_coordinates(positions, y_coordinates_we_want)

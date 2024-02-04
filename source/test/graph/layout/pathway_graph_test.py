@@ -389,8 +389,8 @@ class PathwayGraphLayoutTest(unittest.TestCase):
             paths[0],
             [
                 ("current", (0, 0)),
-                ("current | a", (1, 1)),
-                ("a", (2, 1)),
+                ("current | a", (1, 0.5)),
+                ("a", (2, 0.5)),
             ],
         )
         self.assert_equal_positions(
@@ -398,9 +398,9 @@ class PathwayGraphLayoutTest(unittest.TestCase):
             paths[1],
             [
                 ("current", (0, 0)),
-                ("current | b", (1, -1)),
-                ("b", (2, -1)),
-                ("b | a", (3, -1)),
-                ("a", (4, -1)),
+                ("current | b", (1, -0.5)),
+                ("b", (2, -0.5)),
+                ("b | a", (3, -0.5)),
+                ("a", (4, -0.5)),
             ],
         )
