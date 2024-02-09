@@ -2,11 +2,11 @@ import itertools
 
 import numpy as np
 
-from ...graph.colour import PlotColours, default_pathway_map_colours
-from ...graph.layout.util import add_position, distribute, sort_horizontally
 from ...graph.node import ActionBegin, Node
 from ...graph.pathway_map import PathwayMap
-from ...graph.plot import init_plot
+from ..colour import PlotColours
+from ..util import add_position, distribute, init_plot, sort_horizontally
+from ._colour import default_colours
 
 
 def _distribute_horizontally(
@@ -129,7 +129,7 @@ def plot(
     plot_colours: PlotColours | None = None,
 ) -> None:
     if plot_colours is None:
-        plot_colours = default_pathway_map_colours(pathway_map)
+        plot_colours = default_colours(pathway_map)
 
     init_plot(
         pathway_map.graph,

@@ -5,11 +5,12 @@ import docopt
 
 import adaptation_pathways as ap
 
-from ..graph import (
-    plot_and_save_pathway_graph,
-    plot_and_save_pathway_map,
-    plot_and_save_sequence_graph,
-    read_sequences,
+from ..graph.io import read_sequences
+from ..plot import (
+    plot_default_pathway_graph,
+    plot_default_pathway_map,
+    plot_default_sequence_graph,
+    save_plot,
 )
 from .main import main_function
 
@@ -29,17 +30,20 @@ def plot_graphs(
     plot_pathname = os.path.join(
         plots_prefix_pathname, f"{basename}-sequence_graph.{output_format}"
     )
-    plot_and_save_sequence_graph(sequence_graph, plot_pathname, title="Sequence graph")
+    plot_default_sequence_graph(sequence_graph, title="Sequence graph")
+    save_plot(plot_pathname)
 
     plot_pathname = os.path.join(
         plots_prefix_pathname, f"{basename}-pathway_graph.{output_format}"
     )
-    plot_and_save_pathway_graph(pathway_graph, plot_pathname, title="Pathway graph")
+    plot_default_pathway_graph(pathway_graph, title="Pathway graph")
+    save_plot(plot_pathname)
 
     plot_pathname = os.path.join(
         plots_prefix_pathname, f"{basename}-pathway_map.{output_format}"
     )
-    plot_and_save_pathway_map(pathway_map, plot_pathname, title="Pathway map")
+    plot_default_pathway_map(pathway_map, title="Pathway map")
+    save_plot(plot_pathname)
 
     return 0
 

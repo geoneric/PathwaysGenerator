@@ -1,6 +1,6 @@
-from ...graph.colour import PlotColours
 from ...graph.pathway_map import PathwayMap
-from ...graph.plot import PathwayMapLayout
+from ..colour import PlotColours
+from ..util import PathwayMapLayout
 from .classic import plot as plot_classic
 from .default import plot as plot_default
 

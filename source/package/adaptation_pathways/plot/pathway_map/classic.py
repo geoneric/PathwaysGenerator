@@ -6,10 +6,11 @@ import numpy as np
 
 from ...action import Action
 from ...action_combination import ActionCombination
-from ...graph.colour import PlotColours, default_pathway_map_colours
-from ...graph.layout.util import add_position
 from ...graph.node import ActionBegin, Node
 from ...graph.pathway_map import PathwayMap
+from ..colour import PlotColours
+from ..util import add_position
+from ._colour import default_colours
 
 
 # pylint: disable=too-many-arguments
@@ -436,7 +437,7 @@ def plot(
     plot_colours: PlotColours | None = None,
 ) -> None:
     if plot_colours is None:
-        plot_colours = default_pathway_map_colours(pathway_map)
+        plot_colours = default_colours(pathway_map)
 
     # https://matplotlib.org/stable/users/explain/figure/api_interfaces.html#api-interfaces
     # TODO: figsize
