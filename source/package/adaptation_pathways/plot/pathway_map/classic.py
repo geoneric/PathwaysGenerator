@@ -439,8 +439,6 @@ def plot(
     if plot_colours is None:
         plot_colours = default_colours(pathway_map)
 
-    # https://matplotlib.org/stable/users/explain/figure/api_interfaces.html#api-interfaces
-    # TODO: figsize
     _, axes = plt.subplots(figsize=(5, 2.7), layout="constrained")
 
     classic_pathway_map_plotter(

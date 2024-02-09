@@ -5,12 +5,16 @@ from ..graph.pathway_map import PathwayMap
 from ..graph.sequence_graph import SequenceGraph
 
 
+Colour = tuple[float, float, float, float]
+Colours = list[Colour]
+
+
 @dataclass
 class PlotColours:
-    node_colours: list[tuple[float, float, float, float]] | None = None
-    edge_colours: list[tuple[float, float, float, float]] | None = None
-    node_edge_colours: list[tuple[float, float, float, float]] | None = None
-    label_colour: tuple[float, float, float, float] | None = None
+    node_colours: Colours | None = None
+    edge_colours: Colours | None = None
+    node_edge_colours: Colours | None = None
+    label_colour: Colour | None = None
 
 
 nord_palette_nominal = [
@@ -46,7 +50,7 @@ def default_transparency():
     return 1.0  # 0.75
 
 
-def default_nominal_palette() -> list[tuple[float, float, float, float]]:
+def default_nominal_palette() -> Colours:
     palette = [colour + (default_transparency(),) for colour in nord_palette_nominal]
     palette.append(nord_palette_blue[0] + (default_transparency(),))
 
@@ -55,7 +59,7 @@ def default_nominal_palette() -> list[tuple[float, float, float, float]]:
 
 def default_edge_colours(
     graph: SequenceGraph | PathwayGraph,
-) -> list[tuple[float, float, float, float]]:
+) -> Colours:
     colour = nord_palette_dark[3] + (default_transparency(),)
     colours = [colour] * len(list(graph.graph.edges))
 
@@ -64,12 +68,12 @@ def default_edge_colours(
 
 def default_node_edge_colours(
     graph: SequenceGraph | PathwayGraph | PathwayMap,
-) -> list[tuple[float, float, float, float]]:
+) -> Colours:
     colour = nord_palette_dark[3] + (default_transparency(),)
     colours = [colour] * len(list(graph.graph.edges))
 
     return colours
 
 
-def default_label_colour() -> tuple[float, float, float, float]:
+def default_label_colour() -> Colour:
     return nord_palette_dark[0] + (default_transparency(),)

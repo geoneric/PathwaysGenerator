@@ -12,7 +12,7 @@ from adaptation_pathways.graph import (
     read_tipping_points,
     sequence_graph_to_pathway_map,
 )
-from adaptation_pathways.plot.pathway_map.classic import plot
+from adaptation_pathways.plot import plot_classic_pathway_map as plot
 
 
 sequence_graph, level_by_action = read_sequences(
@@ -41,5 +41,4 @@ pathway_map.assign_tipping_points(tipping_points)
 pathway_map.set_attribute("level", level_by_action)
 
 plot(pathway_map)
-plt.tight_layout()
 plt.show()

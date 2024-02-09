@@ -1,6 +1,7 @@
 from ...graph.node import ActionConversion, ActionPeriod
 from ...graph.pathway_graph import PathwayGraph
 from ..colour import (
+    Colours,
     PlotColours,
     default_edge_colours,
     default_label_colour,
@@ -11,9 +12,7 @@ from ..colour import (
 )
 
 
-def default_node_colours(
-    graph: PathwayGraph,
-) -> list[tuple[float, float, float, float]]:
+def default_node_colours(graph: PathwayGraph) -> Colours:
     palette = default_nominal_palette()
 
     palette_size = len(palette)

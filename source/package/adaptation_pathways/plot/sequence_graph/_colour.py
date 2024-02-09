@@ -1,6 +1,7 @@
 from ...graph.node import Action as ActionNode
 from ...graph.sequence_graph import SequenceGraph
 from ..colour import (
+    Colours,
     PlotColours,
     default_edge_colours,
     default_label_colour,
@@ -9,9 +10,7 @@ from ..colour import (
 )
 
 
-def default_node_colours(
-    graph: SequenceGraph,
-) -> list[tuple[float, float, float, float]]:
+def default_node_colours(graph: SequenceGraph) -> Colours:
     palette = default_nominal_palette()
 
     palette_size = len(palette)

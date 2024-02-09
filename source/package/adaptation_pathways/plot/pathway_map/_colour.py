@@ -2,6 +2,8 @@ from ...action_combination import ActionCombination
 from ...graph.node import ActionBegin, ActionEnd
 from ...graph.pathway_map import PathwayMap
 from ..colour import (
+    Colour,
+    Colours,
     PlotColours,
     default_label_colour,
     default_node_edge_colours,
@@ -12,9 +14,7 @@ from ..colour import (
 )
 
 
-def default_node_colours(
-    graph: PathwayMap,
-) -> list[tuple[float, float, float, float]]:
+def default_node_colours(graph: PathwayMap) -> Colours:
     palette = default_nominal_palette()
     colour_by_action_name = colour_by_action_name_pathway_map(graph, palette)
     colours = []
@@ -37,8 +37,8 @@ def default_node_colours(
 
 
 def colour_by_action_name_pathway_map(
-    graph: PathwayMap, palette: list[tuple[float, float, float, float]]
-) -> dict[str, tuple[float, float, float, float]]:
+    graph: PathwayMap, palette: Colours
+) -> dict[str, Colour]:
     palette_size = len(palette)
     colour_by_action_name = {}
     idx = 0
@@ -52,26 +52,21 @@ def colour_by_action_name_pathway_map(
     return colour_by_action_name
 
 
-def default_edge_colours(
-    graph: PathwayMap,
-) -> list[tuple[float, float, float, float]]:
+def default_edge_colours(graph: PathwayMap) -> Colours:
     palette = default_nominal_palette()
     colour_by_action_name = colour_by_action_name_pathway_map(graph, palette)
     colours = []
 
     # Iterate over all edges and use the colour associated with the action associated with the edge
     for from_node, _ in graph._graph.edges:
-        if isinstance(from_node, ActionBegin):
-            action = from_node.action
+        assert isinstance(from_node, (ActionBegin, ActionEnd)), from_node
 
-            if isinstance(action, ActionCombination):
-                colour = nord_palette_dark[0] + (default_transparency(),)  # Placeholder
-            else:
-                colour = colour_by_action_name[action.name]
+        action = from_node.action
+
+        if isinstance(action, ActionCombination):
+            colour = nord_palette_dark[0] + (default_transparency(),)  # Placeholder
         else:
-            colour = nord_palette_dark[0] + (
-                default_transparency(),
-            )  # Default dark colour
+            colour = colour_by_action_name[action.name]
 
         colours.append(colour)
 
