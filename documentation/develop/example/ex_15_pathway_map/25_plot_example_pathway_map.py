@@ -2,18 +2,16 @@
 Pathway map for an example
 ==========================
 """
+
 from io import StringIO
 
 import matplotlib.pyplot as plt
 
-from adaptation_pathways.graph import (
-    plot_pathway_map,
-    read_sequences,
-    sequence_graph_to_pathway_map,
-)
+from adaptation_pathways.graph import read_sequences, sequence_graph_to_pathway_map
+from adaptation_pathways.plot import plot_default_pathway_map as plot
 
 
-sequence_graph = read_sequences(
+sequence_graph, _ = read_sequences(
     StringIO(
         """
 current a
@@ -32,5 +30,5 @@ c d
 )
 pathway_map = sequence_graph_to_pathway_map(sequence_graph)
 
-plot_pathway_map(pathway_map)
+plot(pathway_map)
 plt.show()

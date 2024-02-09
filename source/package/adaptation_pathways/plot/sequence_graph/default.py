@@ -2,9 +2,11 @@ import itertools
 
 import numpy as np
 
-from ..node import Action
-from ..sequence_graph import SequenceGraph
-from .util import add_position, distribute, sort_horizontally
+from ...graph.node.action import Action
+from ...graph.sequence_graph import SequenceGraph
+from ..colour import PlotColours
+from ..util import add_position, distribute, init_plot, sort_horizontally
+from ._colour import default_colours
 
 
 def _distribute_horizontally(
@@ -81,7 +83,7 @@ def _distribute_vertically(
             nodes[action][1] = y_coordinates[idx]
 
 
-def default_layout(sequence_graph: SequenceGraph) -> dict[Action, np.ndarray]:
+def _layout(sequence_graph: SequenceGraph) -> dict[Action, np.ndarray]:
     """
     Layout for visualizing sequence graphs
 
@@ -99,3 +101,19 @@ def default_layout(sequence_graph: SequenceGraph) -> dict[Action, np.ndarray]:
         _distribute_vertically(sequence_graph, from_action, nodes)
 
     return nodes
+
+
+def plot(
+    sequence_graph: SequenceGraph,
+    title: str = "",
+    plot_colours: PlotColours | None = None,
+) -> None:
+    if plot_colours is None:
+        plot_colours = default_colours(sequence_graph)
+
+    init_plot(
+        sequence_graph.graph,
+        title,
+        _layout(sequence_graph),
+        plot_colours,
+    )

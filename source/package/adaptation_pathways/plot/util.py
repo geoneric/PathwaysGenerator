@@ -1,7 +1,79 @@
+import enum
 import itertools
 import typing
 
+import matplotlib.pyplot as plt
+import networkx as nx
 import numpy as np
+
+from .colour import PlotColours
+
+
+PathwayMapLayout = enum.Enum("PathwayMapLayout", ["DEFAULT", "CLASSIC"])
+
+
+def init_plot(
+    graph: nx.DiGraph,
+    title: str,
+    layout: dict[typing.Any, np.ndarray],
+    plot_colours: PlotColours,
+) -> None:
+    plt.rc(
+        "axes.spines", **{"bottom": False, "left": False, "right": False, "top": False}
+    )
+
+    # draw_options = {
+    #     "with_labels": True,
+    #     "font_size": "small",
+    #     "font_weight": "bold",
+    # }
+
+    _, axis = plt.subplots()
+
+    title = title.strip()
+
+    if len(title) > 0:
+        axis.set_title(title)
+
+    # nx.draw_networkx(
+    #     graph, pos=layout, node_color=node_colours, edge_color=edge_colours, **draw_options
+    # )
+
+    nx.draw_networkx_edges(
+        graph,
+        pos=layout,
+        edge_color=plot_colours.edge_colours,
+        width=1.0,
+        arrows=False,
+        # style="dashed",
+    )
+
+    nx.draw_networkx_nodes(
+        graph,
+        pos=layout,
+        node_color=plot_colours.node_colours,
+        node_size=250,
+        linewidths=0.5,
+        edgecolors=plot_colours.node_edge_colours,
+    )
+
+    nx.draw_networkx_labels(
+        graph,
+        pos=layout,
+        font_size="medium",
+        font_weight="bold",
+        verticalalignment="bottom",
+        horizontalalignment="right",
+        font_color=plot_colours.label_colour,
+    )
+
+
+def save_plot(pathname: str) -> None:
+    plt_options = {
+        # "bbox_inches": "tight",
+        "transparent": True,
+    }
+    plt.savefig(pathname, **plt_options)
 
 
 def _unsort_idxs(values: list[typing.Any]) -> list[int]:

@@ -6,14 +6,16 @@ This example is taken from the adaptation pathways documentation.
 The same action ``b`` is used in different pathways. Therefore, in the specification of the
 sequences, ``b1`` and ``b2`` are used, even though these two are the same action.
 """
+
 from io import StringIO
 
 import matplotlib.pyplot as plt
 
-from adaptation_pathways.graph import plot_sequence_graph, read_sequences
+from adaptation_pathways.graph import read_sequences
+from adaptation_pathways.plot import plot_default_sequence_graph as plot
 
 
-sequence_graph = read_sequences(
+sequence_graph, _ = read_sequences(
     StringIO(
         """
 current a
@@ -31,5 +33,5 @@ c d
     )
 )
 
-plot_sequence_graph(sequence_graph)
+plot(sequence_graph)
 plt.show()

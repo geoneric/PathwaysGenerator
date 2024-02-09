@@ -2,9 +2,11 @@ import itertools
 
 import numpy as np
 
-from ..node import Node
-from ..pathway_graph import PathwayGraph
-from .util import add_position, distribute, sort_horizontally
+from ...graph.node import Node
+from ...graph.pathway_graph import PathwayGraph
+from ..colour import PlotColours
+from ..util import add_position, distribute, init_plot, sort_horizontally
+from ._colour import default_colours
 
 
 def _distribute_horizontally(
@@ -88,7 +90,7 @@ def _distribute_vertically(
             position_by_node[node][1] = y_coordinates[idx]
 
 
-def default_layout(pathway_graph: PathwayGraph) -> dict[Node, np.ndarray]:
+def _layout(pathway_graph: PathwayGraph) -> dict[Node, np.ndarray]:
     """
     Layout for visualizing pathway graphs
 
@@ -106,3 +108,19 @@ def default_layout(pathway_graph: PathwayGraph) -> dict[Node, np.ndarray]:
         _distribute_vertically(pathway_graph, from_node, position_by_node)
 
     return position_by_node
+
+
+def plot(
+    pathway_graph: PathwayGraph,
+    title: str = "",
+    plot_colours: PlotColours | None = None,
+) -> None:
+    if plot_colours is None:
+        plot_colours = default_colours(pathway_graph)
+
+    init_plot(
+        pathway_graph.graph,
+        title,
+        _layout(pathway_graph),
+        plot_colours,
+    )

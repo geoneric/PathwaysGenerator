@@ -17,6 +17,9 @@ class Action:
         self._name = name
         self._edition = edition
 
+    def __str__(self) -> str:
+        return f"{self._name}[{self._edition}]"
+
     def __repr__(self) -> str:
         return f'Action("{self._name}", {self._edition})'
 
