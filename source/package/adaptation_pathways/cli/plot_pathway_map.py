@@ -5,8 +5,8 @@ import docopt
 
 from ..graph.conversion import sequence_graph_to_pathway_map
 from ..graph.io import read_sequences, read_tipping_points
-from ..graph.plot import PathwayMapLayout  # , plot_and_save_pathway_map
-from ..plot.pathway_map import plot_and_save_pathway_map
+from ..graph.plot import save_plot
+from ..plot.pathway_map.classic import plot
 from ..version import __version__ as version
 from .main import main_function
 
@@ -22,9 +22,8 @@ def plot_map(
     pathway_map.assign_tipping_points(tipping_points, verify=True)
     pathway_map.set_attribute("level", level_by_action)
 
-    plot_and_save_pathway_map(
-        pathway_map, plot_pathname, layout=PathwayMapLayout.CLASSIC
-    )
+    plot(pathway_map)
+    save_plot(plot_pathname)
 
     return 0
 

@@ -7,10 +7,11 @@ from adaptation_pathways.action import Action
 from adaptation_pathways.action_combination import ActionCombination
 from adaptation_pathways.graph.conversion import sequence_graph_to_pathway_map
 from adaptation_pathways.graph.io import read_sequences, read_tipping_points
-from adaptation_pathways.graph.layout.pathway_map import classic_layout, default_layout
 from adaptation_pathways.graph.node import Action as ActionNode
 from adaptation_pathways.graph.pathway_map import PathwayMap
 from adaptation_pathways.graph.sequence_graph import SequenceGraph
+from adaptation_pathways.plot.pathway_map.classic import _layout as classic_layout
+from adaptation_pathways.plot.pathway_map.default import _layout as default_layout
 
 
 # pylint: disable=too-many-locals

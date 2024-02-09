@@ -2,17 +2,17 @@
 Pathway map for an example
 ==========================
 """
+
 from io import StringIO
 
 import matplotlib.pyplot as plt
 
 from adaptation_pathways.graph import (
-    PathwayMapLayout,
-    plot_pathway_map,
     read_sequences,
     read_tipping_points,
     sequence_graph_to_pathway_map,
 )
+from adaptation_pathways.plot.pathway_map.classic import plot
 
 
 sequence_graph, level_by_action = read_sequences(
@@ -49,5 +49,5 @@ e 2090
 pathway_map.assign_tipping_points(tipping_points)
 pathway_map.set_attribute("level", level_by_action)
 
-plot_pathway_map(pathway_map, layout=PathwayMapLayout.CLASSIC)
+plot(pathway_map)
 plt.show()

@@ -8,15 +8,11 @@ import numpy as np
 from .colour import (
     PlotColours,
     default_pathway_graph_colours,
-    default_pathway_map_colours,
     default_sequence_graph_colours,
 )
 from .layout.pathway_graph import default_layout as pathway_graph_layout
-from .layout.pathway_map import classic_layout as classic_pathway_map_layout
-from .layout.pathway_map import default_layout as default_pathway_map_layout
 from .layout.sequence_graph import default_layout as sequence_graph_layout
 from .pathway_graph import PathwayGraph
-from .pathway_map import PathwayMap
 from .sequence_graph import SequenceGraph
 
 
@@ -81,7 +77,7 @@ def init_plot(
 
 def save_plot(pathname: str) -> None:
     plt_options = {
-        "bbox_inches": "tight",
+        # "bbox_inches": "tight",
         "transparent": True,
     }
     plt.savefig(pathname, **plt_options)
@@ -142,44 +138,6 @@ def plot_and_save_pathway_graph(
     plot_pathway_graph(
         pathway_graph,
         title,
-        plot_colours,
-    )
-    save_plot(pathname)
-
-
-def plot_pathway_map(
-    pathway_map: PathwayMap,
-    title: str = "",
-    layout: PathwayMapLayout = PathwayMapLayout.DEFAULT,
-    plot_colours: PlotColours | None = None,
-) -> None:
-    if layout == PathwayMapLayout.CLASSIC:
-        pathway_map_layout = classic_pathway_map_layout
-    else:
-        pathway_map_layout = default_pathway_map_layout
-
-    if plot_colours is None:
-        plot_colours = default_pathway_map_colours(pathway_map)
-
-    init_plot(
-        pathway_map.graph,
-        title,
-        pathway_map_layout(pathway_map),
-        plot_colours,
-    )
-
-
-def plot_and_save_pathway_map(
-    pathway_map: PathwayMap,
-    pathname: str,
-    title: str = "",
-    layout: PathwayMapLayout = PathwayMapLayout.DEFAULT,
-    plot_colours: PlotColours | None = None,
-) -> None:
-    plot_pathway_map(
-        pathway_map,
-        title,
-        layout,
         plot_colours,
     )
     save_plot(pathname)

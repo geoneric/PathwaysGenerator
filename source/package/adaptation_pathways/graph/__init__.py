@@ -13,9 +13,8 @@ from .io import read_sequences, read_tipping_points
 from .plot import (
     PathwayMapLayout,
     plot_and_save_pathway_graph,
-    plot_and_save_pathway_map,
     plot_and_save_sequence_graph,
     plot_pathway_graph,
-    plot_pathway_map,
     plot_sequence_graph,
+    save_plot,
 )
