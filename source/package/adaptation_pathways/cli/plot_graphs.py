@@ -5,7 +5,7 @@ import docopt
 
 import adaptation_pathways as ap
 
-from ..graph.io import read_sequences
+from ..graph.io import read_sequence_graph
 from ..plot import (
     plot_default_pathway_graph,
     plot_default_pathway_map,
@@ -19,7 +19,7 @@ from .main import main_function
 def plot_graphs(
     sequences_pathname: str, plots_prefix_pathname: str, output_format: str
 ) -> int:
-    sequence_graph, _ = read_sequences(sequences_pathname)
+    sequence_graph = read_sequence_graph(sequences_pathname)
     pathway_graph = ap.graph.sequence_graph_to_pathway_graph(sequence_graph)
     pathway_map = ap.graph.pathway_graph_to_pathway_map(pathway_graph)
 

@@ -28,12 +28,12 @@ def init_plot(
     #     "font_weight": "bold",
     # }
 
-    _, axis = plt.subplots()
+    _, axes = plt.subplots(layout="constrained")
 
     title = title.strip()
 
     if len(title) > 0:
-        axis.set_title(title)
+        axes.set_title(title)
 
     # nx.draw_networkx(
     #     graph, pos=layout, node_color=node_colours, edge_color=edge_colours, **draw_options

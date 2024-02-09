@@ -3,7 +3,7 @@ import re
 
 from ..action import Action
 from ..action_combination import ActionCombination
-from .node import Action as ActionNode
+from .conversion import sequences_to_sequence_graph
 from .sequence_graph import SequenceGraph
 
 
@@ -60,9 +60,9 @@ def read_tipping_points(
                         f"Multiple tipping points found for action {action_name}[{edition}]"
                     )
 
-                tipping_point_by_name_and_edition[
-                    (action_name, edition)
-                ] = tipping_point
+                tipping_point_by_name_and_edition[(action_name, edition)] = (
+                    tipping_point
+                )
 
     tipping_point_by_action: dict[Action, int] = {}
 
@@ -76,21 +76,18 @@ def read_tipping_points(
 
 
 def _conditionally_add_node(
-    name, edition, level, node_by_name_and_edition, level_by_action
+    name: str, edition: int, action_by_name_and_edition: dict[tuple[str, int], Action]
 ):
-    if (name, edition) not in node_by_name_and_edition:
+    if (name, edition) not in action_by_name_and_edition:
         action = Action(name, edition)
-        node_by_name_and_edition[(name, edition)] = ActionNode(action)
-        level_by_action[action] = level
+        action_by_name_and_edition[(name, edition)] = action
 
 
 # pylint: disable-next=too-many-locals
 def _parse_sequences(
     line: str,
-    line_nr: int,
-    node_by_name_and_edition: dict[tuple[str, int], ActionNode],
-    level_by_action: dict[Action, float],
-) -> tuple[ActionNode, ActionNode]:
+    action_by_name_and_edition: dict[tuple[str, int], Action],
+) -> tuple[Action, Action]:
     from_action_pattern = (
         rf"(?P<from_action_name>{action_name_pattern})"
         rf"(\[(?P<from_edition>{edition_pattern})\])?"
@@ -121,9 +118,7 @@ def _parse_sequences(
     _conditionally_add_node(
         from_action_name,
         from_edition,
-        line_nr + 0.01,
-        node_by_name_and_edition,
-        level_by_action,
+        action_by_name_and_edition,
     )
 
     to_action_name = match.group("to_action_name")
@@ -147,56 +142,44 @@ def _parse_sequences(
     if (
         to_action_name,
         to_edition,
-    ) not in node_by_name_and_edition:
+    ) not in action_by_name_and_edition:
         if not combine_actions:
             action = Action(to_action_name, to_edition)
-            node_by_name_and_edition[(to_action_name, to_edition)] = ActionNode(action)
-            level_by_action[action] = line_nr - 0.01
+            action_by_name_and_edition[(to_action_name, to_edition)] = action
         else:
             _conditionally_add_node(
                 action1_name,
                 edition1,
-                line_nr - 0.01,
-                node_by_name_and_edition,
-                level_by_action,
+                action_by_name_and_edition,
             )
             _conditionally_add_node(
                 action2_name,
                 edition2,
-                line_nr - 0.01,
-                node_by_name_and_edition,
-                level_by_action,
+                action_by_name_and_edition,
             )
 
-            action1 = node_by_name_and_edition[(action1_name, edition1)].action
-            action2 = node_by_name_and_edition[(action2_name, edition2)].action
+            action1 = action_by_name_and_edition[(action1_name, edition1)]
+            action2 = action_by_name_and_edition[(action2_name, edition2)]
 
             action = ActionCombination(to_action_name, [action1, action2], to_edition)
-            node_by_name_and_edition[(to_action_name, to_edition)] = ActionNode(action)
-            level_by_action[action] = line_nr
+            action_by_name_and_edition[(to_action_name, to_edition)] = action
     else:
         # In case of action combinations, the first occurrence of the action must
         # define which actions are combined
         if combine_actions:
             raise ValueError("Action combinations must be defined ASAP and only once")
 
-    from_action = node_by_name_and_edition[(from_action_name, from_edition)]
-    to_action = node_by_name_and_edition[(to_action_name, to_edition)]
+    from_action = action_by_name_and_edition[(from_action_name, from_edition)]
+    to_action = action_by_name_and_edition[(to_action_name, to_edition)]
 
     return from_action, to_action
 
 
-def read_sequences(
-    sequences_pathname: str | io.IOBase,
-) -> tuple[SequenceGraph, dict[Action, float]]:
+def read_sequences(sequences_pathname: str | io.IOBase) -> list[tuple[Action, Action]]:
     """
-    Read sequences from a stream and return the resulting graph and per action a level
+    Read sequences of actions from a stream and return a list with the actions
 
     :param sequences_pathname: Pathname of file to read from or an open stream to read from
-
-    The returned collection of levels can be used for vertically ordering actions in
-    graphs. Although the levels are based on the order in which the actions are mentioned in
-    the input stream, they are not line numbers.
 
     Comments are supported: everything after the first pound sign (#) on a line is
     skipped. Example::
@@ -208,38 +191,48 @@ def read_sequences(
         # Done specifying sequences
     """
     stream = _open_stream(sequences_pathname)
-    sequence_graph = SequenceGraph()
-
-    node_by_name_and_edition: dict[tuple[str, int], ActionNode] = {}
-    level_by_action: dict[Action, float] = {}
+    sequences: list[tuple[Action, Action]] = []
+    action_by_name_and_edition: dict[tuple[str, int], Action] = {}
 
     with stream:
-        line_nr = 0
-
         for line in stream:
             # Strip comments and surrounding white space
             line_as_string = str(line).split("#", 1)[0].strip()
 
             # Skip empty lines
             if len(line_as_string) > 0:
-                line_nr += 1
                 from_action, to_action = _parse_sequences(
                     line_as_string,
-                    line_nr,
-                    node_by_name_and_edition,
-                    level_by_action,
+                    action_by_name_and_edition,
                 )
+                sequences.append((from_action, to_action))
 
-                sequence_graph.add_sequence(from_action, to_action)
+    return sequences
 
-    # Verify that we assigned a level to all actions found
-    assert all(
-        action_node.action in level_by_action
-        for action_node in node_by_name_and_edition.values()
-    ), {
-        action_node.action for action_node in node_by_name_and_edition.values()
-    }.difference(
-        set(level_by_action.keys())
-    )
 
-    return sequence_graph, level_by_action
+def action_level_by_first_occurrence(
+    sequences: list[tuple[Action, Action]]
+) -> dict[Action, float]:
+    """
+    Determine a level per action the sequences of actions passed in
+
+    The returned collection of levels can be used for vertically ordering actions in graphs. The
+    levels are based on the order in which the actions are mentioned in the input collection.
+    Actions occurring earlier in the collection, are assigned lower levels.
+    """
+    level_by_action: dict[Action, float] = {}
+
+    for idx, (from_action, to_action) in enumerate(sequences, 1):
+        if from_action not in level_by_action:
+            level_by_action[from_action] = idx + 0.01
+        if to_action not in level_by_action:
+            level_by_action[to_action] = idx - 0.01
+
+    return level_by_action
+
+
+def read_sequence_graph(sequences_pathname: str | io.IOBase) -> SequenceGraph:
+    sequences = read_sequences(sequences_pathname)
+    sequence_graph = sequences_to_sequence_graph(sequences)
+
+    return sequence_graph
