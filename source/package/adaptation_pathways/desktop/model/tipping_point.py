@@ -29,14 +29,14 @@ class TippingPointModel(QtCore.QAbstractTableModel):
                 # Tipping point: a number
                 return str(self._data[index.row()][index.column()])
 
-    def row_count(self, index):  # pylint: disable=unused-argument
+    def rowCount(self, index):  # pylint: disable=unused-argument
         return len(self._data)
 
-    def column_count(self, index):  # pylint: disable=unused-argument
+    def columnCount(self, index):  # pylint: disable=unused-argument
         return len(self._data[0])
 
     # pylint: disable=inconsistent-return-statements
-    def header_data(self, section, orientation, role):
+    def headerData(self, section, orientation, role):
         if role == Qt.DisplayRole:
             if orientation == Qt.Horizontal:
                 return self._header[section]

@@ -2,8 +2,8 @@ from PySide6 import QtCore  # , QtGui, QtWidgets
 from PySide6.QtCore import Qt
 
 
-# pylint: disable-next=wrong-import-order, unused-import
-from __feature__ import snake_case  # isort:skip
+### # pylint: disable-next=wrong-import-order, unused-import
+### from __feature__ import snake_case  # isort:skip
 
 
 # TODO The model can contain (from action, to action) tuples (Action instances, including
@@ -26,14 +26,14 @@ class SequenceModel(QtCore.QAbstractTableModel):
             edition = 0
             return f"{name}[{edition}]"
 
-    def row_count(self, index):  # pylint: disable=unused-argument
+    def rowCount(self, index):  # pylint: disable=unused-argument
         return len(self._data)
 
-    def column_count(self, index):  # pylint: disable=unused-argument
+    def columnCount(self, index):  # pylint: disable=unused-argument
         return len(self._data[0])
 
     # pylint: disable=inconsistent-return-statements
-    def header_data(self, section, orientation, role):
+    def headerData(self, section, orientation, role):
         if role == Qt.DisplayRole:
             if orientation == Qt.Horizontal:
                 return self._header[section]

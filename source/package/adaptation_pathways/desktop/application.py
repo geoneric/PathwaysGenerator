@@ -10,10 +10,9 @@ import adaptation_pathways as ap
 from .model.sequence import SequenceModel
 from .model.tipping_point import TippingPointModel
 from .path import Path
+from .widget.pathway_map import PathwayMapWidget
+from .widget.sequence_graph import SequenceGraphWidget
 
-
-# pylint: disable-next=wrong-import-order, unused-import
-from __feature__ import snake_case  # isort:skip
 
 loader = QUiLoader()
 
@@ -34,11 +33,11 @@ class MainUI(QObject):  # Not a widget
         self.version = f"{ap.__version__}"
 
         self.ui = loader.load(Path.ui("main_window.ui"), None)
-        self.ui.window_title = f"{self.name} - {self.version}"
+        self.ui.setWindowTitle(f"{self.name} - {self.version}")
         self.ui.show()
 
-        self.ui.action_open.set_icon(QIcon(Path.icon("folder-open-table.png")))
-        self.ui.action_save.set_icon(QIcon(Path.icon("disk.png")))
+        self.ui.action_open.setIcon(QIcon(Path.icon("folder-open-table.png")))
+        self.ui.action_save.setIcon(QIcon(Path.icon("disk.png")))
 
         self.ui.action_open.triggered.connect(self.open_sequences_table)
         self.ui.action_about.triggered.connect(self.show_about_dialog)
@@ -52,7 +51,7 @@ class MainUI(QObject):  # Not a widget
             ["b", "c"],
         ]
         self.sequence_model = SequenceModel(data)
-        self.ui.table_sequences.set_model(self.sequence_model)
+        self.ui.table_sequences.setModel(self.sequence_model)
 
         data = [
             ["current", 2020],
@@ -61,7 +60,20 @@ class MainUI(QObject):  # Not a widget
             ["c", 2050],
         ]
         self.tipping_point_model = TippingPointModel(data)
-        self.ui.table_tipping_points.set_model(self.tipping_point_model)
+        self.ui.table_tipping_points.setModel(self.tipping_point_model)
+
+        # TODO Plot the data from the models, using our own plot routines
+        # - Finish refactoring our plot routines
+
+        sequence_graph_widget = SequenceGraphWidget(
+            parent=None, width=5, height=4, dpi=100
+        )
+        sequence_graph_widget.axes.plot([0, 1, 2, 3, 4], [10, 1, 20, 3, 40])
+        self.ui.plot_tab_widget.addTab(sequence_graph_widget, "Sequence graph")
+
+        pathway_map_widget = PathwayMapWidget(parent=None, width=5, height=4, dpi=100)
+        pathway_map_widget.axes.plot([4, 3, 2, 1, 0], [10, 1, 20, 3, 40])
+        self.ui.plot_tab_widget.addTab(pathway_map_widget, "Pathway map")
 
     @Slot()
     def open_sequences_table(self):
@@ -75,14 +87,14 @@ class MainUI(QObject):  # Not a widget
     @Slot()
     def show_about_dialog(self):
         dialog = loader.load(Path.ui("about_dialog.ui"), self.ui)
-        dialog.set_window_title(f"About {self.name}")
-        dialog.text.set_text("*Meh*!")
+        dialog.setWindowTitle(f"About {self.name}")
+        dialog.text.setText("*Meh*!")
         dialog.show()
 
 
 def application():
     app = QApplication(sys.argv)
-    app.set_window_icon(QIcon(Path.icon("icon.svg")))
+    app.setWindowIcon(QIcon(Path.icon("icon.svg")))
     _ = MainUI()
     app.exec()
 
