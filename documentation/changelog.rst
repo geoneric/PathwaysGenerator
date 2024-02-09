@@ -9,6 +9,8 @@ Description of of all notable changes made per version.
 -----
 - Ordering of actions in a pathway map (classic layout) is now based on the ordering of actions
   in the sequences file.
+- Added custom pathway map plotting function for drawing pathway maps in the classic layout. Your
+  can try it out using the ``ap_plot_pathway_map`` command.
 
 
 0.0.6
