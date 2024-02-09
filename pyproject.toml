@@ -15,7 +15,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "adaptation_pathways"
-version = "0.0.7"
+version = "0.0.8"
 # dynamic = [
 #     "version",
 # ]
