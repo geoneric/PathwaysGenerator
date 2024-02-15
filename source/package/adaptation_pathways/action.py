@@ -30,6 +30,10 @@ class Action:
     def name(self) -> str:
         return self._name
 
+    @name.setter
+    def name(self, name: str) -> None:
+        self._name = name
+
     @property
     def edition(self) -> int:
         return self._edition

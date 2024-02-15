@@ -6,6 +6,7 @@ from .conversion import (
 )
 from .io import (
     action_level_by_first_occurrence,
+    read_actions,
     read_sequence_graph,
     read_sequences,
     read_tipping_points,
