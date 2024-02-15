@@ -7,11 +7,14 @@ from io import StringIO
 
 import matplotlib.pyplot as plt
 
-from adaptation_pathways.graph import read_sequences, sequence_graph_to_pathway_graph
+from adaptation_pathways.graph import (
+    read_sequence_graph,
+    sequence_graph_to_pathway_graph,
+)
 from adaptation_pathways.plot import plot_default_pathway_graph as plot
 
 
-sequence_graph, _ = read_sequences(
+sequence_graph = read_sequence_graph(
     StringIO(
         """
 current a

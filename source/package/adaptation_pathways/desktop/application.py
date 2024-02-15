@@ -1,13 +1,26 @@
 import sys
+from io import StringIO
 
 from PySide6.QtCore import QObject, Slot
-from PySide6.QtGui import QAction, QIcon
+from PySide6.QtGui import QIcon
 from PySide6.QtUiTools import QUiLoader
-from PySide6.QtWidgets import QApplication, QFileDialog
+from PySide6.QtWidgets import QApplication  # , QFileDialog
 
 import adaptation_pathways as ap
 
+from ..action import Action
+from ..graph import (
+    action_level_by_first_occurrence,
+    read_sequences,
+    read_tipping_points,
+    sequence_graph_to_pathway_map,
+    sequences_to_sequence_graph,
+)
+from .model.sequence import SequenceModel
+from .model.tipping_point import TippingPointModel
 from .path import Path
+from .widget.pathway_map import PathwayMapWidget
+from .widget.sequence_graph import SequenceGraphWidget
 
 
 loader = QUiLoader()
@@ -22,7 +35,7 @@ except ImportError:
     pass
 
 
-class MainUI(QObject):  # Not a widget.
+class MainUI(QObject):  # Not a widget
     def __init__(self):
         super().__init__()
         self.name = "Adaptation Pathway Generator"
@@ -32,37 +45,77 @@ class MainUI(QObject):  # Not a widget.
         self.ui.setWindowTitle(f"{self.name} - {self.version}")
         self.ui.show()
 
-        open_sequences_action = QAction(
-            QIcon(Path.icon("folder-open-table.png")),
-            "&Open sequences table",
-            self,
-        )
-        open_sequences_action.triggered.connect(self.open_sequences_table)
-        quit_action = QAction(
-            "Quit",
-            self,
-        )
-        file_menu = self.ui.menubar.addMenu("&File")
-        file_menu.addAction(open_sequences_action)
-        file_menu.addAction(quit_action)
+        self.ui.action_open.setIcon(QIcon(Path.icon("folder-open-table.png")))
+        self.ui.action_save.setIcon(QIcon(Path.icon("disk.png")))
 
-        about_action = QAction(
-            "About",
-            self,
-        )
-        about_action.triggered.connect(self.show_about_dialog)
-        help_menu = self.ui.menubar.addMenu("&Help")
-        help_menu.addAction(about_action)
+        self.ui.action_open.triggered.connect(self.open_dataset)
+        self.ui.action_about.triggered.connect(self.show_about_dialog)
 
-        self.ui.toolBar.addAction(open_sequences_action)
+        sequences: list[tuple[Action, Action]] = []
+        self.sequence_model = SequenceModel(sequences)
+        self.ui.table_sequences.setModel(self.sequence_model)
+
+        data = [
+            ["current", 2020],
+            ["a", 2030],
+            ["b", 2040],
+            ["c", 2050],
+        ]
+        self.tipping_point_model = TippingPointModel(data)
+        self.ui.table_tipping_points.setModel(self.tipping_point_model)
+
+        # TODO Plot the data from the models, using our own plot routines
+        # - Finish refactoring our plot routines
+
+        sequence_graph_widget = SequenceGraphWidget(
+            parent=None, width=5, height=4, dpi=100
+        )
+        sequence_graph_widget.axes.plot([0, 1, 2, 3, 4], [10, 1, 20, 3, 40])
+        self.ui.plot_tab_widget.addTab(sequence_graph_widget, "Sequence graph")
+
+        pathway_map_widget = PathwayMapWidget(parent=None, width=5, height=4, dpi=100)
+        pathway_map_widget.axes.plot([4, 3, 2, 1, 0], [10, 1, 20, 3, 40])
+        self.ui.plot_tab_widget.addTab(pathway_map_widget, "Pathway map")
+
+        self.ui.editor_tab_widget.setCurrentIndex(0)
+        self.ui.plot_tab_widget.setCurrentIndex(0)
+        self.ui.splitter.setSizes((100, 100))
 
     @Slot()
-    def open_sequences_table(self):
-        # TODO Open a table (*.txt (see networkx doc for format convention))
-        pathname = QFileDialog.getOpenFileName(
-            self.ui, "Open File", "/home", "Images (*.png *.xpm *.jpg)"
+    def open_dataset(self):
+        sequences = read_sequences(
+            StringIO(
+                """
+                current a
+                a b
+                b c"""
+            )
         )
-        print(pathname)
+        level_by_action = action_level_by_first_occurrence(sequences)
+        sequence_graph = sequences_to_sequence_graph(sequences)
+        pathway_map = sequence_graph_to_pathway_map(sequence_graph)
+        tipping_points = read_tipping_points(
+            StringIO(
+                """
+                current 2030
+                a 2040
+                b 2050
+                c 2060"""
+            ),
+            pathway_map.actions(),
+        )
+
+        pathway_map.assign_tipping_points(tipping_points)
+        pathway_map.set_attribute("level", level_by_action)
+
+        # TODO Is this correct? Just overwrite?
+        self.sequence_model = SequenceModel(sequences)
+        self.ui.table_sequences.setModel(self.sequence_model)
+
+        # TODO Open a dataset
+        # pathname = QFileDialog.get_open_file_name(
+        #     self.ui, "Open File", "/home", "Images (*.png *.xpm *.jpg)"
+        # )
 
     @Slot()
     def show_about_dialog(self):

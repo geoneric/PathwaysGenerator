@@ -5,8 +5,15 @@ import numpy.testing as npt
 
 from adaptation_pathways.action import Action
 from adaptation_pathways.action_combination import ActionCombination
-from adaptation_pathways.graph.conversion import sequence_graph_to_pathway_map
-from adaptation_pathways.graph.io import read_sequences, read_tipping_points
+from adaptation_pathways.graph.conversion import (
+    sequence_graph_to_pathway_map,
+    sequences_to_sequence_graph,
+)
+from adaptation_pathways.graph.io import (
+    action_level_by_first_occurrence,
+    read_sequences,
+    read_tipping_points,
+)
 from adaptation_pathways.graph.node import Action as ActionNode
 from adaptation_pathways.graph.pathway_map import PathwayMap
 from adaptation_pathways.graph.sequence_graph import SequenceGraph
@@ -18,7 +25,9 @@ from adaptation_pathways.plot.pathway_map.default import _layout as default_layo
 
 
 def configure_pathway_map(sequences_str: str, tipping_points_str: str) -> PathwayMap:
-    sequence_graph, level_by_action = read_sequences(StringIO(sequences_str))
+    sequences = read_sequences(StringIO(sequences_str))
+    sequence_graph = sequences_to_sequence_graph(sequences)
+    level_by_action = action_level_by_first_occurrence(sequences)
     pathway_map = sequence_graph_to_pathway_map(sequence_graph)
     tipping_points = read_tipping_points(
         StringIO(tipping_points_str), pathway_map.actions()

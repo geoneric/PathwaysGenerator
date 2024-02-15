@@ -1,8 +1,25 @@
+from ..action import Action
 from .node import ActionBegin, ActionEnd, ActionPeriod
 from .node.action import Action as ActionNode
 from .pathway_graph import PathwayGraph
 from .pathway_map import PathwayMap
 from .sequence_graph import SequenceGraph
+
+
+def sequences_to_sequence_graph(
+    sequences: list[tuple[Action, Action]]
+) -> SequenceGraph:
+    sequence_graph = SequenceGraph()
+
+    node_by_action: dict[Action, ActionNode] = {}
+
+    for from_action, to_action in sequences:
+        sequence_graph.add_sequence(
+            node_by_action.setdefault(from_action, ActionNode(from_action)),
+            node_by_action.setdefault(to_action, ActionNode(to_action)),
+        )
+
+    return sequence_graph
 
 
 def sequence_graph_to_pathway_graph(sequence_graph: SequenceGraph) -> PathwayGraph:

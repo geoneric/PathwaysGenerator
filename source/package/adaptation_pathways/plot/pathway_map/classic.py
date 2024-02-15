@@ -439,7 +439,7 @@ def plot(
     if plot_colours is None:
         plot_colours = default_colours(pathway_map)
 
-    _, axes = plt.subplots(figsize=(5, 2.7), layout="constrained")
+    _, axes = plt.subplots(layout="constrained")
 
     classic_pathway_map_plotter(
         axes, pathway_map, _layout(pathway_map), title, plot_colours

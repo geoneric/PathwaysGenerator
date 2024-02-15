@@ -3,8 +3,15 @@ import sys
 
 import docopt
 
-from ..graph.conversion import sequence_graph_to_pathway_map
-from ..graph.io import read_sequences, read_tipping_points
+from ..graph.conversion import (
+    sequence_graph_to_pathway_map,
+    sequences_to_sequence_graph,
+)
+from ..graph.io import (
+    action_level_by_first_occurrence,
+    read_sequences,
+    read_tipping_points,
+)
 from ..plot import plot_classic_pathway_map, save_plot
 from ..version import __version__ as version
 from .main import main_function
@@ -14,7 +21,10 @@ from .main import main_function
 def plot_map(
     sequences_pathname: str, tipping_points_pathname: str, plot_pathname: str
 ) -> int:
-    sequence_graph, level_by_action = read_sequences(sequences_pathname)
+    sequences = read_sequences(sequences_pathname)
+    sequence_graph = sequences_to_sequence_graph(sequences)
+    level_by_action = action_level_by_first_occurrence(sequences)
+
     pathway_map = sequence_graph_to_pathway_map(sequence_graph)
     tipping_points = read_tipping_points(tipping_points_pathname, pathway_map.actions())
 
