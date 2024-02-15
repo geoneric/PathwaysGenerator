@@ -22,7 +22,7 @@
       </property>
       <widget class="QTabWidget" name="editor_tab_widget">
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="tab_sequences">
         <attribute name="title">

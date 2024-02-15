@@ -1,4 +1,5 @@
 import sys
+from io import StringIO
 
 from PySide6.QtCore import QObject, Slot
 from PySide6.QtGui import QIcon
@@ -7,15 +8,19 @@ from PySide6.QtWidgets import QApplication  # , QFileDialog
 
 import adaptation_pathways as ap
 
-# from ..graph import read_sequences, read_tipping_points, sequence_graph_to_pathway_map
+from ..action import Action
+from ..graph import (
+    action_level_by_first_occurrence,
+    read_sequences,
+    read_tipping_points,
+    sequence_graph_to_pathway_map,
+    sequences_to_sequence_graph,
+)
 from .model.sequence import SequenceModel
 from .model.tipping_point import TippingPointModel
 from .path import Path
 from .widget.pathway_map import PathwayMapWidget
 from .widget.sequence_graph import SequenceGraphWidget
-
-
-# from io import StringIO
 
 
 loader = QUiLoader()
@@ -46,15 +51,8 @@ class MainUI(QObject):  # Not a widget
         self.ui.action_open.triggered.connect(self.open_dataset)
         self.ui.action_about.triggered.connect(self.show_about_dialog)
 
-        # https://www.pythonguis.com/tutorials/qtableview-modelviews-numpy-pandas/
-        # https://www.pythonguis.com/faq/editing-pyqt-tableview/
-
-        data = [
-            ["current", "a"],
-            ["a", "b"],
-            ["b", "c"],
-        ]
-        self.sequence_model = SequenceModel(data)
+        sequences: list[tuple[Action, Action]] = []
+        self.sequence_model = SequenceModel(sequences)
         self.ui.table_sequences.setModel(self.sequence_model)
 
         data = [
@@ -79,41 +77,45 @@ class MainUI(QObject):  # Not a widget
         pathway_map_widget.axes.plot([4, 3, 2, 1, 0], [10, 1, 20, 3, 40])
         self.ui.plot_tab_widget.addTab(pathway_map_widget, "Pathway map")
 
+        self.ui.editor_tab_widget.setCurrentIndex(0)
+        self.ui.plot_tab_widget.setCurrentIndex(0)
         self.ui.splitter.setSizes((100, 100))
 
     @Slot()
     def open_dataset(self):
-        # sequences = pd.DataFrame([
-        #         ["current", "a"],
-        #         ["a", "b"],
-        #         ["b", "c"],
-        #     ], columns = ["From-action", "To-action"]
-        # sequences = read_sequences(
-        #     StringIO("""
-        #         current a
-        #         a b
-        #         b c""")
-        # )
+        sequences = read_sequences(
+            StringIO(
+                """
+                current a
+                a b
+                b c"""
+            )
+        )
+        level_by_action = action_level_by_first_occurrence(sequences)
+        sequence_graph = sequences_to_sequence_graph(sequences)
+        pathway_map = sequence_graph_to_pathway_map(sequence_graph)
+        tipping_points = read_tipping_points(
+            StringIO(
+                """
+                current 2030
+                a 2040
+                b 2050
+                c 2060"""
+            ),
+            pathway_map.actions(),
+        )
 
-        # pathway_map = sequence_graph_to_pathway_map(sequence_graph)
-        # tipping_points = read_tipping_points(
-        #     StringIO("""
-        #         current 2030
-        #         a 2040
-        #         b 2050
-        #         c 2060"""),
-        #     pathway_map.actions(),
-        # )
+        pathway_map.assign_tipping_points(tipping_points)
+        pathway_map.set_attribute("level", level_by_action)
 
-        # pathway_map.assign_tipping_points(tipping_points)
-        # pathway_map.set_attribute("level", level_by_action)
+        # TODO Is this correct? Just overwrite?
+        self.sequence_model = SequenceModel(sequences)
+        self.ui.table_sequences.setModel(self.sequence_model)
 
-        pass
-        # TODO Open a table (*.txt (see networkx doc for format convention))
+        # TODO Open a dataset
         # pathname = QFileDialog.get_open_file_name(
         #     self.ui, "Open File", "/home", "Images (*.png *.xpm *.jpg)"
         # )
-        # print(pathname)
 
     @Slot()
     def show_about_dialog(self):
