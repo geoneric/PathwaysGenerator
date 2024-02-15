@@ -24,6 +24,23 @@
        <property name="currentIndex">
         <number>0</number>
        </property>
+       <widget class="QWidget" name="tab_actions">
+        <attribute name="title">
+         <string>Actions</string>
+        </attribute>
+        <layout class="QGridLayout" name="gridLayout_3">
+         <item row="0" column="0">
+          <widget class="QTableView" name="table_actions">
+           <property name="contextMenuPolicy">
+            <enum>Qt::CustomContextMenu</enum>
+           </property>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
        <widget class="QWidget" name="tab_sequences">
         <attribute name="title">
          <string>Sequences</string>
@@ -31,16 +48,6 @@
         <layout class="QGridLayout" name="gridLayout">
          <item row="0" column="0">
           <widget class="QTableView" name="table_sequences"/>
-         </item>
-        </layout>
-       </widget>
-       <widget class="QWidget" name="tab_tipping_points">
-        <attribute name="title">
-         <string>Tipping points</string>
-        </attribute>
-        <layout class="QGridLayout" name="gridLayout_3">
-         <item row="0" column="0">
-          <widget class="QTableView" name="table_tipping_points"/>
          </item>
         </layout>
        </widget>

@@ -77,3 +77,12 @@ def default_node_edge_colours(
 
 def default_label_colour() -> Colour:
     return nord_palette_dark[0] + (default_transparency(),)
+
+
+def default_action_colours(nr_actions: int) -> Colours:
+    colours: Colours = []
+
+    while len(colours) < nr_actions:
+        colours += default_nominal_palette()
+
+    return colours[:nr_actions]
