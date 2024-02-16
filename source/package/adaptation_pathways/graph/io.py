@@ -175,7 +175,9 @@ def _parse_sequences(
     return from_action, to_action
 
 
-def read_sequences(sequences_pathname: str | io.IOBase) -> list[tuple[Action, Action]]:
+def read_sequences(
+    sequences_pathname: str | io.IOBase, actions: list[Action] | None = None
+) -> list[tuple[Action, Action]]:
     """
     Read sequences of actions from a stream and return a list with the actions
 
@@ -192,7 +194,11 @@ def read_sequences(sequences_pathname: str | io.IOBase) -> list[tuple[Action, Ac
     """
     stream = _open_stream(sequences_pathname)
     sequences: list[tuple[Action, Action]] = []
-    action_by_name_and_edition: dict[tuple[str, int], Action] = {}
+    action_by_name_and_edition: dict[tuple[str, int], Action] = (
+        {(action.name, action.edition): action for action in actions}
+        if actions is not None
+        else {}
+    )
 
     with stream:
         for line in stream:
@@ -239,7 +245,6 @@ def read_sequence_graph(sequences_pathname: str | io.IOBase) -> SequenceGraph:
 
 
 def _parse_action(line: str, action_by_name: dict[str, Action]) -> Action:
-
     # TODO Allow any number of actions to be combined(?)
     action_pattern = (
         rf"(?P<action_name>{action_name_pattern})"
