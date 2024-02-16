@@ -1,11 +1,12 @@
 import itertools
 
+import matplotlib as mpl
 import numpy as np
 
 from ...graph.node import ActionBegin, Node
 from ...graph.pathway_map import PathwayMap
 from ..colour import PlotColours
-from ..util import add_position, distribute, init_plot, sort_horizontally
+from ..util import add_position, distribute, plot_graph, sort_horizontally
 from ._colour import default_colours
 
 
@@ -124,6 +125,7 @@ def _layout(
 
 
 def plot(
+    axes: mpl.axes.Axes,
     pathway_map: PathwayMap,
     title: str = "",
     plot_colours: PlotColours | None = None,
@@ -131,7 +133,8 @@ def plot(
     if plot_colours is None:
         plot_colours = default_colours(pathway_map)
 
-    init_plot(
+    plot_graph(
+        axes,
         pathway_map.graph,
         title,
         _layout(pathway_map),

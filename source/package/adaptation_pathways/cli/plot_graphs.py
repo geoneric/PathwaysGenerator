@@ -2,11 +2,13 @@ import os.path
 import sys
 
 import docopt
+import matplotlib.pyplot as plt
 
 import adaptation_pathways as ap
 
 from ..graph.io import read_sequence_graph
 from ..plot import (
+    init_axes,
     plot_default_pathway_graph,
     plot_default_pathway_map,
     plot_default_sequence_graph,
@@ -27,22 +29,28 @@ def plot_graphs(
 
     basename = os.path.splitext(os.path.basename(sequences_pathname))[0]
 
+    _, axes = plt.subplots(layout="constrained")
+    init_axes(axes)
+
     plot_pathname = os.path.join(
         plots_prefix_pathname, f"{basename}-sequence_graph.{output_format}"
     )
-    plot_default_sequence_graph(sequence_graph, title="Sequence graph")
+    axes.clear()
+    plot_default_sequence_graph(axes, sequence_graph, title="Sequence graph")
     save_plot(plot_pathname)
 
     plot_pathname = os.path.join(
         plots_prefix_pathname, f"{basename}-pathway_graph.{output_format}"
     )
-    plot_default_pathway_graph(pathway_graph, title="Pathway graph")
+    axes.clear()
+    plot_default_pathway_graph(axes, pathway_graph, title="Pathway graph")
     save_plot(plot_pathname)
 
     plot_pathname = os.path.join(
         plots_prefix_pathname, f"{basename}-pathway_map.{output_format}"
     )
-    plot_default_pathway_map(pathway_map, title="Pathway map")
+    axes.clear()
+    plot_default_pathway_map(axes, pathway_map, title="Pathway map")
     save_plot(plot_pathname)
 
     return 0

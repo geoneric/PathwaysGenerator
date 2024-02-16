@@ -2,6 +2,7 @@ import enum
 import itertools
 import typing
 
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
@@ -12,15 +13,30 @@ from .colour import PlotColours
 PathwayMapLayout = enum.Enum("PathwayMapLayout", ["DEFAULT", "CLASSIC"])
 
 
-def init_plot(
+def init_axes(axes: mpl.axes.Axes) -> None:
+
+    axes.spines.top.set_visible(False)
+    axes.spines.right.set_visible(False)
+    axes.spines.bottom.set_visible(False)
+    axes.spines.left.set_visible(False)
+    axes.tick_params(
+        left=False,
+        bottom=False,
+    )
+    axes.set_xticklabels([])
+    axes.set_yticklabels([])
+
+
+def plot_graph(
+    axes: mpl.axes.Axes,
     graph: nx.DiGraph,
     title: str,
     layout: dict[typing.Any, np.ndarray],
     plot_colours: PlotColours,
 ) -> None:
-    plt.rc(
-        "axes.spines", **{"bottom": False, "left": False, "right": False, "top": False}
-    )
+    # plt.rc(
+    #     "axes.spines", **{"bottom": False, "left": False, "right": False, "top": False}
+    # )
 
     # draw_options = {
     #     "with_labels": True,
@@ -28,7 +44,7 @@ def init_plot(
     #     "font_weight": "bold",
     # }
 
-    _, axes = plt.subplots(layout="constrained")
+    # _, axes = plt.subplots(layout="constrained")
 
     title = title.strip()
 
@@ -41,6 +57,7 @@ def init_plot(
 
     nx.draw_networkx_edges(
         graph,
+        ax=axes,
         pos=layout,
         edge_color=plot_colours.edge_colours,
         width=1.0,
@@ -50,6 +67,7 @@ def init_plot(
 
     nx.draw_networkx_nodes(
         graph,
+        ax=axes,
         pos=layout,
         node_color=plot_colours.node_colours,
         node_size=250,
@@ -59,6 +77,7 @@ def init_plot(
 
     nx.draw_networkx_labels(
         graph,
+        ax=axes,
         pos=layout,
         font_size="medium",
         font_weight="bold",

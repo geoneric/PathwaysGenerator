@@ -13,8 +13,15 @@ from ..action import Action
 # action_level_by_first_occurrence
 # read_tipping_points
 # sequence_graph_to_pathway_map
-# sequences_to_sequence_graph
-from ..graph import read_actions, read_sequences
+from ..graph import (
+    PathwayMap,
+    SequenceGraph,
+    read_actions,
+    read_sequences,
+    sequence_graph_to_pathway_map,
+    sequences_to_sequence_graph,
+)
+from ..plot import plot_default_pathway_map, plot_default_sequence_graph
 from ..plot.colour import Colour, default_action_colours, default_nominal_palette
 from .model.action import ActionModel
 from .model.sequence import SequenceModel
@@ -82,19 +89,39 @@ class MainUI(QObject):  # Not a widget
         # TODO Plot the data from the models, using our own plot routines
         # - Finish refactoring our plot routines
 
-        sequence_graph_widget = SequenceGraphWidget(
+        self.sequence_graph_widget = SequenceGraphWidget(
             parent=None, width=5, height=4, dpi=100
         )
-        # sequence_graph_widget.axes.plot([0, 1, 2, 3, 4], [10, 1, 20, 3, 40])
-        self.ui.plot_tab_widget.addTab(sequence_graph_widget, "Sequence graph")
+        self.ui.plot_tab_widget.addTab(self.sequence_graph_widget, "Sequence graph")
 
-        pathway_map_widget = PathwayMapWidget(parent=None, width=5, height=4, dpi=100)
-        # pathway_map_widget.axes.plot([4, 3, 2, 1, 0], [10, 1, 20, 3, 40])
-        self.ui.plot_tab_widget.addTab(pathway_map_widget, "Pathway map")
+        self.pathway_map_widget = PathwayMapWidget(
+            parent=None, width=5, height=4, dpi=100
+        )
+        self.ui.plot_tab_widget.addTab(self.pathway_map_widget, "Pathway map")
 
         self.ui.editor_tab_widget.setCurrentIndex(0)
         self.ui.plot_tab_widget.setCurrentIndex(0)
         self.ui.splitter.setSizes((100, 100))
+
+    def plot_sequence_graph(self, sequence_graph: SequenceGraph) -> None:
+        # TODO Pass in the right colours
+        self.sequence_graph_widget.axes.clear()
+        plot_default_sequence_graph(self.sequence_graph_widget.axes, sequence_graph)
+        self.sequence_graph_widget.draw()
+
+    def plot_pathway_map(self, pathway_map: PathwayMap) -> None:
+        # TODO Pass in the right colours
+        self.pathway_map_widget.axes.clear()
+        plot_default_pathway_map(self.pathway_map_widget.axes, pathway_map)
+        self.pathway_map_widget.draw()
+
+    def update_plots(self) -> None:
+        sequences = [(record[0], record[1]) for record in self.sequences]
+        sequence_graph = sequences_to_sequence_graph(sequences)
+        pathway_map = sequence_graph_to_pathway_map(sequence_graph)
+
+        self.plot_sequence_graph(sequence_graph)
+        self.plot_pathway_map(pathway_map)
 
     @Slot()
     def open_dataset(self):
@@ -152,6 +179,8 @@ class MainUI(QObject):  # Not a widget
         # pathname = QFileDialog.get_open_file_name(
         #     self.ui, "Open File", "/home", "Images (*.png *.xpm *.jpg)"
         # )
+
+        self.update_plots()
 
     def on_actions_table_context_menu(self, pos):
         context = QtWidgets.QMenu(self.ui.table_actions)
@@ -297,6 +326,8 @@ class MainUI(QObject):  # Not a widget
         for action in actions:
             del self.colour_by_action[action]
 
+        self.update_plots()
+
     def on_sequences_table_context_menu(self, pos):
         context = QtWidgets.QMenu(self.ui.table_sequences)
         sequence_idx = self.ui.table_sequences.rowAt(pos.y())
@@ -344,6 +375,7 @@ class MainUI(QObject):  # Not a widget
         # TODO try to use the model logic for this
         self.ui.table_sequences.model().layoutChanged.emit()
         self.edit_sequence(len(self.sequences) - 1)
+        self.update_plots()
 
     def edit_sequence(self, idx):  # pylint: disable=too-many-statements
         sequence_record = self.sequences[idx]
@@ -459,10 +491,10 @@ class MainUI(QObject):  # Not a widget
             )
 
             if something_changed:
-                self.sequences[idx] = [new_from_action, new_to_action]
-
                 # TODO try to use the model logic for this
+                self.sequences[idx] = [new_from_action, new_to_action]
                 self.ui.table_sequences.model().layoutChanged.emit()
+                self.update_plots()
 
     @Slot()
     def show_about_dialog(self):
