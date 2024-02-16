@@ -50,7 +50,11 @@ class PathwayMap(RootedGraph):
         return result
 
     def actions(self) -> list[Action]:
-        return list(dict.fromkeys(begin.action for begin in self.all_action_begins()))
+        return (
+            list(dict.fromkeys(begin.action for begin in self.all_action_begins()))
+            if self.nr_nodes() > 0
+            else []
+        )
 
     def continued_actions(self, action_combination: ActionCombination) -> list[Action]:
         """

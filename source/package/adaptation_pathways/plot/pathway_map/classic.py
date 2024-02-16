@@ -1,7 +1,6 @@
 import math
 
 import matplotlib as mpl
-import matplotlib.pyplot as plt
 import numpy as np
 
 from ...action import Action
@@ -432,14 +431,13 @@ def _layout(
 
 
 def plot(
+    axes: mpl.axes.Axes,
     pathway_map: PathwayMap,
     title: str = "",
     plot_colours: PlotColours | None = None,
 ) -> None:
     if plot_colours is None:
         plot_colours = default_colours(pathway_map)
-
-    _, axes = plt.subplots(layout="constrained")
 
     classic_pathway_map_plotter(
         axes, pathway_map, _layout(pathway_map), title, plot_colours

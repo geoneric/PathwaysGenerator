@@ -1,11 +1,12 @@
 import itertools
 
+import matplotlib as mpl
 import numpy as np
 
 from ...graph.node import Node
 from ...graph.pathway_graph import PathwayGraph
 from ..colour import PlotColours
-from ..util import add_position, distribute, init_plot, sort_horizontally
+from ..util import add_position, distribute, plot_graph, sort_horizontally
 from ._colour import default_colours
 
 
@@ -111,6 +112,7 @@ def _layout(pathway_graph: PathwayGraph) -> dict[Node, np.ndarray]:
 
 
 def plot(
+    axes: mpl.axes.Axes,
     pathway_graph: PathwayGraph,
     title: str = "",
     plot_colours: PlotColours | None = None,
@@ -118,7 +120,8 @@ def plot(
     if plot_colours is None:
         plot_colours = default_colours(pathway_graph)
 
-    init_plot(
+    plot_graph(
+        axes,
         pathway_graph.graph,
         title,
         _layout(pathway_graph),

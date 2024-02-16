@@ -11,3 +11,6 @@ from .io import (
     read_sequences,
     read_tipping_points,
 )
+from .pathway_graph import PathwayGraph
+from .pathway_map import PathwayMap
+from .sequence_graph import SequenceGraph
