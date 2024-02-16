@@ -22,7 +22,7 @@
       </property>
       <widget class="QTabWidget" name="editor_tab_widget">
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="tab_actions">
         <attribute name="title">
@@ -47,7 +47,14 @@
         </attribute>
         <layout class="QGridLayout" name="gridLayout">
          <item row="0" column="0">
-          <widget class="QTableView" name="table_sequences"/>
+          <widget class="QTableView" name="table_sequences">
+           <property name="contextMenuPolicy">
+            <enum>Qt::CustomContextMenu</enum>
+           </property>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>
