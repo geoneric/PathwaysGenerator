@@ -11,6 +11,7 @@ from adaptation_pathways.graph import (
     read_sequence_graph,
     sequence_graph_to_pathway_graph,
 )
+from adaptation_pathways.plot import init_axes
 from adaptation_pathways.plot import plot_default_pathway_graph as plot
 
 
@@ -31,5 +32,7 @@ f e
 )
 pathway_graph = sequence_graph_to_pathway_graph(sequence_graph)
 
-plot(pathway_graph)
+_, axes = plt.subplots(layout="constrained")
+init_axes(axes)
+plot(axes, pathway_graph)
 plt.show()

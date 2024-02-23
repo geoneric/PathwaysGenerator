@@ -14,16 +14,20 @@ from ..action import Action
 # read_tipping_points
 # sequence_graph_to_pathway_map
 from ..graph import (
+    PathwayGraph,
     PathwayMap,
     SequenceGraph,
+    pathway_graph_to_pathway_map,
     read_actions,
     read_sequences,
-    sequence_graph_to_pathway_map,
+    sequence_graph_to_pathway_graph,
     sequences_to_sequence_graph,
 )
 from ..plot import (
+    pathway_graph_node_colours,
     pathway_map_edge_colours,
     pathway_map_node_colours,
+    plot_default_pathway_graph,
     plot_default_pathway_map,
     plot_default_sequence_graph,
     sequence_graph_node_colours,
@@ -40,6 +44,7 @@ from ..plot.colour import (
 from .model.action import ActionModel
 from .model.sequence import SequenceModel
 from .path import Path
+from .widget.pathway_graph import PathwayGraphWidget
 from .widget.pathway_map import PathwayMapWidget
 from .widget.sequence_graph import SequenceGraphWidget
 
@@ -124,6 +129,11 @@ class MainUI(QObject):  # Not a widget
         )
         self.ui.plot_tab_widget.addTab(self.sequence_graph_widget, "Sequence graph")
 
+        self.pathway_graph_widget = PathwayGraphWidget(
+            parent=None, width=5, height=4, dpi=100
+        )
+        self.ui.plot_tab_widget.addTab(self.pathway_graph_widget, "Pathway graph")
+
         self.pathway_map_widget = PathwayMapWidget(
             parent=None, width=5, height=4, dpi=100
         )
@@ -131,17 +141,14 @@ class MainUI(QObject):  # Not a widget
 
         self.ui.editor_tab_widget.setCurrentIndex(0)
         self.ui.plot_tab_widget.setCurrentIndex(0)
-        self.ui.splitter.setSizes((100, 100))
+        self.ui.splitter.setSizes((100, 200))
 
     def plot_sequence_graph(self, sequence_graph: SequenceGraph) -> None:
         colour_by_action_name = {
             action.name: colour for action, colour in self.colour_by_action.items()
         }
-        node_colours = sequence_graph_node_colours(
-            sequence_graph, colour_by_action_name
-        )
         plot_colours = PlotColours(
-            node_colours,
+            sequence_graph_node_colours(sequence_graph, colour_by_action_name),
             default_edge_colours(sequence_graph),
             default_node_edge_colours(sequence_graph),
             default_label_colour(),
@@ -152,6 +159,23 @@ class MainUI(QObject):  # Not a widget
             self.sequence_graph_widget.axes, sequence_graph, plot_colours=plot_colours
         )
         self.sequence_graph_widget.draw()
+
+    def plot_pathway_graph(self, pathway_graph: PathwayGraph) -> None:
+        colour_by_action_name = {
+            action.name: colour for action, colour in self.colour_by_action.items()
+        }
+        plot_colours = PlotColours(
+            pathway_graph_node_colours(pathway_graph, colour_by_action_name),
+            default_edge_colours(pathway_graph),
+            default_node_edge_colours(pathway_graph),
+            default_label_colour(),
+        )
+
+        self.pathway_graph_widget.axes.clear()
+        plot_default_pathway_graph(
+            self.pathway_graph_widget.axes, pathway_graph, plot_colours=plot_colours
+        )
+        self.pathway_graph_widget.draw()
 
     def plot_pathway_map(self, pathway_map: PathwayMap) -> None:
         colour_by_action_name = {
@@ -173,9 +197,11 @@ class MainUI(QObject):  # Not a widget
     def update_plots(self) -> None:
         sequences = [(record[0], record[1]) for record in self.sequences]
         sequence_graph = sequences_to_sequence_graph(sequences)
-        pathway_map = sequence_graph_to_pathway_map(sequence_graph)
+        pathway_graph = sequence_graph_to_pathway_graph(sequence_graph)
+        pathway_map = pathway_graph_to_pathway_map(pathway_graph)
 
         self.plot_sequence_graph(sequence_graph)
+        self.plot_pathway_graph(pathway_graph)
         self.plot_pathway_map(pathway_map)
 
     @Slot()
@@ -277,14 +303,18 @@ class MainUI(QObject):  # Not a widget
         self.actions.append([action])
 
         self.ui.table_actions.model().layoutChanged.emit()
-        self.edit_action(len(self.actions) - 1)
+        self.edit_action(len(self.actions) - 1, default_values=True)
 
-    def edit_action(self, idx):
+    def edit_action(self, idx, default_values=False):
         action_record = self.actions[idx]
         action = action_record[0]
 
         dialog = loader.load(Path.ui("edit_action_dialog.ui"), self.ui)
         dialog.name_edit.setText(action.name)
+
+        if default_values:
+            # Nudge the user to immediately change the default name
+            dialog.name_edit.selectAll()
 
         palette = dialog.select_colour_button.palette()
         role = dialog.select_colour_button.backgroundRole()

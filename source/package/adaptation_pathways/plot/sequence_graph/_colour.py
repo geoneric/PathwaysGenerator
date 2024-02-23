@@ -35,6 +35,7 @@ def colour_by_action_name(graph: SequenceGraph, palette: Colours) -> dict[str, C
         assert isinstance(node, ActionNode)
         if node.action.name not in result:
             result[node.action.name] = palette[idx % palette_size]
+            idx += 1
 
     return result
 
