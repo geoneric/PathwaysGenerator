@@ -93,6 +93,10 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>name_edit</tabstop>
+  <tabstop>select_colour_button</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
