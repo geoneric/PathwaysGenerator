@@ -115,6 +115,11 @@ After testing the package, new versions of the package can be installed like thi
 Release a package
 -----------------
 
+.. warning::
+
+   Double-check that all changes are committed.
+
+
 Python package
 ~~~~~~~~~~~~~~
 
@@ -173,7 +178,7 @@ Wrap-up
    - ``pyproject.toml``
    - ``source/package/adaptation_pathways/version.py``
 
-#. Add a section for the upcoming version to the :ref:`changelog <sec-changelog>`.
+#. Add a section for the upcoming version to the :ref:`changelog <sec-changelog>`: ``documentation/changelog.rst``.
 
 
 Notes on software we use
