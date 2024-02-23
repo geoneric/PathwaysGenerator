@@ -49,10 +49,21 @@ class RootedGraph:
         """
         :return: The root node
         """
-        if self.nr_nodes() == 0:
+
+        root_nodes = [node for node, degree in self._graph.in_degree() if degree == 0]
+
+        nr_root_nodes = len(root_nodes)
+
+        if nr_root_nodes == 0:
             raise LookupError("Graph is empty")
 
-        return next(nx.topological_sort(self._graph))
+        if nr_root_nodes > 1:
+            raise LookupError(
+                "Only single rooted graphs are supported, "
+                f"but this graph contains {nr_root_nodes} root nodes"
+            )
+
+        return root_nodes[0]
 
     def all_to_nodes(self, from_node):
         # Use shortest_path to find all nodes reachable from the node passed in
