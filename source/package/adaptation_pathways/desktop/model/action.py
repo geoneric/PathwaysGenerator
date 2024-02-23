@@ -1,17 +1,22 @@
 from PySide6 import QtCore, QtGui
 from PySide6.QtCore import Qt
 
+from ...action import Action
+from ...plot.colour import Colour
+
 
 class ActionModel(QtCore.QAbstractTableModel):
 
     _actions: list[list]
-    _headers: tuple[str, str]
+    _headers: tuple[str]
+    _colour_by_action: dict[Action, Colour]
 
-    def __init__(self, actions: list[list]):
+    def __init__(self, actions: list[list], colour_by_action: dict[Action, Colour]):
 
         super().__init__()
         self._actions = actions
-        self._headers = ("Name", "Tipping point")
+        self._headers = ("Name",)
+        self._colour_by_action = colour_by_action
 
     # pylint: disable=inconsistent-return-statements, no-else-return
     def data(self, index, role):
@@ -20,12 +25,10 @@ class ActionModel(QtCore.QAbstractTableModel):
             if index.column() == 0:
                 action = record[0]
                 return action.name
-            elif index.column() == 1:
-                tipping_point = record[2]
-                return f"{tipping_point}"
         elif role == Qt.DecorationRole:
             if index.column() == 0:
-                colour = self._actions[index.row()][1]
+                action = self._actions[index.row()][0]
+                colour = self._colour_by_action[action]
                 return QtGui.QColor.fromRgbF(*colour)
 
     def rowCount(self, index):  # pylint: disable=unused-argument

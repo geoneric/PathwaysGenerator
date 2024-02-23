@@ -9,6 +9,7 @@ class SequenceModel(QtCore.QAbstractTableModel):
 
     _sequences: list[list[Action]]
     _headers: tuple[str, str]
+    _colour_by_action: dict[Action, Colour]
 
     def __init__(
         self, sequences: list[list[Action]], colour_by_action: dict[Action, Colour]

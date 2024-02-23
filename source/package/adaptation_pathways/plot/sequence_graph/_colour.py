@@ -1,6 +1,7 @@
 from ...graph.node import Action as ActionNode
 from ...graph.sequence_graph import SequenceGraph
 from ..colour import (
+    Colour,
     Colours,
     PlotColours,
     default_edge_colours,
@@ -10,24 +11,38 @@ from ..colour import (
 )
 
 
-def default_node_colours(graph: SequenceGraph) -> Colours:
-    palette = default_nominal_palette()
-
-    palette_size = len(palette)
-    colour_by_action_name = {}
+def colour_by_node(
+    graph: SequenceGraph, colour_by_action_name: dict[str, Colour]
+) -> Colours:
+    # pylint: disable=redefined-outer-name
     colours = []
 
-    # Colour each unique action unique
+    for node in graph._graph.nodes:
+        assert isinstance(node, ActionNode)
+        assert node.action.name in colour_by_action_name, node.action
+        colours.append(colour_by_action_name[node.action.name])
+
+    return colours
+
+
+def colour_by_action_name(graph: SequenceGraph, palette: Colours) -> dict[str, Colour]:
+    palette_size = len(palette)
+    result = {}
+
     idx = 0
 
     for node in graph._graph.nodes:
         assert isinstance(node, ActionNode)
-        if node.action.name not in colour_by_action_name:
-            colour_by_action_name[node.action.name] = palette[idx % palette_size]
-            idx += 1
-        colours.append(colour_by_action_name[node.action.name])
+        if node.action.name not in result:
+            result[node.action.name] = palette[idx % palette_size]
 
-    return colours
+    return result
+
+
+def default_node_colours(graph: SequenceGraph) -> Colours:
+    return colour_by_node(
+        graph, colour_by_action_name(graph, default_nominal_palette())
+    )
 
 
 def default_colours(sequence_graph: SequenceGraph) -> PlotColours:

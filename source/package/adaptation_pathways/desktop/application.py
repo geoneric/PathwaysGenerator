@@ -21,8 +21,22 @@ from ..graph import (
     sequence_graph_to_pathway_map,
     sequences_to_sequence_graph,
 )
-from ..plot import plot_default_pathway_map, plot_default_sequence_graph
-from ..plot.colour import Colour, default_action_colours, default_nominal_palette
+from ..plot import (
+    pathway_map_edge_colours,
+    pathway_map_node_colours,
+    plot_default_pathway_map,
+    plot_default_sequence_graph,
+    sequence_graph_node_colours,
+)
+from ..plot.colour import (
+    Colour,
+    PlotColours,
+    default_action_colours,
+    default_edge_colours,
+    default_label_colour,
+    default_node_edge_colours,
+    default_nominal_palette,
+)
 from .model.action import ActionModel
 from .model.sequence import SequenceModel
 from .path import Path
@@ -45,11 +59,24 @@ except ImportError:
     pass
 
 
+def configure_colour_dialog(palette):
+    for idx, colour in enumerate(palette):
+        QtWidgets.QColorDialog.setCustomColor(idx, QtGui.QColor.fromRgbF(*colour))
+
+
+# def exception_handler(type_, value, traceback):
+#     QtWidgets.QMessageBox.critical(None, "Error", f"{value}")
+#     sys.stderr.write(f"{traceback}")
+
+
 class MainUI(QObject):  # Not a widget
     def __init__(self):
         super().__init__()
         self.name = "Adaptation Pathway Generator"
         self.version = f"{ap.__version__}"
+
+        self._current_palette = default_nominal_palette()
+        configure_colour_dialog(self._current_palette)
 
         self.ui = loader.load(Path.ui("main_window.ui"), None)
         self.ui.setWindowTitle(f"{self.name} - {self.version}")
@@ -75,19 +102,22 @@ class MainUI(QObject):  # Not a widget
             lambda idx: self.edit_sequence(idx.row())
         )
 
+        self.colour_by_action: dict[Action, Colour] = {}
+
         self.actions: list[list] = []
-        self.action_model = ActionModel(self.actions)
+        self.action_model = ActionModel(self.actions, self.colour_by_action)
         self.ui.table_actions.setModel(self.action_model)
 
         self.sequences: list[list[Action]] = []
-        self.colour_by_action: dict[Action, Colour] = {}
         self.sequence_model = SequenceModel(self.sequences, self.colour_by_action)
         self.ui.table_sequences.setModel(self.sequence_model)
 
         self.action_model.rowsAboutToBeRemoved.connect(self.actions_about_to_be_removed)
-
-        # TODO Plot the data from the models, using our own plot routines
-        # - Finish refactoring our plot routines
+        self.action_model.rowsRemoved.connect(self.actions_removed)
+        self.sequence_model.rowsAboutToBeRemoved.connect(
+            self.sequences_about_to_be_removed
+        )
+        self.sequence_model.rowsRemoved.connect(self.sequences_removed)
 
         self.sequence_graph_widget = SequenceGraphWidget(
             parent=None, width=5, height=4, dpi=100
@@ -104,15 +134,40 @@ class MainUI(QObject):  # Not a widget
         self.ui.splitter.setSizes((100, 100))
 
     def plot_sequence_graph(self, sequence_graph: SequenceGraph) -> None:
-        # TODO Pass in the right colours
+        colour_by_action_name = {
+            action.name: colour for action, colour in self.colour_by_action.items()
+        }
+        node_colours = sequence_graph_node_colours(
+            sequence_graph, colour_by_action_name
+        )
+        plot_colours = PlotColours(
+            node_colours,
+            default_edge_colours(sequence_graph),
+            default_node_edge_colours(sequence_graph),
+            default_label_colour(),
+        )
+
         self.sequence_graph_widget.axes.clear()
-        plot_default_sequence_graph(self.sequence_graph_widget.axes, sequence_graph)
+        plot_default_sequence_graph(
+            self.sequence_graph_widget.axes, sequence_graph, plot_colours=plot_colours
+        )
         self.sequence_graph_widget.draw()
 
     def plot_pathway_map(self, pathway_map: PathwayMap) -> None:
-        # TODO Pass in the right colours
+        colour_by_action_name = {
+            action.name: colour for action, colour in self.colour_by_action.items()
+        }
+        plot_colours = PlotColours(
+            pathway_map_node_colours(pathway_map, colour_by_action_name),
+            pathway_map_edge_colours(pathway_map, colour_by_action_name),
+            default_node_edge_colours(pathway_map),
+            default_label_colour(),
+        )
+
         self.pathway_map_widget.axes.clear()
-        plot_default_pathway_map(self.pathway_map_widget.axes, pathway_map)
+        plot_default_pathway_map(
+            self.pathway_map_widget.axes, pathway_map, plot_colours=plot_colours
+        )
         self.pathway_map_widget.draw()
 
     def update_plots(self) -> None:
@@ -137,7 +192,6 @@ class MainUI(QObject):  # Not a widget
         colours = default_action_colours(len(actions))
         self.colour_by_action.clear()
         self.colour_by_action.update(zip(actions, colours))
-        tipping_points = [0] * len(actions)
 
         sequences = read_sequences(
             StringIO(
@@ -166,7 +220,8 @@ class MainUI(QObject):  # Not a widget
         # pathway_map.set_attribute("level", level_by_action)
 
         self.actions.clear()
-        self.actions.extend(list(t) for t in zip(actions, colours, tipping_points))
+        # self.actions.extend(list(t) for t in zip(actions, colours, tipping_points))
+        self.actions.extend([action] for action in actions)
         # TODO try to use the model logic for this
         self.ui.table_actions.model().layoutChanged.emit()
 
@@ -212,24 +267,28 @@ class MainUI(QObject):  # Not a widget
         context.exec(self.ui.table_actions.viewport().mapToGlobal(pos))
 
     def add_action(self):
-        name = "Name"
-        colour = default_nominal_palette()[0]
-        tipping_point = 0
+        current_nr_actions = len(self.actions)
+        name = f"Name{current_nr_actions + 1}"
+        colour_idx = current_nr_actions % len(self._current_palette)
+        colour = self._current_palette[colour_idx]
 
-        self.actions.append((Action(name), colour, tipping_point))
+        action = Action(name)
+        self.colour_by_action[action] = colour
+        self.actions.append([action])
+
         self.ui.table_actions.model().layoutChanged.emit()
         self.edit_action(len(self.actions) - 1)
 
     def edit_action(self, idx):
         action_record = self.actions[idx]
-        action, colour, tipping_point = action_record
+        action = action_record[0]
 
         dialog = loader.load(Path.ui("edit_action_dialog.ui"), self.ui)
         dialog.name_edit.setText(action.name)
 
         palette = dialog.select_colour_button.palette()
         role = dialog.select_colour_button.backgroundRole()
-        colour = QtGui.QColor.fromRgbF(*colour)
+        colour = QtGui.QColor.fromRgbF(*self.colour_by_action[action])
         palette.setColor(role, colour)
         dialog.select_colour_button.setPalette(palette)
         dialog.select_colour_button.setAutoFillBackground(True)
@@ -241,31 +300,28 @@ class MainUI(QObject):  # Not a widget
             Allow the user to select a colour
             """
             nonlocal new_colour
+
             new_colour = QtWidgets.QColorDialog.getColor(initial=colour)
+
+            if not new_colour.isValid():
+                new_colour = colour
+
             palette.setColor(role, new_colour)
             dialog.select_colour_button.setPalette(palette)
-            # dialog.select_colour_button.setAutoFillBackground(True)
 
         dialog.select_colour_button.clicked.connect(select_colour)
 
-        dialog.tipping_point_spin_box.setValue(tipping_point)
-
         if dialog.exec():
             new_name = dialog.name_edit.text()
-            new_tipping_point = dialog.tipping_point_spin_box.value()
 
-            something_changed = (
-                new_name != action.name
-                or new_colour != colour
-                or new_tipping_point != tipping_point
-            )
+            something_changed = new_name != action.name or new_colour != colour
 
             if something_changed:
                 # self.actions[idx][0].name = new_name
                 # self.actions[idx][1] = new_colour.getRgbF()
-                # self.actions[idx][2] = new_tipping_point
 
-                self.actions[idx] = [action, new_colour.getRgbF(), new_tipping_point]
+                self.colour_by_action[action] = new_colour.getRgbF()
+                self.actions[idx] = [action]
 
                 old_name = action.name
 
@@ -278,8 +334,6 @@ class MainUI(QObject):  # Not a widget
 
                 self.actions[idx][0].name = new_name
 
-                self.colour_by_action[action] = new_colour.getRgbF()
-
                 # new_action_tuple = (
                 #     Action(new_name),
                 #     new_colour.getRgbF(),
@@ -289,6 +343,7 @@ class MainUI(QObject):  # Not a widget
                 # TODO try to use the model logic for this
                 self.ui.table_actions.model().layoutChanged.emit()
                 self.ui.table_sequences.model().layoutChanged.emit()
+                self.update_plots()
 
     def remove_actions(self, idx, nr_actions):
         # TODO button = QtWidgets.QMessageBox.warning(
@@ -326,6 +381,19 @@ class MainUI(QObject):  # Not a widget
         for action in actions:
             del self.colour_by_action[action]
 
+    def actions_removed(
+        self, parent, first_idx, last_idx
+    ):  # pylint: disable=unused-argument
+        self.update_plots()
+
+    def sequences_about_to_be_removed(
+        self, parent, first_idx, last_idx
+    ):  # pylint: disable=unused-argument
+        pass
+
+    def sequences_removed(
+        self, parent, first_idx, last_idx
+    ):  # pylint: disable=unused-argument
         self.update_plots()
 
     def on_sequences_table_context_menu(self, pos):
@@ -505,6 +573,7 @@ class MainUI(QObject):  # Not a widget
 
 
 def application():
+    # sys.excepthook = exception_handler
     app = QtWidgets.QApplication(sys.argv)
     app.setWindowIcon(QtGui.QIcon(Path.icon("icon.svg")))
     _ = MainUI()
