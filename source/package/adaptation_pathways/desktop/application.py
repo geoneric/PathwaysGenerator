@@ -1,5 +1,6 @@
 import copy
 import sys
+from datetime import datetime
 from io import StringIO
 
 from PySide6 import QtCore, QtGui, QtWidgets
@@ -64,6 +65,10 @@ except ImportError:
     pass
 
 
+def timestamp() -> str:
+    return datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+
+
 def configure_colour_dialog(palette):
     for idx, colour in enumerate(palette):
         QtWidgets.QColorDialog.setCustomColor(idx, QtGui.QColor.fromRgbF(*colour))
@@ -87,10 +92,22 @@ class MainUI(QObject):  # Not a widget
         self.ui.setWindowTitle(f"{self.name} - {self.version}")
         self.ui.show()
 
+        self.log_widget = loader.load(Path.ui("log_widget.ui"), None)
+        self.log_widget.browser.insertHtml(
+            "<i>Below you may see messages that have been logged while using the application. When "
+            "interactively defining the graphs underlying the pathway map, they may temporarily "
+            "end up in an inconsistent state. Instead of continuously reporting errors, they "
+            "are logged here. If you know what you are doing, you do not need to read them, "
+            "but they may be useful case of surprising behaviour.</i><hr/>"
+        )
+
+        self.ui.installEventFilter(self)
+
         self.ui.action_open.setIcon(QtGui.QIcon(Path.icon("folder-open-table.png")))
         self.ui.action_save.setIcon(QtGui.QIcon(Path.icon("disk.png")))
 
         self.ui.action_open.triggered.connect(self.open_dataset)
+        self.ui.action_toggle_log_window.toggled.connect(self.log_widget.setVisible)
         self.ui.action_about.triggered.connect(self.show_about_dialog)
 
         self.ui.table_actions.customContextMenuRequested.connect(
@@ -143,6 +160,23 @@ class MainUI(QObject):  # Not a widget
         self.ui.plot_tab_widget.setCurrentIndex(0)
         self.ui.splitter.setSizes((100, 200))
 
+        self.plot_widgets = [
+            self.sequence_graph_widget,
+            self.pathway_graph_widget,
+            self.pathway_map_widget,
+        ]
+
+    def eventFilter(self, object_, event):
+        if (
+            isinstance(object_, QtWidgets.QMainWindow)
+            and event.type() == QtCore.QEvent.Close
+        ):
+            # Only when the log window is hidden will the application exit
+            self.log_widget.hide()
+            return True
+
+        return False
+
     def plot_sequence_graph(self, sequence_graph: SequenceGraph) -> None:
         colour_by_action_name = {
             action.name: colour for action, colour in self.colour_by_action.items()
@@ -194,15 +228,33 @@ class MainUI(QObject):  # Not a widget
         )
         self.pathway_map_widget.draw()
 
-    def update_plots(self) -> None:
-        sequences = [(record[0], record[1]) for record in self.sequences]
-        sequence_graph = sequences_to_sequence_graph(sequences)
-        pathway_graph = sequence_graph_to_pathway_graph(sequence_graph)
-        pathway_map = pathway_graph_to_pathway_map(pathway_graph)
+    def log_message(self, message: str) -> None:
 
-        self.plot_sequence_graph(sequence_graph)
-        self.plot_pathway_graph(pathway_graph)
-        self.plot_pathway_map(pathway_map)
+        self.log_widget.browser.insertHtml(f"<b>{timestamp()}</b>: {message}<br/>")
+
+        # If the log browser is not visible, notify the user that there is something to look at
+
+        # Update the status bar
+        self.ui.statusBar().showMessage("Messages have been logged")
+
+    def clear_plots(self):
+        for plot_widget in self.plot_widgets:
+            plot_widget.axes.clear()
+            plot_widget.draw()
+
+    def update_plots(self) -> None:
+        try:
+            sequences = [(record[0], record[1]) for record in self.sequences]
+            sequence_graph = sequences_to_sequence_graph(sequences)
+            pathway_graph = sequence_graph_to_pathway_graph(sequence_graph)
+            pathway_map = pathway_graph_to_pathway_map(pathway_graph)
+
+            self.plot_sequence_graph(sequence_graph)
+            self.plot_pathway_graph(pathway_graph)
+            self.plot_pathway_map(pathway_map)
+        except LookupError as exception:
+            self.clear_plots()
+            self.log_message(str(exception))
 
     @Slot()
     def open_dataset(self):
