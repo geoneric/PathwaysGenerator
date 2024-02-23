@@ -5,8 +5,19 @@ Changelog
 Description of of all notable changes made per version.
 
 
+0.0.9
+-----
+- ...
+
+
 0.0.8
 -----
+- Various improvements to the ``ap_pathway_generator`` command:
+    - Define actions and assign colours to them
+    - Define sequences
+    - Visualize sequences graph
+    - Visualize pathway graph
+    - Visualize pathway map (default layout, without taking tipping points into account)
 
 
 0.0.7
