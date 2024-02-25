@@ -7,7 +7,7 @@ Description of of all notable changes made per version.
 
 0.0.9
 -----
-- ...
+- Support moving sequences in the sequences table of the pathway generator.
 
 
 0.0.8

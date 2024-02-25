@@ -123,6 +123,11 @@ class MainUI(QObject):  # Not a widget
         self.ui.table_sequences.doubleClicked.connect(
             lambda idx: self.edit_sequence(idx.row())
         )
+        self.ui.table_sequences.verticalHeader().setSectionsMovable(True)
+        self.ui.table_sequences.verticalHeader().setDragEnabled(True)
+        self.ui.table_sequences.verticalHeader().setDragDropMode(
+            QtWidgets.QAbstractItemView.InternalMove
+        )
 
         self.colour_by_action: dict[Action, Colour] = {}
 
