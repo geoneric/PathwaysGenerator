@@ -86,3 +86,18 @@ def default_action_colours(nr_actions: int) -> Colours:
         colours += default_nominal_palette()
 
     return colours[:nr_actions]
+
+
+def rgba_to_hex(colour: Colour) -> str:
+    r = int(colour[0] * 255)
+    g = int(colour[1] * 255)
+    b = int(colour[2] * 255)
+    a = int(colour[3] * 255)
+
+    return f"#{a:02x}{r:02x}{g:02x}{b:02x}"
+
+
+def hex_to_rgba(colour: str) -> Colour:
+    rgba = tuple(int(colour[i : i + 2], 16) for i in (0, 2, 4, 6))
+
+    return rgba[1] / 255.0, rgba[2] / 255.0, rgba[3] / 255.0, rgba[0] / 255.0

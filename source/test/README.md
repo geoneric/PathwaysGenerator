@@ -10,5 +10,11 @@ handy to be able to execute a specific test case.
 PYTHONPATH=../package:$PYTHONPATH python -m unittest ap_test/my_test.py
 ```
 
-See this page for more information, for example about executing a single test method:
+Example for executing a specific test method:
+
+```bash
+python -m unittest ap_test.io.sqlite_test.SQLiteTest.test_action_combination_02_pathway
+```
+
+See this page for more information:
 https://docs.python.org/3/library/unittest.html#command-line-interface
