@@ -6,7 +6,6 @@ from ...plot.colour import Colour
 
 
 class SequenceModel(QtCore.QAbstractTableModel):
-
     _sequences: list[list[Action]]
     _horizonal_headers: tuple[str, str]
     _colour_by_action: dict[Action, Colour]
@@ -27,7 +26,13 @@ class SequenceModel(QtCore.QAbstractTableModel):
 
         if role == Qt.DecorationRole:
             action = self._sequences[index.row()][index.column()]
-            colour = self._colour_by_action[action]
+            colour = self._colour_by_action[
+                next(
+                    action_
+                    for action_ in self._colour_by_action
+                    if action_.name == action.name
+                )
+            ]
             return QtGui.QColor.fromRgbF(*colour)
 
     def rowCount(self, index):  # pylint: disable=unused-argument

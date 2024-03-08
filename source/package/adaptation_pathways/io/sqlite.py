@@ -292,7 +292,7 @@ def write_dataset(  # pylint: disable=too-many-locals
 
 def read_dataset(  # pylint: disable=too-many-locals
     database_path: Path | str,
-) -> tuple[list[Action], list[tuple[Action, Action]], dict[Action, list[str]]]:
+) -> tuple[list[Action], list[tuple[Action, Action]], dict[Action, str]]:
     """
     Open the database and return the contents
 

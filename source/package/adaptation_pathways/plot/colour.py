@@ -98,6 +98,9 @@ def rgba_to_hex(colour: Colour) -> str:
 
 
 def hex_to_rgba(colour: str) -> Colour:
+    assert len(colour) == 9, colour
+    assert colour[0] == "#", colour
+    colour = colour[1:]
     rgba = tuple(int(colour[i : i + 2], 16) for i in (0, 2, 4, 6))
 
     return rgba[1] / 255.0, rgba[2] / 255.0, rgba[3] / 255.0, rgba[0] / 255.0

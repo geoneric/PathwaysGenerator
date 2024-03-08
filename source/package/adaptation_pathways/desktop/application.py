@@ -30,11 +30,12 @@ from ..plot import (
 from ..plot.colour import (
     Colour,
     PlotColours,
-    default_action_colours,
     default_edge_colours,
     default_label_colour,
     default_node_edge_colours,
     default_nominal_palette,
+    hex_to_rgba,
+    rgba_to_hex,
 )
 from .model.action import ActionModel
 from .model.sequence import SequenceModel
@@ -285,12 +286,15 @@ class MainUI(QObject):  # Not a widget
         )
 
         if dataset_pathname:
-            actions, sequences = dbms.read_dataset(dataset_pathname)
+            actions, sequences, colour_by_action = dbms.read_dataset(dataset_pathname)
 
-            # TODO Also read colours
-            colours = default_action_colours(len(actions))
             self.colour_by_action.clear()
-            self.colour_by_action.update(zip(actions, colours))
+            self.colour_by_action.update(
+                {
+                    action: hex_to_rgba(colour)
+                    for action, colour in colour_by_action.items()
+                }
+            )
 
             self._set_dataset_pathname(dataset_pathname)
 
@@ -320,9 +324,13 @@ class MainUI(QObject):  # Not a widget
 
         actions = [record[0] for record in self.actions]
         sequences = [(sequence[0], sequence[1]) for sequence in self.sequences]
+        colour_by_action = {
+            action: rgba_to_hex(colour)
+            for action, colour in self.colour_by_action.items()
+        }
 
         try:
-            dbms.write_dataset(actions, sequences, dataset_pathname)
+            dbms.write_dataset(actions, sequences, colour_by_action, dataset_pathname)
             self._set_dataset_pathname(dataset_pathname)
             self._set_data_changed(False)
         except RuntimeError as exception:
@@ -444,6 +452,7 @@ class MainUI(QObject):  # Not a widget
             dialog.select_colour_button.setPalette(palette)
 
         dialog.select_colour_button.clicked.connect(select_colour)
+        dialog.adjustSize()
 
         if dialog.exec():
             new_name = dialog.name_edit.text()
@@ -657,6 +666,8 @@ class MainUI(QObject):  # Not a widget
                 if action.name == sequence_record[1].name
             )
         )
+
+        dialog.adjustSize()
 
         if dialog.exec():
             start_of_pathway = dialog.start_pathway_radio_button.isChecked()
