@@ -1,7 +1,15 @@
 import copy
+from io import StringIO
 
 from adaptation_pathways.action import Action
 from adaptation_pathways.action_combination import ActionCombination
+
+
+def empty_stream():
+    return StringIO(
+        """
+        """
+    )
 
 
 def serial_pathway():

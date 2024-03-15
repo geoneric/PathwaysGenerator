@@ -2,7 +2,7 @@ import unittest
 
 from adaptation_pathways.action import Action
 from adaptation_pathways.io import sqlite as dbms
-from adaptation_pathways.plot.colour import default_action_colours, rgba_to_hex
+from adaptation_pathways.plot.colour import argb_to_hex, default_action_colours
 
 from .. import test_data
 
@@ -52,7 +52,7 @@ class SQLiteTest(unittest.TestCase):
 
     def _test_round_trip(self, database_path, actions, sequences):
         colours = [
-            rgba_to_hex(colour) for colour in default_action_colours(len(actions))
+            argb_to_hex(colour) for colour in default_action_colours(len(actions))
         ]
         colour_by_action = {action: colours[idx] for idx, action in enumerate(actions)}
 

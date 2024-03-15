@@ -30,12 +30,12 @@ from ..plot import (
 from ..plot.colour import (
     Colour,
     PlotColours,
+    argb_to_hex,
     default_edge_colours,
     default_label_colour,
     default_node_edge_colours,
     default_nominal_palette,
-    hex_to_rgba,
-    rgba_to_hex,
+    hex_to_argb,
 )
 from .model.action import ActionModel
 from .model.sequence import SequenceModel
@@ -291,7 +291,7 @@ class MainUI(QObject):  # Not a widget
             self.colour_by_action.clear()
             self.colour_by_action.update(
                 {
-                    action: hex_to_rgba(colour)
+                    action: hex_to_argb(colour)
                     for action, colour in colour_by_action.items()
                 }
             )
@@ -325,7 +325,7 @@ class MainUI(QObject):  # Not a widget
         actions = [record[0] for record in self.actions]
         sequences = [(sequence[0], sequence[1]) for sequence in self.sequences]
         colour_by_action = {
-            action: rgba_to_hex(colour)
+            action: argb_to_hex(colour)
             for action, colour in self.colour_by_action.items()
         }
 

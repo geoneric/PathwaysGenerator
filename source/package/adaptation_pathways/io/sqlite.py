@@ -2,6 +2,7 @@ import copy
 import sqlite3
 from pathlib import Path
 
+from .. import alias
 from ..action import Action
 from ..action_combination import ActionCombination
 
@@ -11,7 +12,7 @@ _edition_table_name = "edition"
 _sequence_table_name = "sequence"
 _action_combination_table_name = "action_combination"
 _plot_table_name = "plot"
-_default_database_path_suffix = ".apw"
+default_database_path_suffix = ".apw"
 
 
 def normalize_database_path(database_path: Path | str) -> Path:
@@ -26,15 +27,15 @@ def normalize_database_path(database_path: Path | str) -> Path:
 
     # Only add the default suffix if the path doesn't already have one
     if len(database_path.suffix) == 0:
-        database_path = database_path.with_suffix(_default_database_path_suffix)
+        database_path = database_path.with_suffix(default_database_path_suffix)
 
     return database_path
 
 
 def write_dataset(  # pylint: disable=too-many-locals
-    actions: list[Action],
-    sequences: list[tuple[Action, Action]],
-    colours: dict[Action, str],
+    actions: alias.Actions,
+    sequences: alias.Sequences,
+    colour_by_action: alias.ColourByAction,
     database_path: Path | str,
     *,
     overwrite: bool = True,
@@ -157,7 +158,7 @@ def write_dataset(  # pylint: disable=too-many-locals
     action_instances_by_name: dict[str, list[Action]] = {}
 
     # All unique Action instances, is some order
-    action_instances: list[Action] = []
+    action_instances: alias.Actions = []
 
     def add_action_instance(action):
         if action.name not in action_instances_by_name:
@@ -266,7 +267,10 @@ def write_dataset(  # pylint: disable=too-many-locals
         )
 
     plot_records = (
-        {"action_id": action_id_by_name[action.name], "colour": colours[action]}
+        {
+            "action_id": action_id_by_name[action.name],
+            "colour": colour_by_action[action],
+        }
         for action in actions
     )
 
@@ -292,7 +296,7 @@ def write_dataset(  # pylint: disable=too-many-locals
 
 def read_dataset(  # pylint: disable=too-many-locals
     database_path: Path | str,
-) -> tuple[list[Action], list[tuple[Action, Action]], dict[Action, str]]:
+) -> tuple[alias.Actions, alias.Sequences, alias.ColourByAction]:
     """
     Open the database and return the contents
 
@@ -380,11 +384,11 @@ def read_dataset(  # pylint: disable=too-many-locals
 
     plot_data = connection.execute(f"SELECT action_id, colour from {_plot_table_name}")
 
-    colours = {
+    colour_by_action = {
         action_instance_by_id[plot_record[0]]: plot_record[1]
         for plot_record in plot_data
     }
 
     connection.close()
 
-    return actions, sequences, colours
+    return actions, sequences, colour_by_action

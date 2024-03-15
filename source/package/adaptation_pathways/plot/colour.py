@@ -88,7 +88,7 @@ def default_action_colours(nr_actions: int) -> Colours:
     return colours[:nr_actions]
 
 
-def rgba_to_hex(colour: Colour) -> str:
+def argb_to_hex(colour: Colour) -> str:
     r = int(colour[0] * 255)
     g = int(colour[1] * 255)
     b = int(colour[2] * 255)
@@ -97,10 +97,10 @@ def rgba_to_hex(colour: Colour) -> str:
     return f"#{a:02x}{r:02x}{g:02x}{b:02x}"
 
 
-def hex_to_rgba(colour: str) -> Colour:
+def hex_to_argb(colour: str) -> Colour:
     assert len(colour) == 9, colour
     assert colour[0] == "#", colour
     colour = colour[1:]
-    rgba = tuple(int(colour[i : i + 2], 16) for i in (0, 2, 4, 6))
+    argb = tuple(int(colour[i : i + 2], 16) for i in (0, 2, 4, 6))
 
-    return rgba[1] / 255.0, rgba[2] / 255.0, rgba[3] / 255.0, rgba[0] / 255.0
+    return argb[1] / 255.0, argb[2] / 255.0, argb[3] / 255.0, argb[0] / 255.0

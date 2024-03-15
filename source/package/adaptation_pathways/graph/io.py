@@ -1,5 +1,6 @@
 import io
 import re
+from pathlib import Path
 
 from ..action import Action
 from ..action_combination import ActionCombination
@@ -11,10 +12,10 @@ edition_pattern = r"\d+"
 action_name_pattern = r"\w+"
 
 
-def _open_stream(pathname: str | io.IOBase) -> io.IOBase:
+def open_stream(pathname: str | Path | io.IOBase) -> io.IOBase:
     stream: io.IOBase
 
-    if isinstance(pathname, str):
+    if isinstance(pathname, (str, Path)):
         stream = open(pathname, encoding="utf-8")  # pylint: disable=consider-using-with
     else:
         stream = pathname
@@ -26,7 +27,7 @@ def _open_stream(pathname: str | io.IOBase) -> io.IOBase:
 def read_tipping_points(
     tipping_points_pathname: str | io.IOBase, actions: list[Action]
 ) -> dict[Action, int]:
-    stream = _open_stream(tipping_points_pathname)
+    stream = open_stream(tipping_points_pathname)
     tipping_point_by_name_and_edition: dict[tuple[str, int], int] = {}
 
     tipping_point_pattern = r"(?P<tipping_point>\d+)"
@@ -192,7 +193,7 @@ def read_sequences(
         current c  # Third sequence
         # Done specifying sequences
     """
-    stream = _open_stream(sequences_pathname)
+    stream = open_stream(sequences_pathname)
     sequences: list[tuple[Action, Action]] = []
     action_by_name_and_edition: dict[tuple[str, int], Action] = (
         {(action.name, action.edition): action for action in actions}
@@ -242,70 +243,3 @@ def read_sequence_graph(sequences_pathname: str | io.IOBase) -> SequenceGraph:
     sequence_graph = sequences_to_sequence_graph(sequences)
 
     return sequence_graph
-
-
-def _parse_action(line: str, action_by_name: dict[str, Action]) -> Action:
-    # TODO Allow any number of actions to be combined(?)
-    action_pattern = (
-        rf"(?P<action_name>{action_name_pattern})"
-        rf"(\(\s*(?P<action1_name>{action_name_pattern})\s*&\s*"
-        rf"(?P<action2_name>{action_name_pattern})\s*\))?"
-    )
-    pattern = rf"{action_pattern}"
-
-    match = re.fullmatch(pattern, line)
-
-    if match is None:
-        raise ValueError(f"Cannot parse action: {line}")
-
-    action_name = match.group("action_name")
-    action1_name = match.group("action1_name") or ""
-    action2_name = match.group("action2_name") or ""
-
-    assert (action1_name == "" and action2_name == "") or (
-        action1_name != "" and action2_name != ""
-    )
-    combine_actions = action1_name != ""
-
-    if action_name in action_by_name:
-        raise ValueError("Actions must be defined only once")
-
-    if not combine_actions:
-        action = Action(action_name)
-        action_by_name[action_name] = action
-    else:
-        if action1_name not in action_by_name:
-            action = Action(action1_name)
-            action_by_name[action1_name] = action
-
-        if action2_name not in action_by_name:
-            action = Action(action2_name)
-            action_by_name[action2_name] = action
-
-        action1 = action_by_name[action1_name]
-        action2 = action_by_name[action2_name]
-
-        action = ActionCombination(action_name, [action1, action2])
-        action_by_name[action_name] = action
-
-    action = action_by_name[action_name]
-
-    return action
-
-
-def read_actions(actions_pathname: str | io.IOBase) -> list[Action]:
-    stream = _open_stream(actions_pathname)
-    actions: list[Action] = []
-    action_by_name: dict[str, Action] = {}
-
-    with stream:
-        for line in stream:
-            # Strip comments and surrounding white space
-            line_as_string = str(line).split("#", 1)[0].strip()
-
-            # Skip empty lines
-            if len(line_as_string) > 0:
-                action = _parse_action(line_as_string, action_by_name)
-                actions.append(action)
-
-    return actions

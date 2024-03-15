@@ -9,6 +9,8 @@ Description of of all notable changes made per version.
 -----
 - Support moving sequences in the sequences table of the pathway generator.
 - Support writing and reading information about pathways to a binary file.
+- Support import / export between text and binary dataset formats. See ``ap_import`` and
+  ``ap_export`` commands.
 
 
 0.0.8
