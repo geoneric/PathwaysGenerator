@@ -13,4 +13,127 @@ format:
 ---
 
 
-# TODO
+# Done
+
+## File formats
+
+Text-based and Binary
+
+```bash
+ap_export my_pathways my_pathways.apw
+ap_import my_pathways.apw my_pathways
+```
+
+→ Demo
+
+
+## Graphs and maps
+
+- Deterministic ordering of branches (classic layout)
+- Custom pathway map (classic layout) plotting function
+
+→ Demo
+
+
+## Desktop application
+
+- Add actions
+- Add sequences
+- Show graphs
+- Save data / load data (binary format)
+
+→ Demo
+
+
+# Todo
+
+:::: {.columns}
+::: {.column with=50%}
+- I/O
+- Pathway map (classic layout)
+    - Action combinations (position, style)
+    - Parallel actions
+- Publish code
+- Refactor
+- Add documentation
+- Add tests
+:::
+
+::: {.column with=50%}
+Desktop application:
+
+- Improve flow for adding info
+- Tipping points
+- Add pathway map (classic layout)
+- Export to PDF
+:::
+
+::::
+
+# Questions
+
+---
+
+- Do pathways ever merge (conceptually, not visually)?
+- Sequence graph → Action edition not relevant?
+- Pathway graph → Simplify, ditch transitions?
+
+
+---
+
+Defining actions:
+
+- One of them must be the one and only root
+    - Always the first one?
+- Action combinations
+    - Possible once two actions have been added
+
+---
+
+Defining sequences:
+
+- First sequence must **start** a pathway
+    - **start**: from root node to other action
+- Subsequent sequences can **start** or **continue** a pathway
+    - **continue**: from sequence to other action
+- Maybe replace "Add sequence..." by:
+    - "Start new pathway..."
+    - "Continue pathway..."
+
+
+---
+
+Defining tipping points:
+
+- All "to actions" of sequences must have one
+- Table: `| to action | tipping point |`
+- How to visually identify "to actions"?
+- Show pathway leading up to each `to_action`:
+    - name | name | name | name
+    - Also add colours
+    - Group by pathway, sort by increasing length
+        - Tipping points in shared actions in other pathways must be synchronized or
+          filtered out
+    - ?
+
+---
+
+- General layout of pathway generator OK?
+
+
+# Julius' use-cases
+
+- "Implement in Dash environment"
+- Custom colours: colours can be associated with actions now
+- Custom names / images: how did you update these?
+- Custom annotation of nodes:
+    - Annotate specific ones
+    - Properties of all of them (radius?)
+- action_level_by_first_occurrence is only used for vertical ordering
+- Subsetting of graphs / hiding parts of the graph
+
+
+# Planning
+
+- ~28 days spent
+- ~7-12 to go(?)
