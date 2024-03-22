@@ -2,7 +2,7 @@ import unittest
 
 from adaptation_pathways.action import Action
 from adaptation_pathways.io import sqlite as dbms
-from adaptation_pathways.plot.colour import argb_to_hex, default_action_colours
+from adaptation_pathways.plot.colour import default_action_colours
 
 from .. import test_data
 
@@ -51,16 +51,21 @@ class SQLiteTest(unittest.TestCase):
         self.compare_colours(*colours)
 
     def _test_round_trip(self, database_path, actions, sequences):
-        colours = [
-            argb_to_hex(colour) for colour in default_action_colours(len(actions))
-        ]
+        tipping_point_by_action = {}  # TODO
+        colours = list(default_action_colours(len(actions)))
         colour_by_action = {action: colours[idx] for idx, action in enumerate(actions)}
 
-        dbms.write_dataset(actions, sequences, colour_by_action, database_path)
-
-        actions_we_got, sequences_we_got, colours_we_got = dbms.read_dataset(
-            database_path
+        # pylint: disable-next=unused-variable
+        dbms.write_dataset(
+            actions, sequences, tipping_point_by_action, colour_by_action, database_path
         )
+
+        # pylint: disable=unused-variable
+        actions_we_got, sequences_we_got, tipping_points_we_got, colours_we_got = (
+            dbms.read_dataset(database_path)
+        )
+
+        # TODO tipping_points_we_got
 
         self.compare_data(
             (actions_we_got, actions),
@@ -72,15 +77,19 @@ class SQLiteTest(unittest.TestCase):
         database_path = "overwrite.db"
         actions = []
         sequences = []
-        colours = {}
+        tipping_point_by_action = {}  # TODO
+        colour_by_action = {}
 
-        dbms.write_dataset(actions, sequences, colours, database_path)
+        dbms.write_dataset(
+            actions, sequences, tipping_point_by_action, colour_by_action, database_path
+        )
         self.assertRaises(
             RuntimeError,
             dbms.write_dataset,
             actions,
             sequences,
-            colours,
+            tipping_point_by_action,
+            colour_by_action,
             database_path,
             overwrite=False,
         )

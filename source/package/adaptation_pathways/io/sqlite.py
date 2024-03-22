@@ -5,6 +5,7 @@ from pathlib import Path
 from .. import alias
 from ..action import Action
 from ..action_combination import ActionCombination
+from ..plot.colour import default_node_colour, hex_to_rgba, rgba_to_hex
 
 
 _action_table_name = "action"
@@ -32,9 +33,14 @@ def normalize_database_path(database_path: Path | str) -> Path:
     return database_path
 
 
-def write_dataset(  # pylint: disable=too-many-locals
+def dataset_exists(database_path: Path | str) -> bool:
+    return normalize_database_path(database_path).exists()
+
+
+def write_dataset(  # pylint: disable=too-many-locals, too-many-arguments, unused-argument
     actions: alias.Actions,
     sequences: alias.Sequences,
+    tipping_point_by_action: alias.TippingPointByAction,  # TODO get rid of unused-argument ignore
     colour_by_action: alias.ColourByAction,
     database_path: Path | str,
     *,
@@ -43,6 +49,8 @@ def write_dataset(  # pylint: disable=too-many-locals
     """
     Save the information passed in to the database
     """
+    # TODO Save tipping points
+
     database_path = normalize_database_path(database_path)
 
     if database_path.exists() and not overwrite:
@@ -269,7 +277,7 @@ def write_dataset(  # pylint: disable=too-many-locals
     plot_records = (
         {
             "action_id": action_id_by_name[action.name],
-            "colour": colour_by_action[action],
+            "colour": rgba_to_hex(colour_by_action[action]),
         }
         for action in actions
     )
@@ -296,7 +304,9 @@ def write_dataset(  # pylint: disable=too-many-locals
 
 def read_dataset(  # pylint: disable=too-many-locals
     database_path: Path | str,
-) -> tuple[alias.Actions, alias.Sequences, alias.ColourByAction]:
+) -> tuple[
+    alias.Actions, alias.Sequences, alias.TippingPointByAction, alias.ColourByAction
+]:
     """
     Open the database and return the contents
 
@@ -385,10 +395,24 @@ def read_dataset(  # pylint: disable=too-many-locals
     plot_data = connection.execute(f"SELECT action_id, colour from {_plot_table_name}")
 
     colour_by_action = {
-        action_instance_by_id[plot_record[0]]: plot_record[1]
+        action_instance_by_id[plot_record[0]]: hex_to_rgba(plot_record[1])
         for plot_record in plot_data
     }
 
+    for action in actions:
+        if not action in colour_by_action:
+            colour_by_action[action] = default_node_colour()
+
     connection.close()
 
-    return actions, sequences, colour_by_action
+    # TODO
+    tipping_point_by_action: alias.TippingPointByAction = {}
+
+    for _, to_action in sequences:
+        assert to_action not in tipping_point_by_action, (
+            f"{to_action.name} already in {tipping_point_by_action}: "
+            f"multiple tipping points for the same action is not supported"
+        )
+        tipping_point_by_action[to_action] = 0
+
+    return actions, sequences, tipping_point_by_action, colour_by_action

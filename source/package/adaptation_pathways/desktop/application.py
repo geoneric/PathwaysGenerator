@@ -8,6 +8,7 @@ from PySide6.QtUiTools import QUiLoader
 
 import adaptation_pathways as ap
 
+from .. import alias
 from ..action import Action
 from ..graph import (
     PathwayGraph,
@@ -30,12 +31,10 @@ from ..plot import (
 from ..plot.colour import (
     Colour,
     PlotColours,
-    argb_to_hex,
     default_edge_colours,
     default_label_colour,
     default_node_edge_colours,
     default_nominal_palette,
-    hex_to_argb,
 )
 from .model.action import ActionModel
 from .model.sequence import SequenceModel
@@ -134,13 +133,13 @@ class MainUI(QObject):  # Not a widget
             QtWidgets.QAbstractItemView.InternalMove
         )
 
-        self.colour_by_action: dict[Action, Colour] = {}
+        self.colour_by_action: dict[Action, Colour] = {}  # type: ignore
 
-        self.actions: list[list] = []
+        self.actions: list[list] = []  # type: ignore
         self.action_model = ActionModel(self.actions, self.colour_by_action)
         self.ui.table_actions.setModel(self.action_model)
 
-        self.sequences: list[list[Action]] = []
+        self.sequences: list[list[Action]] = []  # type: ignore
         self.sequence_model = SequenceModel(self.sequences, self.colour_by_action)
         self.ui.table_sequences.setModel(self.sequence_model)
 
@@ -286,15 +285,13 @@ class MainUI(QObject):  # Not a widget
         )
 
         if dataset_pathname:
-            actions, sequences, colour_by_action = dbms.read_dataset(dataset_pathname)
+            # pylint: disable-next=unused-variable
+            actions, sequences, tipping_point_by_action, colour_by_action = (
+                dbms.read_dataset(dataset_pathname)
+            )
 
             self.colour_by_action.clear()
-            self.colour_by_action.update(
-                {
-                    action: hex_to_argb(colour)
-                    for action, colour in colour_by_action.items()
-                }
-            )
+            self.colour_by_action.update(dict(colour_by_action.items()))
 
             self._set_dataset_pathname(dataset_pathname)
 
@@ -324,13 +321,17 @@ class MainUI(QObject):  # Not a widget
 
         actions = [record[0] for record in self.actions]
         sequences = [(sequence[0], sequence[1]) for sequence in self.sequences]
-        colour_by_action = {
-            action: argb_to_hex(colour)
-            for action, colour in self.colour_by_action.items()
-        }
+        tipping_point_by_action: alias.TippingPointByAction = {}  # TODO
+        colour_by_action = dict(self.colour_by_action.items())
 
         try:
-            dbms.write_dataset(actions, sequences, colour_by_action, dataset_pathname)
+            dbms.write_dataset(
+                actions,
+                sequences,
+                tipping_point_by_action,
+                colour_by_action,
+                dataset_pathname,
+            )
             self._set_dataset_pathname(dataset_pathname)
             self._set_data_changed(False)
         except RuntimeError as exception:

@@ -24,27 +24,6 @@ from .main import main_function
 #      Goal is to show dependencies between actions. Graph statistics.
 
 
-def assign_default_colours(actions, colour_by_action):
-    # argb
-    default_colour = "#ff4c566a"
-
-    for action in actions:
-        if not action in colour_by_action:
-            colour_by_action[action] = default_colour
-
-    return colour_by_action
-
-
-def assign_default_tipping_points(sequences, tipping_point_by_action):
-    default_tipping_point = 0
-
-    for _, to_action in sequences:
-        if not to_action in tipping_point_by_action:
-            tipping_point_by_action[to_action] = default_tipping_point
-
-    return tipping_point_by_action
-
-
 @main_function
 def import_(basename_pathname: str, dataset_pathname: str) -> int:
 
@@ -52,12 +31,13 @@ def import_(basename_pathname: str, dataset_pathname: str) -> int:
         basename_pathname
     )
 
-    tipping_point_by_action = assign_default_tipping_points(
-        sequences, tipping_point_by_action
+    sqlite.write_dataset(
+        actions,
+        sequences,
+        tipping_point_by_action,
+        colour_by_action,
+        Path(dataset_pathname),
     )
-    colour_by_action = assign_default_colours(actions, colour_by_action)
-
-    sqlite.write_dataset(actions, sequences, colour_by_action, Path(dataset_pathname))
 
     return 0
 

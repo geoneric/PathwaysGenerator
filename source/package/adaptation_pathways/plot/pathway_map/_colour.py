@@ -8,7 +8,6 @@ from ..colour import (
     default_label_colour,
     default_node_edge_colours,
     default_nominal_palette,
-    default_transparency,
     nord_palette_dark,
     nord_palette_light,
 )
@@ -27,7 +26,7 @@ def node_colours(
         action = node.action
 
         if isinstance(action, ActionCombination):
-            colour = nord_palette_light[0] + (default_transparency(),)  # Placeholder
+            colour = nord_palette_light[0]  # Placeholder
         else:
             colour = colour_by_action_name[action.name]
 
@@ -48,7 +47,7 @@ def edge_colours(
         action = from_node.action
 
         if isinstance(action, ActionCombination):
-            colour = nord_palette_dark[0] + (default_transparency(),)  # Placeholder
+            colour = nord_palette_dark[0]  # Placeholder
         else:
             colour = colour_by_action_name[action.name]
 

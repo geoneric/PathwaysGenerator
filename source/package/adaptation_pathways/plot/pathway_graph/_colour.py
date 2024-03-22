@@ -8,7 +8,6 @@ from ..colour import (
     default_label_colour,
     default_node_edge_colours,
     default_nominal_palette,
-    default_transparency,
     nord_palette_light,
 )
 
@@ -18,7 +17,7 @@ def colour_by_node(
 ) -> Colours:
     # pylint: disable=redefined-outer-name
     colours = []
-    conversion_colour = nord_palette_light[0] + (default_transparency(),)
+    conversion_colour = nord_palette_light[0]
 
     # Use the same colour for conversions
     # Colour each unique action unique

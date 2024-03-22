@@ -4,6 +4,7 @@ from io import StringIO
 from adaptation_pathways.action import Action
 from adaptation_pathways.action_combination import ActionCombination
 from adaptation_pathways.io import text
+from adaptation_pathways.plot.colour import hex_to_rgba
 
 
 class TextTest(unittest.TestCase):
@@ -53,7 +54,7 @@ class TextTest(unittest.TestCase):
         self.assertEqual(actions[0].name, "current")
         self.assertEqual(len(colour_by_action), 1)
         self.assertTrue(actions[0] in colour_by_action)
-        self.assertEqual(colour_by_action[actions[0]], "#12345678")
+        self.assertEqual(colour_by_action[actions[0]], hex_to_rgba("#12345678"))
 
         self.assertRaises(
             ValueError,
@@ -95,9 +96,9 @@ class TextTest(unittest.TestCase):
         self.assertEqual(actions[1].name, "b")
         self.assertEqual(actions[2].name, "c")
         self.assertEqual(len(colour_by_action), 3)
-        self.assertEqual(colour_by_action[actions[0]], "#12345678")
-        self.assertEqual(colour_by_action[actions[1]], "#87654321")
-        self.assertEqual(colour_by_action[actions[2]], "#24688642")
+        self.assertEqual(colour_by_action[actions[0]], hex_to_rgba("#12345678"))
+        self.assertEqual(colour_by_action[actions[1]], hex_to_rgba("#87654321"))
+        self.assertEqual(colour_by_action[actions[2]], hex_to_rgba("#24688642"))
         self.assertTrue(isinstance(actions[0], Action))
         self.assertTrue(isinstance(actions[1], Action))
         self.assertTrue(isinstance(actions[2], ActionCombination))
@@ -130,7 +131,7 @@ class TextTest(unittest.TestCase):
         ]
 
         for string in strings:
-            sequences, action_by_name_and_edition = text.read_sequences(
+            sequences, tipping_point_by_action = text.read_sequences(
                 StringIO(
                     f"""
                     {string}
@@ -138,7 +139,7 @@ class TextTest(unittest.TestCase):
                 )
             )
             self.assertEqual(len(sequences), 0)
-            self.assertEqual(len(action_by_name_and_edition), 0)
+            self.assertEqual(len(tipping_point_by_action), len(sequences))
 
     def test_single_sequence(self):
         strings = [
@@ -146,14 +147,22 @@ class TextTest(unittest.TestCase):
             current a
             """,
             """
+            current a 0
+            """,
+            """
             # One sequence coming up
             current a  # This is the one
+            # That was the one
+            """,
+            """
+            # One sequence coming up
+            current a 0  # This is the one
             # That was the one
             """,
         ]
 
         for string in strings:
-            sequences, action_by_name_and_edition = text.read_sequences(
+            sequences, tipping_point_by_action = text.read_sequences(
                 StringIO(
                     f"""
                     {string}
@@ -163,11 +172,12 @@ class TextTest(unittest.TestCase):
             self.assertEqual(len(sequences), 1)
             self.assertEqual(sequences[0][0].name, "current")
             self.assertEqual(sequences[0][1].name, "a")
-            self.assertEqual(len(action_by_name_and_edition), 2)
-            self.assertTrue(("current", 0) in action_by_name_and_edition)
-            self.assertEqual(action_by_name_and_edition[("current", 0)].name, "current")
-            self.assertTrue(("a", 0) in action_by_name_and_edition)
-            self.assertEqual(action_by_name_and_edition[("a", 0)].name, "a")
+
+            self.assertEqual(len(tipping_point_by_action), len(sequences))
+            self.assertTrue(
+                all(sequence[1] in tipping_point_by_action for sequence in sequences)
+            )
+            self.assertEqual(tipping_point_by_action[sequences[0][1]], 0)
 
     def test_multiple_sequences(self):
         strings = [
@@ -176,10 +186,15 @@ class TextTest(unittest.TestCase):
             a b
             b c
             """,
+            """
+            current a 0
+            a b 0
+            b c 0
+            """,
         ]
 
         for string in strings:
-            sequences, action_by_name_and_edition = text.read_sequences(
+            sequences, tipping_point_by_action = text.read_sequences(
                 StringIO(
                     f"""
                     {string}
@@ -197,15 +212,13 @@ class TextTest(unittest.TestCase):
             self.assertEqual(sequences[0][1], sequences[1][0])
             self.assertEqual(sequences[1][1], sequences[2][0])
 
-            self.assertEqual(len(action_by_name_and_edition), 4)
-            self.assertTrue(("current", 0) in action_by_name_and_edition)
-            self.assertEqual(action_by_name_and_edition[("current", 0)].name, "current")
-            self.assertTrue(("a", 0) in action_by_name_and_edition)
-            self.assertEqual(action_by_name_and_edition[("a", 0)].name, "a")
-            self.assertTrue(("b", 0) in action_by_name_and_edition)
-            self.assertEqual(action_by_name_and_edition[("b", 0)].name, "b")
-            self.assertTrue(("c", 0) in action_by_name_and_edition)
-            self.assertEqual(action_by_name_and_edition[("c", 0)].name, "c")
+            self.assertEqual(len(tipping_point_by_action), len(sequences))
+            self.assertTrue(
+                all(sequence[1] in tipping_point_by_action for sequence in sequences)
+            )
+            self.assertEqual(tipping_point_by_action[sequences[0][1]], 0)
+            self.assertEqual(tipping_point_by_action[sequences[1][1]], 0)
+            self.assertEqual(tipping_point_by_action[sequences[2][1]], 0)
 
     def test_multiple_editions(self):
         strings = [
@@ -213,10 +226,14 @@ class TextTest(unittest.TestCase):
             current a[1]
             current a[2]
             """,
+            """
+            current a[1] 0
+            current a[2] 0
+            """,
         ]
 
         for string in strings:
-            sequences, action_by_name_and_edition = text.read_sequences(
+            sequences, tipping_point_by_action = text.read_sequences(
                 StringIO(
                     f"""
                     {string}
@@ -232,115 +249,45 @@ class TextTest(unittest.TestCase):
             self.assertEqual(sequences[0][0], sequences[1][0])
             self.assertNotEqual(sequences[0][1], sequences[1][1])
 
-            self.assertEqual(len(action_by_name_and_edition), 3)
-            self.assertTrue(("current", 0) in action_by_name_and_edition)
-            self.assertEqual(action_by_name_and_edition[("current", 0)].name, "current")
-            self.assertTrue(("a", 1) in action_by_name_and_edition)
-            self.assertEqual(action_by_name_and_edition[("a", 1)].name, "a")
-            self.assertTrue(("a", 2) in action_by_name_and_edition)
-            self.assertEqual(action_by_name_and_edition[("a", 2)].name, "a")
-
-    def test_empty_tipping_points(self):
-        strings = [
-            """
-            """,
-            """
-            # empty...
-            """,
-            """
-
-            """,
-        ]
-
-        action_by_name_and_edition: dict[tuple[str, int], Action] = {}
-
-        for string in strings:
-            tipping_points = text.read_tipping_points(
-                StringIO(
-                    f"""
-                    {string}
-                    """
-                ),
-                action_by_name_and_edition,
+            self.assertEqual(len(tipping_point_by_action), len(sequences))
+            self.assertTrue(
+                all(sequence[1] in tipping_point_by_action for sequence in sequences)
             )
-            self.assertEqual(len(tipping_points), 0)
+            self.assertEqual(tipping_point_by_action[sequences[0][1]], 0)
+            self.assertEqual(tipping_point_by_action[sequences[1][1]], 0)
 
     def test_multiple_tipping_points(self):
-        _, action_by_name_and_edition = text.read_sequences(
+        sequences, tipping_point_by_action = text.read_sequences(
             StringIO(
                 """
-                current a[5]
-                a[5] b
-                b c
+                current[1] current 2020
+                current a[5] 2030
+                a[5] b 2040
+                b c 2050
                 """
             )
         )
-        tipping_point_strings = [
-            """
-            current 2020
-            a[5] 2030
-            b 2040
-            c 2050
-            """,
-        ]
 
-        for string in tipping_point_strings:
-            tipping_point_by_action = text.read_tipping_points(
-                StringIO(
-                    f"""
-                    {string}
-                    """
-                ),
-                action_by_name_and_edition,
-            )
-            self.assertEqual(len(tipping_point_by_action), 4)
+        self.assertEqual(len(sequences), 4)
+        self.assertEqual(sequences[0][0].name, "current")
+        self.assertEqual(sequences[0][1].name, "current")
+        self.assertEqual(sequences[1][0].name, "current")
+        self.assertEqual(sequences[1][1].name, "a")
+        self.assertEqual(sequences[2][0].name, "a")
+        self.assertEqual(sequences[2][1].name, "b")
+        self.assertEqual(sequences[3][0].name, "b")
+        self.assertEqual(sequences[3][1].name, "c")
 
-            for name, tipping_point_we_want in [
-                ("current", 2020),
-                ("a", 2030),
-                ("b", 2040),
-                ("c", 2050),
-            ]:
-                _, tipping_point_we_got = next(
-                    (action, tipping_point)
-                    for action, tipping_point in tipping_point_by_action.items()
-                    if action.name == name
-                )
-                self.assertEqual(tipping_point_we_got, tipping_point_we_want)
+        self.assertNotEqual(sequences[0][0], sequences[0][1])
+        self.assertEqual(sequences[0][1], sequences[1][0])
+        self.assertEqual(sequences[1][1], sequences[2][0])
+        self.assertEqual(sequences[2][1], sequences[3][0])
 
-    def test_tipping_point_unknown_action(self):
-        _, action_by_name_and_edition = text.read_sequences(
-            StringIO(
-                """
-                current a[5]
-                a[5] b
-                b c
-                """
-            )
+        self.assertEqual(len(tipping_point_by_action), len(sequences))
+        self.assertTrue(
+            all(sequence[1] in tipping_point_by_action for sequence in sequences)
         )
-        tipping_point_strings = [
-            """
-            current 2020
-            a[4] 2030  # Unknown edition
-            b 2040
-            c 2050
-            """,
-            """
-            current 2020
-            æ[5] 2030  # Unknown name
-            b 2040
-            c 2050
-            """,
-        ]
-
-        for string in tipping_point_strings:
-            self.assertRaises(
-                ValueError,
-                text.read_tipping_points,
-                StringIO(
-                    f"""
-                    {string}
-                    """
-                ),
-                action_by_name_and_edition,
-            )
+        self.assertEqual(tipping_point_by_action[sequences[0][1]], 2020)
+        self.assertEqual(tipping_point_by_action[sequences[1][1]], 2030)
+        self.assertEqual(tipping_point_by_action[sequences[2][1]], 2040)
+        self.assertEqual(tipping_point_by_action[sequences[3][1]], 2050)

@@ -55,13 +55,17 @@ def converging_pathway():
 
     actions = [current, a, b, c, d]
 
+    d1 = copy.copy(d)
+    d2 = copy.copy(d)
+    d3 = copy.copy(d)
+
     sequences = [
         (current, a),
         (current, b),
         (current, c),
-        (a, d),
-        (b, d),
-        (c, d),
+        (a, d1),
+        (b, d2),
+        (c, d3),
     ]
 
     return actions, sequences
@@ -144,22 +148,29 @@ def use_case_01_pathway():
 
     actions = [current, a, b, c, d, e, f]
 
+    e1 = copy.copy(e)
+    e2 = copy.copy(e)
+    f1 = copy.copy(f)
+    f2 = copy.copy(f)
+    f3 = copy.copy(f)
+
     sequences = [
         (current, a),
-        (a, e),
+        (a, e1),
         (current, b),
-        (b, f),
+        (b, f1),
         (current, c),
-        (c, f),
+        (c, f2),
         (current, d),
-        (d, f),
-        (f, e),
+        (d, f3),
+        (f, e2),
     ]
 
     return actions, sequences
 
 
 def use_case_02_pathway():
+    # pylint: disable=too-many-locals
     current = Action("current")
     a = Action("a")
     b = Action("b")
@@ -168,21 +179,30 @@ def use_case_02_pathway():
 
     actions = [current, a, b, c, d]
 
+    a1 = copy.copy(a)
+    a2 = copy.copy(a)
+    a3 = copy.copy(a)
+    a4 = copy.copy(a)
     b1 = copy.copy(b)
     b2 = copy.copy(b)
+    c1 = copy.copy(c)
+    c2 = copy.copy(c)
+    d1 = copy.copy(d)
+    d2 = copy.copy(d)
+    d3 = copy.copy(d)
 
     sequences = [
-        (current, a),
+        (current, a1),
         (current, b1),
-        (current, c),
-        (current, d),
-        (b1, a),
-        (b1, c),
-        (b1, d),
+        (current, c1),
+        (current, d1),
+        (b1, a2),
+        (b1, c2),
+        (b1, d2),
         (c, b2),
-        (b2, a),
-        (c, a),
-        (c, d),
+        (b2, a3),
+        (c, a4),
+        (c, d3),
     ]
 
     return actions, sequences

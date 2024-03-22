@@ -4,5 +4,7 @@ from .plot.alias import *  # pylint: disable=wildcard-import, unused-wildcard-im
 
 
 Actions = list[Action | ActionCombination]
-Sequences = list[tuple[Action, Action]]
-TippingPointByAction = dict[Action, int]
+Sequence = tuple[Action, Action]
+Sequences = list[Sequence]
+TippingPoint = int
+TippingPointByAction = dict[Action, TippingPoint]

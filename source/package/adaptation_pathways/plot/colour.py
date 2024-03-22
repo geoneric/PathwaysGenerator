@@ -18,41 +18,37 @@ class PlotColours:
 
 
 nord_palette_nominal = [
-    (191 / 255, 97 / 255, 106 / 255),  # Redish
-    (208 / 255, 135 / 255, 112 / 255),  # Orange
-    (235 / 255, 203 / 255, 139 / 255),  # Dark yellow
-    (163 / 255, 190 / 255, 140 / 255),  # Green
-    (180 / 255, 142 / 255, 173 / 255),  # Purple
+    (191 / 255, 97 / 255, 106 / 255, 1.0),  # Redish
+    (208 / 255, 135 / 255, 112 / 255, 1.0),  # Orange
+    (235 / 255, 203 / 255, 139 / 255, 1.0),  # Dark yellow
+    (163 / 255, 190 / 255, 140 / 255, 1.0),  # Green
+    (180 / 255, 142 / 255, 173 / 255, 1.0),  # Purple
 ]
 
 nord_palette_dark = [
-    (46 / 255, 52 / 255, 64 / 255),  # Dark
-    (59 / 255, 66 / 255, 82 / 255),  # Lighter than nord0
-    (67 / 255, 76 / 255, 94 / 255),  # Lighter than nord1
-    (76 / 255, 86 / 255, 106 / 255),  # Lighter than nord2
+    (46 / 255, 52 / 255, 64 / 255, 1.0),  # Dark
+    (59 / 255, 66 / 255, 82 / 255, 1.0),  # Lighter than nord0
+    (67 / 255, 76 / 255, 94 / 255, 1.0),  # Lighter than nord1
+    (76 / 255, 86 / 255, 106 / 255, 1.0),  # Lighter than nord2
 ]
 
 nord_palette_light = [
-    (216 / 255, 222 / 255, 233 / 255),  # Bright
-    (229 / 255, 233 / 255, 240 / 255),  # Lighter than nord4
-    (236 / 255, 239 / 255, 244 / 255),  # Lighter than nord5
+    (216 / 255, 222 / 255, 233 / 255, 1.0),  # Bright
+    (229 / 255, 233 / 255, 240 / 255, 1.0),  # Lighter than nord4
+    (236 / 255, 239 / 255, 244 / 255, 1.0),  # Lighter than nord5
 ]
 
 nord_palette_blue = [
-    (143 / 255, 188 / 255, 187 / 255),  # Calm, frozen polar water
-    (136 / 255, 192 / 255, 208 / 255),  # Bright, shiny, pure and clear ice
-    (129 / 255, 161 / 255, 193 / 255),  # Darkened, arctic waters
-    (94 / 255, 129 / 255, 172 / 255),  # Dark, deep arctic ocean
+    (143 / 255, 188 / 255, 187 / 255, 1.0),  # Calm, frozen polar water
+    (136 / 255, 192 / 255, 208 / 255, 1.0),  # Bright, shiny, pure and clear ice
+    (129 / 255, 161 / 255, 193 / 255, 1.0),  # Darkened, arctic waters
+    (94 / 255, 129 / 255, 172 / 255, 1.0),  # Dark, deep arctic ocean
 ]
 
 
-def default_transparency():
-    return 1.0  # 0.75
-
-
 def default_nominal_palette() -> Colours:
-    palette = [colour + (default_transparency(),) for colour in nord_palette_nominal]
-    palette.append(nord_palette_blue[0] + (default_transparency(),))
+    palette = nord_palette_nominal
+    palette.append(nord_palette_blue[0])
 
     return palette
 
@@ -60,7 +56,7 @@ def default_nominal_palette() -> Colours:
 def default_edge_colours(
     graph: SequenceGraph | PathwayGraph,
 ) -> Colours:
-    colour = nord_palette_dark[3] + (default_transparency(),)
+    colour = nord_palette_dark[3]
     colours = [colour] * len(list(graph.graph.edges))
 
     return colours
@@ -69,14 +65,18 @@ def default_edge_colours(
 def default_node_edge_colours(
     graph: SequenceGraph | PathwayGraph | PathwayMap,
 ) -> Colours:
-    colour = nord_palette_dark[3] + (default_transparency(),)
+    colour = nord_palette_dark[3]
     colours = [colour] * len(list(graph.graph.edges))
 
     return colours
 
 
+def default_node_colour() -> Colour:
+    return nord_palette_dark[3]
+
+
 def default_label_colour() -> Colour:
-    return nord_palette_dark[0] + (default_transparency(),)
+    return nord_palette_dark[0]
 
 
 def default_action_colours(nr_actions: int) -> Colours:
@@ -88,16 +88,17 @@ def default_action_colours(nr_actions: int) -> Colours:
     return colours[:nr_actions]
 
 
-def argb_to_hex(colour: Colour) -> str:
+def rgba_to_hex(colour: Colour) -> str:
     r = int(colour[0] * 255)
     g = int(colour[1] * 255)
     b = int(colour[2] * 255)
     a = int(colour[3] * 255)
 
+    # argb format
     return f"#{a:02x}{r:02x}{g:02x}{b:02x}"
 
 
-def hex_to_argb(colour: str) -> Colour:
+def hex_to_rgba(colour: str) -> Colour:
     assert len(colour) == 9, colour
     assert colour[0] == "#", colour
     colour = colour[1:]
