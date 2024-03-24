@@ -34,7 +34,7 @@ def configure_pathway_map(sequences_str: str, tipping_points_str: str) -> Pathwa
     )
 
     pathway_map.assign_tipping_points(tipping_points)
-    pathway_map.set_attribute("level", level_by_action)
+    pathway_map.set_attribute("level_by_action", level_by_action)
 
     return pathway_map
 

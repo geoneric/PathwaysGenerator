@@ -144,18 +144,22 @@ class TextTest(unittest.TestCase):
     def test_single_sequence(self):
         strings = [
             """
+            current current
             current a
             """,
             """
+            current current
             current a 0
             """,
             """
             # One sequence coming up
+            current current
             current a  # This is the one
             # That was the one
             """,
             """
             # One sequence coming up
+            current current
             current a 0  # This is the one
             # That was the one
             """,
@@ -173,20 +177,23 @@ class TextTest(unittest.TestCase):
             self.assertEqual(sequences[0][0].name, "current")
             self.assertEqual(sequences[0][1].name, "a")
 
-            self.assertEqual(len(tipping_point_by_action), len(sequences))
+            self.assertEqual(len(tipping_point_by_action), len(sequences) + 1)
             self.assertTrue(
                 all(sequence[1] in tipping_point_by_action for sequence in sequences)
             )
+            self.assertEqual(tipping_point_by_action[sequences[0][0]], 0)
             self.assertEqual(tipping_point_by_action[sequences[0][1]], 0)
 
     def test_multiple_sequences(self):
         strings = [
             """
+            current current
             current a
             a b
             b c
             """,
             """
+            current current 0
             current a 0
             a b 0
             b c 0
@@ -212,10 +219,11 @@ class TextTest(unittest.TestCase):
             self.assertEqual(sequences[0][1], sequences[1][0])
             self.assertEqual(sequences[1][1], sequences[2][0])
 
-            self.assertEqual(len(tipping_point_by_action), len(sequences))
+            self.assertEqual(len(tipping_point_by_action), len(sequences) + 1)
             self.assertTrue(
                 all(sequence[1] in tipping_point_by_action for sequence in sequences)
             )
+            self.assertEqual(tipping_point_by_action[sequences[0][0]], 0)
             self.assertEqual(tipping_point_by_action[sequences[0][1]], 0)
             self.assertEqual(tipping_point_by_action[sequences[1][1]], 0)
             self.assertEqual(tipping_point_by_action[sequences[2][1]], 0)
@@ -223,10 +231,12 @@ class TextTest(unittest.TestCase):
     def test_multiple_editions(self):
         strings = [
             """
+            current current
             current a[1]
             current a[2]
             """,
             """
+            current current 0
             current a[1] 0
             current a[2] 0
             """,
@@ -249,10 +259,11 @@ class TextTest(unittest.TestCase):
             self.assertEqual(sequences[0][0], sequences[1][0])
             self.assertNotEqual(sequences[0][1], sequences[1][1])
 
-            self.assertEqual(len(tipping_point_by_action), len(sequences))
+            self.assertEqual(len(tipping_point_by_action), len(sequences) + 1)
             self.assertTrue(
                 all(sequence[1] in tipping_point_by_action for sequence in sequences)
             )
+            self.assertEqual(tipping_point_by_action[sequences[0][0]], 0)
             self.assertEqual(tipping_point_by_action[sequences[0][1]], 0)
             self.assertEqual(tipping_point_by_action[sequences[1][1]], 0)
 
@@ -268,26 +279,23 @@ class TextTest(unittest.TestCase):
             )
         )
 
-        self.assertEqual(len(sequences), 4)
+        self.assertEqual(len(sequences), 3)
         self.assertEqual(sequences[0][0].name, "current")
-        self.assertEqual(sequences[0][1].name, "current")
-        self.assertEqual(sequences[1][0].name, "current")
-        self.assertEqual(sequences[1][1].name, "a")
-        self.assertEqual(sequences[2][0].name, "a")
-        self.assertEqual(sequences[2][1].name, "b")
-        self.assertEqual(sequences[3][0].name, "b")
-        self.assertEqual(sequences[3][1].name, "c")
+        self.assertEqual(sequences[0][1].name, "a")
+        self.assertEqual(sequences[1][0].name, "a")
+        self.assertEqual(sequences[1][1].name, "b")
+        self.assertEqual(sequences[2][0].name, "b")
+        self.assertEqual(sequences[2][1].name, "c")
 
         self.assertNotEqual(sequences[0][0], sequences[0][1])
         self.assertEqual(sequences[0][1], sequences[1][0])
         self.assertEqual(sequences[1][1], sequences[2][0])
-        self.assertEqual(sequences[2][1], sequences[3][0])
 
-        self.assertEqual(len(tipping_point_by_action), len(sequences))
+        self.assertEqual(len(tipping_point_by_action), len(sequences) + 1)
         self.assertTrue(
             all(sequence[1] in tipping_point_by_action for sequence in sequences)
         )
-        self.assertEqual(tipping_point_by_action[sequences[0][1]], 2020)
-        self.assertEqual(tipping_point_by_action[sequences[1][1]], 2030)
-        self.assertEqual(tipping_point_by_action[sequences[2][1]], 2040)
-        self.assertEqual(tipping_point_by_action[sequences[3][1]], 2050)
+        self.assertEqual(tipping_point_by_action[sequences[0][0]], 2020)
+        self.assertEqual(tipping_point_by_action[sequences[0][1]], 2030)
+        self.assertEqual(tipping_point_by_action[sequences[1][1]], 2040)
+        self.assertEqual(tipping_point_by_action[sequences[2][1]], 2050)

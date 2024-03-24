@@ -47,9 +47,13 @@ def colour_by_action_name(graph: PathwayGraph, palette: Colours) -> dict[str, Co
 
 
 def default_node_colours(graph: PathwayGraph) -> Colours:
-    return colour_by_node(
-        graph, colour_by_action_name(graph, default_nominal_palette())
+    colour_by_action_name_ = (
+        graph.graph.graph["colour_by_action_name"]
+        if "colour_by_action_name" in graph.graph.graph
+        else colour_by_action_name(graph, default_nominal_palette())
     )
+
+    return colour_by_node(graph, colour_by_action_name_)
 
 
 def default_colours(pathway_graph: PathwayGraph) -> PlotColours:

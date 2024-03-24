@@ -78,8 +78,7 @@ class VerifyTippingPointsTest(unittest.TestCase):
 
         pathway_map = sequence_graph_to_pathway_map(sequence_graph)
 
-        with self.assertRaises(ValueError):
-            verify_tipping_points(pathway_map)
+        verify_tipping_points(pathway_map)
 
         tipping_points = {a: 5}
         pathway_map.assign_tipping_points(tipping_points)
@@ -119,8 +118,7 @@ class VerifyTippingPointsTest(unittest.TestCase):
 
         pathway_map = sequence_graph_to_pathway_map(sequence_graph)
 
-        with self.assertRaises(ValueError):
-            verify_tipping_points(pathway_map)
+        verify_tipping_points(pathway_map)
 
         tipping_points = {
             current: 2024,
@@ -128,7 +126,7 @@ class VerifyTippingPointsTest(unittest.TestCase):
             b: 2030,
             c: 2030,
             d: 2030,
-            f: 2030,  # <-- can't tip this soon already
+            f: 2029,  # <-- can't tip this soon already
             e: 2100,
         }
         pathway_map.assign_tipping_points(tipping_points)

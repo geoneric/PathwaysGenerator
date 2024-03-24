@@ -268,12 +268,13 @@ def _distribute_vertically(
     root_action_begin: ActionBegin,
     position_by_node: dict[Node, np.ndarray],
 ) -> None:
+
     action_end = pathway_map.action_end(root_action_begin)
     position_by_node[action_end][1] = position_by_node[root_action_begin][1]
 
     # min_distance = 1.0
 
-    # All unique actions in the graph
+    # All unique action instances in the graph
     actions = pathway_map.actions()
 
     # Sieve out combined actions that combine a single *existing* action with a *new* one. These
@@ -327,7 +328,9 @@ def _distribute_vertically(
 
     # Now it is time to re-order the actions to distribute, based on their level, if any was set
     level_by_action = (
-        pathway_map.graph.graph["level"] if "level" in pathway_map.graph.graph else {}
+        pathway_map.graph.graph["level_by_action"]
+        if "level_by_action" in pathway_map.graph.graph
+        else {}
     )
 
     # Update the levels of action combinations that continue multiple existing actions. These
@@ -364,6 +367,7 @@ def _distribute_vertically(
     )
 
     y_coordinate_by_action = dict(zip(names_of_actions_to_distribute, y_coordinates))
+    # y_coordinate_by_action[root_action_begin.action.name] = 0
 
     for action_begin in pathway_map.all_action_begins()[1:]:  # Skip root node
         action = action_begin.action
@@ -405,10 +409,10 @@ def _layout(
     The pathway map passed in must contain sane tipping points. When in doubt, call
     ``verify_tipping_points()`` before calling this function.
 
-    The graph in the pathway map passed in must contain an attribute called "level", with a
-    numeric value per action, which corresponds with the position in the above mentioned stack.
-    Low numbers correspond with a high position in the stack (large y-coordinate). Such actions
-    will be positioned at the top of the pathway map.
+    The graph in the pathway map passed in must contain an attribute called "level_by_action",
+    with a numeric value per action, which corresponds with the position in the above mentioned
+    stack.  Low numbers correspond with a high position in the stack (large y-coordinate). Such
+    actions will be positioned at the top of the pathway map.
     """
     position_by_node: dict[Node, np.ndarray] = {}
 
@@ -419,7 +423,7 @@ def _layout(
 
         min_tipping_point, max_tipping_point = pathway_map.tipping_point_range()
         tipping_point_range = max_tipping_point - min_tipping_point
-        assert tipping_point_range > 0
+        assert tipping_point_range >= 0
         x_coordinate = tipping_point - 0.1 * tipping_point_range
 
         add_position(position_by_node, root_action_begin, (x_coordinate, 0))

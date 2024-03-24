@@ -16,10 +16,10 @@ from adaptation_pathways.plot import plot_default_pathway_graph as plot
 actions, colour_by_action = text.read_actions(
     StringIO(
         """
-current
-a
-b
-c
+current #ff4c566a
+a #ffbf616a
+b #ffd08770
+c #ffebcb8b
 """
     )
 )
@@ -35,6 +35,12 @@ b c
 )
 sequence_graph = conversion.sequences_to_sequence_graph(sequences)
 pathway_graph = conversion.sequence_graph_to_pathway_graph(sequence_graph)
+
+colour_by_action_name = {
+    action.name: colour for action, colour in colour_by_action.items()
+}
+
+pathway_graph.set_attribute("colour_by_action_name", colour_by_action_name)
 
 _, axes = plt.subplots(layout="constrained")
 init_axes(axes)

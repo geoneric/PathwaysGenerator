@@ -73,15 +73,21 @@ def colour_by_action_name_pathway_map(
 
 
 def default_node_colours(graph: PathwayMap) -> Colours:
-    palette = default_nominal_palette()
-    colour_by_action_name = colour_by_action_name_pathway_map(graph, palette)
+    colour_by_action_name = (
+        graph.graph.graph["colour_by_action_name"]
+        if "colour_by_action_name" in graph.graph.graph
+        else colour_by_action_name_pathway_map(graph, default_nominal_palette())
+    )
 
     return node_colours(graph, colour_by_action_name)
 
 
 def default_edge_colours(graph: PathwayMap) -> Colours:
-    palette = default_nominal_palette()
-    colour_by_action_name = colour_by_action_name_pathway_map(graph, palette)
+    colour_by_action_name = (
+        graph.graph.graph["colour_by_action_name"]
+        if "colour_by_action_name" in graph.graph.graph
+        else colour_by_action_name_pathway_map(graph, default_nominal_palette())
+    )
 
     return edge_colours(graph, colour_by_action_name)
 

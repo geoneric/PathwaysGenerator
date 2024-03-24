@@ -200,6 +200,8 @@ def read_sequences(
     action_by_name_and_edition: dict[tuple[str, int], Action] = {}
 
     with stream:
+        root_action_seen = False
+
         for line in stream:
             line_as_string = _strip_line(line)
 
@@ -209,9 +211,20 @@ def read_sequences(
                     line_as_string,
                     action_by_name_and_edition,
                 )
-                sequences.append(sequence)
+                if not root_action_seen and sequence[0].name == sequence[1].name:
+                    root_action_seen = True
+                else:
+                    sequences.append(sequence)
+
                 assert sequence[1] not in tipping_point_by_action, sequence[1]
                 tipping_point_by_action[sequence[1]] = tipping_point
+
+        if len(sequences) > 0 and not root_action_seen:
+            raise ValueError(
+                "Exactly one sequence must relate the root / current action with itself. "
+                "This allows a tipping point to be defined for the graph's first action. "
+                "Such a sequence is not present in the file. "
+            )
 
     return sequences, tipping_point_by_action
 
