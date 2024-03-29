@@ -177,6 +177,7 @@ def _update_data_limits(axes, coordinates):
 
 
 def _configure_axes(axes, pathway_map, layout, title, plot_colours):
+    # pylint: disable=too-many-locals
     if len(title) > 0:
         axes.set_title(title)
 
@@ -187,21 +188,50 @@ def _configure_axes(axes, pathway_map, layout, title, plot_colours):
     axes.set_xlabel("time")
 
     actions = pathway_map.actions()
+
     action_names = [action.name for action in actions]
 
+    labels = []
     y_coordinates = []
     label_colours = []
+    is_action_combination = []
+    y_coordinates_of_regular_actions = []
 
+    # Action combinations that continue a single action end up at the same y-coordinate as
+    # the action which they continue. Coordinates and labels for only these specific combinations
+    # must be sieved out of the collections.
     for action_name in action_names:
-        y_coordinate, colour = next(
-            (layout[action_node][1], plot_colours.node_colours[idx])
-            for idx, action_node in enumerate(layout)
-            if action_node.action.name == action_name
-        )
-        y_coordinates.append(y_coordinate)
-        label_colours.append(colour)
+        for idx, action_node in enumerate(layout):
+            if action_node.action.name == action_name:
+                y_coordinate = layout[action_node][1]
+                colour = plot_colours.node_colours[idx]
 
-    axes.set_yticks(y_coordinates, labels=action_names)
+                labels.append(action_name)
+                y_coordinates.append(y_coordinate)
+                label_colours.append(colour)
+
+                is_action_combination.append(
+                    isinstance(action_node.action, ActionCombination)
+                )
+                if not isinstance(action_node.action, ActionCombination):
+                    y_coordinates_of_regular_actions.append(y_coordinate)
+
+    # Sieve out the information for those action combinations that continue a single action
+
+    # sieve = [
+    #     is_action_combination[idx]
+    #     and y_coordinates_of_regular_actions.count([y_coordinates[idx]]) > 0
+    #     for idx in range(len(y_coordinates))
+    # ]
+    # y_coordinates = [
+    #     y_coordinates[idx] for idx in range(len(y_coordinates)) if not sieve[idx]
+    # ]
+    # labels = [labels[idx] for idx in range(len(labels)) if not sieve[idx]]
+    # label_colours = [
+    #     label_colours[idx] for idx in range(len(label_colours)) if not sieve[idx]
+    # ]
+
+    axes.set_yticks(y_coordinates, labels=labels)
 
     for colour, tick in zip(label_colours, axes.yaxis.get_major_ticks()):
         tick.label1.set_color(colour)
@@ -294,6 +324,7 @@ def _distribute_vertically(
                 names_of_actions_to_distribute.append(action.name)
         else:
             continued_actions = pathway_map.continued_actions(action)
+            print(continued_actions)
 
             if len(continued_actions) == 1:
                 # Action is a combination of a single existing action with a new one

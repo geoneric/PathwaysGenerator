@@ -35,7 +35,8 @@ a d[1]
 b d[2]
 c d[3]
 """
-    )
+    ),
+    actions,
 )
 sequence_graph = conversion.sequences_to_sequence_graph(sequences)
 pathway_map = conversion.sequence_graph_to_pathway_map(sequence_graph)

@@ -42,7 +42,8 @@ f[1]       e[2]
 f[2]       e[3]
 f[3]       e[4]
 """
-    )
+    ),
+    actions,
 )
 sequence_graph = conversion.sequences_to_sequence_graph(sequences)
 

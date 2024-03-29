@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 
+from ..action import Action
 from .colour import PlotColours
 
 
@@ -190,3 +191,24 @@ def distribute(coordinates: list[float], min_distance: float) -> list[float]:
     distributed_coordinates = _unsort(distributed_coordinates, idxs)
 
     return list(reversed(distributed_coordinates))
+
+
+def action_level_by_first_occurrence(
+    sequences: list[tuple[Action, Action]]
+) -> dict[Action, float]:
+    """
+    Determine a level per action the sequences of actions passed in
+
+    The returned collection of levels can be used for vertically ordering actions in graphs. The
+    levels are based on the order in which the actions are mentioned in the input collection.
+    Actions occurring earlier in the collection, are assigned lower levels.
+    """
+    level_by_action: dict[Action, float] = {}
+
+    for idx, (from_action, to_action) in enumerate(sequences, 1):
+        if from_action not in level_by_action:
+            level_by_action[from_action] = idx + 0.01
+        if to_action not in level_by_action:
+            level_by_action[to_action] = idx - 0.01
+
+    return level_by_action

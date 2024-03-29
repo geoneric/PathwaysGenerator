@@ -7,9 +7,9 @@ from io import StringIO
 
 import matplotlib.pyplot as plt
 
-from adaptation_pathways.graph import action_level_by_first_occurrence, conversion
+from adaptation_pathways.graph import conversion
 from adaptation_pathways.io import text
-from adaptation_pathways.plot import init_axes
+from adaptation_pathways.plot import action_level_by_first_occurrence, init_axes
 from adaptation_pathways.plot import plot_classic_pathway_map as plot
 
 
@@ -35,7 +35,8 @@ a d[1] 2070
 b d[2] 2070
 c d[3] 2070
 """
-    )
+    ),
+    actions,
 )
 sequence_graph = conversion.sequences_to_sequence_graph(sequences)
 pathway_map = conversion.sequence_graph_to_pathway_map(sequence_graph)

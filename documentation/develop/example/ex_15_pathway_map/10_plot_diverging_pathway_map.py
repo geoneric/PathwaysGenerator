@@ -31,7 +31,8 @@ current a
 current b
 current c
 """
-    )
+    ),
+    actions,
 )
 sequence_graph = conversion.sequences_to_sequence_graph(sequences)
 pathway_map = conversion.sequence_graph_to_pathway_map(sequence_graph)

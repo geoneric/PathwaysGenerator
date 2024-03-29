@@ -8,9 +8,9 @@ from ..graph.conversion import (
     sequence_graph_to_pathway_map,
     sequences_to_sequence_graph,
 )
-from ..graph.io import action_level_by_first_occurrence
 from ..io import sqlite, text
 from ..plot import init_axes, plot_classic_pathway_map, save_plot
+from ..plot.util import action_level_by_first_occurrence
 from ..version import __version__ as version
 from .main import main_function
 

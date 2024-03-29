@@ -1,3 +1,4 @@
+import copy
 import io
 import re
 from pathlib import Path
@@ -5,8 +6,22 @@ from pathlib import Path
 from .. import alias
 from ..action import Action
 from ..action_combination import ActionCombination
-from ..graph.io import action_name_pattern, edition_pattern, open_stream
 from ..plot.colour import hex_to_rgba, rgba_to_hex
+
+
+edition_pattern = r"\d+"
+action_name_pattern = r"\w+"
+
+
+def open_stream(pathname: str | Path | io.IOBase) -> io.IOBase:
+    stream: io.IOBase
+
+    if isinstance(pathname, (str, Path)):
+        stream = open(pathname, encoding="utf-8")  # pylint: disable=consider-using-with
+    else:
+        stream = pathname
+
+    return stream
 
 
 def format_actions_path(basename_pathname: str) -> Path:
@@ -113,17 +128,46 @@ def read_actions(
 # pylint: disable-next=too-many-locals
 def _parse_sequence(
     line: str,
+    actions: alias.Actions,
+    sequence_action_by_action: dict[Action, Action],
     action_by_name_and_edition: dict[tuple[str, int], Action],
 ) -> tuple[alias.Sequence, alias.TippingPoint]:
 
-    def conditionally_add_node(
-        name: str,
-        edition: int,
-        action_by_name_and_edition: dict[tuple[str, int], Action],
-    ):
+    def action_by_name(name: str) -> alias.Action:
+        # Find action instance corresponding with the name. Should be only one of these.
+        actions_by_name = [action for action in actions if action.name == name]
+
+        if len(actions_by_name) != 1:
+            raise ValueError(
+                f"Action {name} from sequence must occur exactly one in the  collection of actions"
+            )
+
+        return actions_by_name[0]
+
+    def conditionally_add_node(name: str, edition: int):
         if (name, edition) not in action_by_name_and_edition:
-            action = Action(name, edition)
-            action_by_name_and_edition[(name, edition)] = action
+
+            # Corresponding instance in the actions collection. We need it to determine its type.
+            action = action_by_name(name)
+
+            if isinstance(action, ActionCombination):
+                # Create a new instance passing in the collection of combined actions created
+                # earlier for the sequence collection we are building. Note that combined
+                # actions can be combined actions themselves, etc.
+                sequence_action = ActionCombination(
+                    name,
+                    copy.deepcopy(action.actions),  # TODO Would also work?
+                    # [
+                    #     sequence_action_by_action[combined_action]
+                    #     for combined_action in action.actions
+                    # ],
+                    edition,
+                )
+            else:
+                sequence_action = Action(name, edition)  # type: ignore[assignment]
+
+            sequence_action_by_action[action] = sequence_action
+            action_by_name_and_edition[(name, edition)] = sequence_action
 
     from_action_pattern = (
         rf"(?P<from_action_name>{action_name_pattern})"
@@ -149,13 +193,13 @@ def _parse_sequence(
         if match.group("from_edition") is not None
         else 0
     )
-    conditionally_add_node(from_action_name, from_edition, action_by_name_and_edition)
+    conditionally_add_node(from_action_name, from_edition)
 
     to_action_name = match.group("to_action_name")
     to_edition = (
         int(match.group("to_edition")) if match.group("to_edition") is not None else 0
     )
-    conditionally_add_node(to_action_name, to_edition, action_by_name_and_edition)
+    conditionally_add_node(to_action_name, to_edition)
 
     tipping_point = (
         int(match.group("tipping_point"))
@@ -171,6 +215,7 @@ def _parse_sequence(
 
 def read_sequences(
     sequences_path: Path | io.IOBase,
+    actions: alias.Actions,
 ) -> tuple[alias.Sequences, alias.TippingPointByAction]:
     """
     Read sequences of actions and an optional tipping point from a stream and return the
@@ -190,6 +235,7 @@ def read_sequences(
     stream = open_stream(sequences_path)
     sequences: alias.Sequences = []
     tipping_point_by_action: alias.TippingPointByAction = {}
+    sequence_action_by_action: dict[Action, Action] = {}
     action_by_name_and_edition: dict[tuple[str, int], Action] = {}
 
     with stream:
@@ -202,14 +248,24 @@ def read_sequences(
             if len(line_as_string) > 0:
                 sequence, tipping_point = _parse_sequence(
                     line_as_string,
+                    actions,
+                    sequence_action_by_action,
                     action_by_name_and_edition,
                 )
+
                 if not root_action_seen and sequence[0].name == sequence[1].name:
                     root_action_seen = True
                 else:
                     sequences.append(sequence)
 
-                assert sequence[1] not in tipping_point_by_action, sequence[1]
+                if sequence[1] in tipping_point_by_action:
+                    raise ValueError(
+                        f"Found tipping point {tipping_point} "
+                        f"for action {sequence[1]}, which already has "
+                        f"tipping point {tipping_point_by_action[sequence[1]]}. "
+                        "Actions must be associated with exactly one tipping point."
+                    )
+
                 tipping_point_by_action[sequence[1]] = tipping_point
 
         if len(sequences) > 0 and not root_action_seen:
@@ -220,61 +276,6 @@ def read_sequences(
             )
 
     return sequences, tipping_point_by_action
-
-
-# def _parse_tipping_point(
-#     line: str,
-#     action_by_name_and_edition: dict[tuple[str, int], Action],
-# ) -> tuple[Action, int]:
-#
-#     action_pattern = (
-#         rf"(?P<action_name>{action_name_pattern})"
-#         rf"(\[(?P<edition>{edition_pattern})\])?"
-#     )
-#     tipping_point_pattern = r"(?P<tipping_point>\d+)"
-#     pattern = rf"{action_pattern}\s+{tipping_point_pattern}"
-#
-#     match = re.fullmatch(pattern, line)
-#
-#     if match is None:
-#         raise ValueError(f"Cannot parse tipping point: {line}")
-#
-#     action_name = match.group("action_name")
-#     edition = int(match.group("edition")) if match.group("edition") is not None else 0
-#     tipping_point = int(match.group("tipping_point"))
-#
-#     if not (action_name, edition) in action_by_name_and_edition:
-#         raise ValueError(
-#             f"Tipping point for unknown action {action_name} (edition {edition})"
-#         )
-#
-#     action = action_by_name_and_edition[(action_name, edition)]
-#
-#     return action, tipping_point
-#
-#
-# def read_tipping_points(
-#     tipping_points_path: Path | io.IOBase,
-#     action_by_name_and_edition: dict[tuple[str, int], Action],
-# ) -> dict[Action, int]:
-#
-#     stream = open_stream(tipping_points_path)
-#     tipping_point_by_action: dict[Action, int] = {}
-#
-#     with stream:
-#         for line in stream:
-#             line_as_string = _strip_line(line)
-#
-#             # Skip empty lines
-#             if len(line_as_string) > 0:
-#
-#                 action, tipping_point = _parse_tipping_point(
-#                     line_as_string,
-#                     action_by_name_and_edition,
-#                 )
-#                 tipping_point_by_action[action] = tipping_point
-#
-#     return tipping_point_by_action
 
 
 def read_dataset(
@@ -294,16 +295,7 @@ def read_dataset(
     sequences_path = format_sequences_path(basename_pathname)
 
     actions, colour_by_action = read_actions(actions_path)
-    sequences, tipping_point_by_action = read_sequences(sequences_path)
-
-    action_names = [action.name for action in actions]
-
-    for sequence in sequences:
-        for action in sequence:
-            if action.name not in action_names:
-                raise ValueError(
-                    f"Action {action.name} from {sequences_path} is not present in {actions_path}"
-                )
+    sequences, tipping_point_by_action = read_sequences(sequences_path, actions)
 
     return actions, sequences, tipping_point_by_action, colour_by_action
 

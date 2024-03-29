@@ -131,12 +131,19 @@ class TextTest(unittest.TestCase):
         ]
 
         for string in strings:
+            actions, _ = text.read_actions(
+                StringIO(
+                    """
+                    """
+                )
+            )
             sequences, tipping_point_by_action = text.read_sequences(
                 StringIO(
                     f"""
                     {string}
                     """
-                )
+                ),
+                actions,
             )
             self.assertEqual(len(sequences), 0)
             self.assertEqual(len(tipping_point_by_action), len(sequences))
@@ -166,12 +173,21 @@ class TextTest(unittest.TestCase):
         ]
 
         for string in strings:
+            actions, _ = text.read_actions(
+                StringIO(
+                    """
+                    current
+                    a
+                    """
+                )
+            )
             sequences, tipping_point_by_action = text.read_sequences(
                 StringIO(
                     f"""
                     {string}
                     """
-                )
+                ),
+                actions,
             )
             self.assertEqual(len(sequences), 1)
             self.assertEqual(sequences[0][0].name, "current")
@@ -201,12 +217,23 @@ class TextTest(unittest.TestCase):
         ]
 
         for string in strings:
+            actions, _ = text.read_actions(
+                StringIO(
+                    """
+                    current
+                    a
+                    b
+                    c
+                    """
+                )
+            )
             sequences, tipping_point_by_action = text.read_sequences(
                 StringIO(
                     f"""
                     {string}
                     """
-                )
+                ),
+                actions,
             )
             self.assertEqual(len(sequences), 3)
             self.assertEqual(sequences[0][0].name, "current")
@@ -243,12 +270,21 @@ class TextTest(unittest.TestCase):
         ]
 
         for string in strings:
+            actions, _ = text.read_actions(
+                StringIO(
+                    """
+                    current
+                    a
+                    """
+                )
+            )
             sequences, tipping_point_by_action = text.read_sequences(
                 StringIO(
                     f"""
                     {string}
                     """
-                )
+                ),
+                actions,
             )
             self.assertEqual(len(sequences), 2)
             self.assertEqual(sequences[0][0].name, "current")
@@ -268,6 +304,16 @@ class TextTest(unittest.TestCase):
             self.assertEqual(tipping_point_by_action[sequences[1][1]], 0)
 
     def test_multiple_tipping_points(self):
+        actions, _ = text.read_actions(
+            StringIO(
+                """
+                current
+                a
+                b
+                c
+                """
+            )
+        )
         sequences, tipping_point_by_action = text.read_sequences(
             StringIO(
                 """
@@ -276,7 +322,8 @@ class TextTest(unittest.TestCase):
                 a[5] b 2040
                 b c 2050
                 """
-            )
+            ),
+            actions,
         )
 
         self.assertEqual(len(sequences), 3)

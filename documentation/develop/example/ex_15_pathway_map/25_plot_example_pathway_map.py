@@ -48,7 +48,8 @@ c[1]       d[4]
 
 current    d[1]
 """
-    )
+    ),
+    actions,
 )
 sequence_graph = conversion.sequences_to_sequence_graph(sequences)
 pathway_map = conversion.sequence_graph_to_pathway_map(sequence_graph)

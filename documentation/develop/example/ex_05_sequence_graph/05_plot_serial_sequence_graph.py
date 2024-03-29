@@ -31,7 +31,8 @@ current a
 a b
 b c
 """
-    )
+    ),
+    actions,
 )
 sequence_graph = conversion.sequences_to_sequence_graph(sequences)
 
