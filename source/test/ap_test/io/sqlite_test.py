@@ -1,5 +1,7 @@
+import random
 import unittest
 
+from adaptation_pathways import alias
 from adaptation_pathways.action import Action
 from adaptation_pathways.io import sqlite as dbms
 from adaptation_pathways.plot.colour import default_action_colours
@@ -34,24 +36,61 @@ class SQLiteTest(unittest.TestCase):
             [(type(action1), type(action2)) for action1, action2 in sequences_we_want],
         )
 
+    def compare_tipping_points(self, tipping_points_we_got, tipping_points_we_want):
+        self.assertEqual(
+            [
+                (action.name, (type(tipping_point), tipping_point))
+                for action, tipping_point in tipping_points_we_got.items()
+            ],
+            [
+                (action.name, (type(tipping_point), tipping_point))
+                for action, tipping_point in tipping_points_we_want.items()
+            ],
+        )
+
     def compare_colours(self, colours_we_got, colours_we_want):
         self.assertEqual(
-            [(action.name, colour) for action, colour in colours_we_got.items()],
-            [(action.name, colour) for action, colour in colours_we_want.items()],
+            [
+                (action.name, (type(colour), colour))
+                for action, colour in colours_we_got.items()
+            ],
+            [
+                (action.name, (type(colour), colour))
+                for action, colour in colours_we_want.items()
+            ],
         )
 
     def compare_data(  # pylint: disable=too-many-arguments
         self,
         actions,
         sequences,
+        tipping_points,
         colours,
     ):
         self.compare_actions(*actions)
         self.compare_sequences(*sequences)
+        self.compare_tipping_points(*tipping_points)
         self.compare_colours(*colours)
 
-    def _test_round_trip(self, database_path, actions, sequences):
-        tipping_point_by_action = {}  # TODO
+    def _test_round_trip(
+        self, database_path: str, actions: alias.Actions, sequences: alias.Sequences
+    ):
+
+        # Add tipping point for the root action, which is not part of the sequences collection
+        to_action_names = [sequence[1].name for sequence in sequences]
+        root_actions = {
+            sequence[0]
+            for sequence in sequences
+            if sequence[0].name not in to_action_names
+        }
+        assert len(root_actions) == 1, f"{root_actions}"
+        root_action = root_actions.pop()
+        tipping_point_by_action = {root_action: random.randint(2020, 2100)}
+
+        tipping_point_by_action |= {
+            sequence[1]: random.randint(2020, 2100) for sequence in sequences
+        }
+
         colours = list(default_action_colours(len(actions)))
         colour_by_action = {action: colours[idx] for idx, action in enumerate(actions)}
 
@@ -65,11 +104,10 @@ class SQLiteTest(unittest.TestCase):
             dbms.read_dataset(database_path)
         )
 
-        # TODO tipping_points_we_got
-
         self.compare_data(
             (actions_we_got, actions),
             (sequences_we_got, sequences),
+            (tipping_points_we_got, tipping_point_by_action),
             (colours_we_got, colour_by_action),
         )
 
@@ -77,7 +115,7 @@ class SQLiteTest(unittest.TestCase):
         database_path = "overwrite.db"
         actions = []
         sequences = []
-        tipping_point_by_action = {}  # TODO
+        tipping_point_by_action = {}
         colour_by_action = {}
 
         dbms.write_dataset(

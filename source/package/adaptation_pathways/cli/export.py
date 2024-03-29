@@ -4,22 +4,17 @@ from pathlib import Path
 
 import docopt
 
-from ..action import Action
 from ..io import sqlite, text
 from ..version import __version__ as version
 from .main import main_function
 
 
-# Current issue:
-# TODO Read tipping points from dataset
-
-
 @main_function
 def export(dataset_pathname: str, basename_pathname: str) -> int:
 
-    actions, sequences, colour_by_action = sqlite.read_dataset(Path(dataset_pathname))
-
-    tipping_point_by_action: dict[Action, int] = {}
+    actions, sequences, tipping_point_by_action, colour_by_action = sqlite.read_dataset(
+        Path(dataset_pathname)
+    )
 
     text.write_dataset(
         actions, sequences, tipping_point_by_action, colour_by_action, basename_pathname

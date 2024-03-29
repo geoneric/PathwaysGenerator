@@ -6,7 +6,7 @@ from .. import alias
 from ..action import Action
 from ..action_combination import ActionCombination
 from ..graph.io import action_name_pattern, edition_pattern, open_stream
-from ..plot.colour import hex_to_rgba
+from ..plot.colour import hex_to_rgba, rgba_to_hex
 
 
 def format_actions_path(basename_pathname: str) -> Path:
@@ -21,13 +21,6 @@ def format_sequences_path(basename_pathname: str) -> Path:
     Return path formatted as `<name>-sequence.txt`
     """
     return Path(f"{basename_pathname}-sequence.txt")
-
-
-def format_tipping_points_path(basename_pathname: str) -> Path:
-    """
-    Return path formatted as `<name>-tipping_point.txt`
-    """
-    return Path(f"{basename_pathname}-tipping_point.txt")
 
 
 def _strip_line(line: bytes) -> str:
@@ -332,13 +325,36 @@ def write_actions(
 ) -> None:
     with open(path, "w", encoding="utf8") as file:
         for action in actions:
-            file.write(f"{_format_action(action)} {colour_by_action[action]}\n")
+            file.write(
+                f"{_format_action(action)} {rgba_to_hex(colour_by_action[action])}\n"
+            )
 
 
-def write_sequences(sequences: alias.Sequences, path: Path) -> None:
+def write_sequences(
+    sequences: alias.Sequences,
+    tipping_point_by_action: alias.TippingPointByAction,
+    path: Path,
+) -> None:
     with open(path, "w", encoding="utf8") as file:
+        if len(sequences) > 0:
+            root_actions = {
+                action
+                for action in tipping_point_by_action
+                if action not in [sequence[1] for sequence in sequences]
+            }
+            assert len(root_actions) == 1, f"{root_actions}"
+            root_action = root_actions.pop()
+
+            file.write(
+                f"{_format_action(root_action)} {_format_action(root_action)} "
+                f"{tipping_point_by_action[root_action]}\n"
+            )
+
         for from_action, to_action in sequences:
-            file.write(f"{_format_action(from_action)} {_format_action(to_action)}\n")
+            file.write(
+                f"{_format_action(from_action)} {_format_action(to_action)} "
+                f"{tipping_point_by_action[to_action]}\n"
+            )
 
 
 def write_tipping_points(
@@ -360,17 +376,10 @@ def write_dataset(
     Write the information about adaptation pathways to a set of text files
 
     The names of the created text files are fixed, see :py:func:`format_actions_path`,
-    :py:func:`format_sequences_path`, :py:func:`format_tipping_points_path`. Existing files
-    are overwritten.
-
-    In case the tipping-point collection is empty, no tipping-point file is created.
+    :py:func:`format_sequences_path`. Existing files are overwritten.
     """
     actions_path = format_actions_path(basename_pathname)
     sequences_path = format_sequences_path(basename_pathname)
-    tipping_points_path = format_tipping_points_path(basename_pathname)
 
     write_actions(actions, colour_by_action, actions_path)
-    write_sequences(sequences, sequences_path)
-
-    if len(tipping_point_by_action) > 0:
-        write_tipping_points(tipping_point_by_action, tipping_points_path)
+    write_sequences(sequences, tipping_point_by_action, sequences_path)

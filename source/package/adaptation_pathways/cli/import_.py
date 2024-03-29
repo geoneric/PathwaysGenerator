@@ -9,21 +9,6 @@ from ..version import __version__ as version
 from .main import main_function
 
 
-# Current issue:
-# TODO Merge tipping points (optional) with sequences. Get rid of tipping points table.
-# TODO Support writing tipping points to database
-# TODO Support writing action combinations to database
-# TODO Update all cli to use text.read_dataset and sqlite.read_dataset
-# TODO Use argb everywhere?
-# TODO Get rid of Action's edition
-
-
-# New issue:
-# TODO Update sequence graph to show connections between actions,
-#      whatever the timing. Uniqueness doesn't matter at all, only the name.
-#      Goal is to show dependencies between actions. Graph statistics.
-
-
 @main_function
 def import_(basename_pathname: str, dataset_pathname: str) -> int:
 
