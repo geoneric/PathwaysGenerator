@@ -8,7 +8,6 @@ from ..colour import (
     default_label_colour,
     default_node_edge_colours,
     default_nominal_palette,
-    default_transparency,
     nord_palette_light,
 )
 
@@ -18,7 +17,7 @@ def colour_by_node(
 ) -> Colours:
     # pylint: disable=redefined-outer-name
     colours = []
-    conversion_colour = nord_palette_light[0] + (default_transparency(),)
+    conversion_colour = nord_palette_light[0]
 
     # Use the same colour for conversions
     # Colour each unique action unique
@@ -48,9 +47,13 @@ def colour_by_action_name(graph: PathwayGraph, palette: Colours) -> dict[str, Co
 
 
 def default_node_colours(graph: PathwayGraph) -> Colours:
-    return colour_by_node(
-        graph, colour_by_action_name(graph, default_nominal_palette())
+    colour_by_action_name_ = (
+        graph.graph.graph["colour_by_action_name"]
+        if "colour_by_action_name" in graph.graph.graph
+        else colour_by_action_name(graph, default_nominal_palette())
     )
+
+    return colour_by_node(graph, colour_by_action_name_)
 
 
 def default_colours(pathway_graph: PathwayGraph) -> PlotColours:

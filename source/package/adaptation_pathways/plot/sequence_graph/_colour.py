@@ -41,9 +41,13 @@ def colour_by_action_name(graph: SequenceGraph, palette: Colours) -> dict[str, C
 
 
 def default_node_colours(graph: SequenceGraph) -> Colours:
-    return colour_by_node(
-        graph, colour_by_action_name(graph, default_nominal_palette())
+    colour_by_action_name_ = (
+        graph.graph.graph["colour_by_action_name"]
+        if "colour_by_action_name" in graph.graph.graph
+        else colour_by_action_name(graph, default_nominal_palette())
     )
+
+    return colour_by_node(graph, colour_by_action_name_)
 
 
 def default_colours(sequence_graph: SequenceGraph) -> PlotColours:

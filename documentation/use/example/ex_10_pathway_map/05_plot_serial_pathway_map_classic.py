@@ -7,44 +7,44 @@ from io import StringIO
 
 import matplotlib.pyplot as plt
 
-from adaptation_pathways.graph import (
-    action_level_by_first_occurrence,
-    read_sequences,
-    read_tipping_points,
-    sequence_graph_to_pathway_map,
-    sequences_to_sequence_graph,
-)
-from adaptation_pathways.plot import init_axes
+from adaptation_pathways.graph import conversion
+from adaptation_pathways.io import text
+from adaptation_pathways.plot import action_level_by_first_occurrence, init_axes
 from adaptation_pathways.plot import plot_classic_pathway_map as plot
 
 
-sequences = read_sequences(
+actions, colour_by_action = text.read_actions(
     StringIO(
         """
-current a
-a b
-b c
+current #ff4c566a
+a #ffbf616a
+b #ffd08770
+c #ffebcb8b
 """
     )
 )
-sequence_graph = sequences_to_sequence_graph(sequences)
-level_by_action = action_level_by_first_occurrence(sequences)
-
-pathway_map = sequence_graph_to_pathway_map(sequence_graph)
-tipping_points = read_tipping_points(
+sequences, tipping_point_by_action = text.read_sequences(
     StringIO(
         """
-current 2030
-a 2040
-b 2050
-c 2060
+current current 2030
+current a 2040
+a b 2050
+b c 2060
 """
     ),
-    pathway_map.actions(),
+    actions,
 )
+sequence_graph = conversion.sequences_to_sequence_graph(sequences)
+pathway_map = conversion.sequence_graph_to_pathway_map(sequence_graph)
 
-pathway_map.assign_tipping_points(tipping_points)
-pathway_map.set_attribute("level", level_by_action)
+level_by_action = action_level_by_first_occurrence(sequences)
+colour_by_action_name = {
+    action.name: colour for action, colour in colour_by_action.items()
+}
+
+pathway_map.assign_tipping_points(tipping_point_by_action)
+pathway_map.set_attribute("level_by_action", level_by_action)
+pathway_map.set_attribute("colour_by_action_name", colour_by_action_name)
 
 _, axes = plt.subplots(layout="constrained")
 init_axes(axes)

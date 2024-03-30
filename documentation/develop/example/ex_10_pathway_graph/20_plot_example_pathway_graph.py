@@ -7,30 +7,52 @@ from io import StringIO
 
 import matplotlib.pyplot as plt
 
-from adaptation_pathways.graph import (
-    read_sequence_graph,
-    sequence_graph_to_pathway_graph,
-)
+from adaptation_pathways.graph import conversion
+from adaptation_pathways.io import text
 from adaptation_pathways.plot import init_axes
 from adaptation_pathways.plot import plot_default_pathway_graph as plot
 
 
-sequence_graph = read_sequence_graph(
+actions, colour_by_action = text.read_actions(
     StringIO(
         """
-current a
-a e
-current b
-b f
-current c
-c f
-current d
-d f
-f e
+current #ff4c566a
+a #ffbf616a
+b #ffd08770
+c #ffebcb8b
+d #ffa3be8c
+e #ffb48ead
+f #ff5e81ac
 """
     )
 )
-pathway_graph = sequence_graph_to_pathway_graph(sequence_graph)
+sequences, tipping_point_by_action = text.read_sequences(
+    StringIO(
+        """
+current[1] current
+current    a
+a          e[1]
+current    b
+b          f[1]
+current    c
+c          f[2]
+current    d
+d          f[3]
+f[1]       e[2]
+f[2]       e[3]
+f[3]       e[4]
+"""
+    ),
+    actions,
+)
+sequence_graph = conversion.sequences_to_sequence_graph(sequences)
+pathway_graph = conversion.sequence_graph_to_pathway_graph(sequence_graph)
+
+colour_by_action_name = {
+    action.name: colour for action, colour in colour_by_action.items()
+}
+
+pathway_graph.set_attribute("colour_by_action_name", colour_by_action_name)
 
 _, axes = plt.subplots(layout="constrained")
 init_axes(axes)

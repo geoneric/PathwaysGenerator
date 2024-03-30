@@ -2,8 +2,10 @@ import copy
 import sqlite3
 from pathlib import Path
 
+from .. import alias
 from ..action import Action
 from ..action_combination import ActionCombination
+from ..plot.colour import default_node_colour, hex_to_rgba, rgba_to_hex
 
 
 _action_table_name = "action"
@@ -11,7 +13,7 @@ _edition_table_name = "edition"
 _sequence_table_name = "sequence"
 _action_combination_table_name = "action_combination"
 _plot_table_name = "plot"
-_default_database_path_suffix = ".apw"
+default_database_path_suffix = ".apw"
 
 
 def normalize_database_path(database_path: Path | str) -> Path:
@@ -26,15 +28,20 @@ def normalize_database_path(database_path: Path | str) -> Path:
 
     # Only add the default suffix if the path doesn't already have one
     if len(database_path.suffix) == 0:
-        database_path = database_path.with_suffix(_default_database_path_suffix)
+        database_path = database_path.with_suffix(default_database_path_suffix)
 
     return database_path
 
 
-def write_dataset(  # pylint: disable=too-many-locals
-    actions: list[Action],
-    sequences: list[tuple[Action, Action]],
-    colours: dict[Action, str],
+def dataset_exists(database_path: Path | str) -> bool:
+    return normalize_database_path(database_path).exists()
+
+
+def write_dataset(  # pylint: disable=too-many-locals, too-many-arguments
+    actions: alias.Actions,
+    sequences: alias.Sequences,
+    tipping_point_by_action: alias.TippingPointByAction,
+    colour_by_action: alias.ColourByAction,
     database_path: Path | str,
     *,
     overwrite: bool = True,
@@ -42,6 +49,8 @@ def write_dataset(  # pylint: disable=too-many-locals
     """
     Save the information passed in to the database
     """
+    assert len(colour_by_action) == len(actions), f"{colour_by_action} ↔ {actions}"
+
     database_path = normalize_database_path(database_path)
 
     if database_path.exists() and not overwrite:
@@ -51,6 +60,7 @@ def write_dataset(  # pylint: disable=too-many-locals
 
     connection = sqlite3.connect(database_path)
     connection.execute("PRAGMA foreign_keys = 1")
+    connection.execute("PRAGMA ignore_check_constraints = 0")
 
     connection.execute(
         f"""
@@ -84,6 +94,7 @@ def write_dataset(  # pylint: disable=too-many-locals
             sequence_id INTEGER NOT NULL,
             from_edition_id INTEGER NOT NULL,
             to_edition_id INTEGER NOT NULL,
+            tipping_point INTEGER NOT NULL CHECK (tipping_point > 0),
 
             PRIMARY KEY (sequence_id),
             FOREIGN KEY (from_edition_id)
@@ -157,7 +168,7 @@ def write_dataset(  # pylint: disable=too-many-locals
     action_instances_by_name: dict[str, list[Action]] = {}
 
     # All unique Action instances, is some order
-    action_instances: list[Action] = []
+    action_instances: alias.Actions = []
 
     def add_action_instance(action):
         if action.name not in action_instances_by_name:
@@ -205,14 +216,33 @@ def write_dataset(  # pylint: disable=too-many-locals
             edition_records,
         )
 
-    sequence_records = (
+    sequence_records = list(
         {
             "sequence_id": sequence_id,
             "from_edition_id": edition_id_by_instance[sequence[0]],
             "to_edition_id": edition_id_by_instance[sequence[1]],
+            "tipping_point": tipping_point_by_action[sequence[1]],
         }
-        for sequence_id, sequence in enumerate(sequences)
+        for sequence_id, sequence in enumerate(sequences, start=1)
     )
+
+    if len(sequences) > 0:
+        root_actions = {
+            action
+            for action in tipping_point_by_action
+            if action not in [sequence[1] for sequence in sequences]
+        }
+        assert len(root_actions) == 1, f"{root_actions}"
+        root_action = root_actions.pop()
+
+        sequence_records = [
+            {
+                "sequence_id": 0,
+                "from_edition_id": edition_id_by_instance[root_action],
+                "to_edition_id": edition_id_by_instance[root_action],
+                "tipping_point": tipping_point_by_action[root_action],
+            }
+        ] + sequence_records
 
     with connection:
         connection.executemany(
@@ -221,13 +251,15 @@ def write_dataset(  # pylint: disable=too-many-locals
             (
                 sequence_id,
                 from_edition_id,
-                to_edition_id
+                to_edition_id,
+                tipping_point
             )
             VALUES
             (
                 :sequence_id,
                 :from_edition_id,
-                :to_edition_id
+                :to_edition_id,
+                :tipping_point
             )
             """,
             sequence_records,
@@ -266,7 +298,10 @@ def write_dataset(  # pylint: disable=too-many-locals
         )
 
     plot_records = (
-        {"action_id": action_id_by_name[action.name], "colour": colours[action]}
+        {
+            "action_id": action_id_by_name[action.name],
+            "colour": rgba_to_hex(colour_by_action[action]),
+        }
         for action in actions
     )
 
@@ -292,7 +327,9 @@ def write_dataset(  # pylint: disable=too-many-locals
 
 def read_dataset(  # pylint: disable=too-many-locals
     database_path: Path | str,
-) -> tuple[list[Action], list[tuple[Action, Action]], dict[Action, str]]:
+) -> tuple[
+    alias.Actions, alias.Sequences, alias.TippingPointByAction, alias.ColourByAction
+]:
     """
     Open the database and return the contents
 
@@ -321,7 +358,12 @@ def read_dataset(  # pylint: disable=too-many-locals
         )
 
     edition_data = list(
-        connection.execute(f"SELECT action_id, edition_id from {_edition_table_name}")
+        connection.execute(
+            f"""
+            SELECT action_id, edition_id
+            FROM {_edition_table_name}
+            """
+        )
     )
 
     action_id_by_edition_id: dict[int, int] = {
@@ -336,7 +378,12 @@ def read_dataset(  # pylint: disable=too-many-locals
     }
 
     action_data = list(
-        connection.execute(f"SELECT action_id, name from {_action_table_name}")
+        connection.execute(
+            f"""
+            SELECT action_id, name
+            FROM {_action_table_name}
+            """
+        )
     )
     action_instance_by_id: dict[int, Action | ActionCombination] = {}
 
@@ -366,8 +413,13 @@ def read_dataset(  # pylint: disable=too-many-locals
         for action_id, edition_id in edition_data
     }
 
-    sequence_data = connection.execute(
-        f"SELECT sequence_id, from_edition_id, to_edition_id from {_sequence_table_name}"
+    sequence_data = list(
+        connection.execute(
+            f"""
+            SELECT sequence_id, from_edition_id, to_edition_id, tipping_point
+            FROM {_sequence_table_name}
+            """
+        )
     )
 
     sequences = [
@@ -378,13 +430,39 @@ def read_dataset(  # pylint: disable=too-many-locals
         for sequence_record in sequence_data
     ]
 
-    plot_data = connection.execute(f"SELECT action_id, colour from {_plot_table_name}")
+    # One of the sequences relates the root action with itself. This is the one sequence which
+    # we must remove from the collection.
+    root_sequences = [
+        (sequence[0], sequence[1])
+        for sequence in sequences
+        if sequence[0] == sequence[1]
+    ]
+    assert len(root_sequences) == 1, f"{root_sequences}"
+    sequences.remove(root_sequences[0])
 
-    colours = {
-        action_instance_by_id[plot_record[0]]: plot_record[1]
+    tipping_point_by_action = {
+        action_instance_by_edition[sequence_record[2]]: sequence_record[3]
+        for sequence_record in sequence_data
+    }
+
+    plot_data = connection.execute(
+        f"""
+        SELECT action_id, colour
+        FROM {_plot_table_name}
+        """
+    )
+
+    colour_by_action = {
+        action_instance_by_id[plot_record[0]]: hex_to_rgba(plot_record[1])
         for plot_record in plot_data
     }
 
+    for action in actions:
+        if not action in colour_by_action:
+            colour_by_action[action] = default_node_colour()
+
     connection.close()
 
-    return actions, sequences, colours
+    assert len(colour_by_action) == len(actions), f"{colour_by_action} ↔ {actions}"
+
+    return actions, sequences, tipping_point_by_action, colour_by_action

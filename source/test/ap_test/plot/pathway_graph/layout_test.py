@@ -360,9 +360,9 @@ class PathwayGraphLayoutTest(unittest.TestCase):
     def test_action_edition_01(self):
         sequence_graph = SequenceGraph()
         current = Action("current")
-        a1 = Action("a", 1)
+        a1 = Action("a")
         b = Action("b")
-        a2 = Action("a", 2)
+        a2 = Action("a")
 
         current_node = ActionNode(current)
         a1_node = ActionNode(a1)

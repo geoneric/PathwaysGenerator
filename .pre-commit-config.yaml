@@ -21,6 +21,10 @@ repos:
   hooks:
   - id: mypy
     additional_dependencies: ["types-requests"]
+    # args:
+    #   [
+    #     "--check-untyped-defs",
+    #   ]
 - repo: local
   hooks:
   - id: pylint
