@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import adaptation_pathways as ap
 
 from ..graph import PathwayGraph, PathwayMap, SequenceGraph, sequences_to_sequence_graph
-from ..io import sqlite, text
+from ..io.dataset import read_dataset
 from ..plot import (
     init_axes,
     plot_default_pathway_graph,
@@ -41,16 +41,10 @@ def plot_graphs(
     basename_pathname: str, plots_prefix_pathname: str, output_format: str
 ) -> int:
 
-    if sqlite.dataset_exists(basename_pathname):
-        # pylint: disable-next=unused-variable
-        actions, sequences, tipping_point_by_action, colour_by_action = (
-            sqlite.read_dataset(basename_pathname)
-        )
-    else:
-        # pylint: disable-next=unused-variable
-        actions, sequences, tipping_point_by_action, colour_by_action = (
-            text.read_dataset(basename_pathname)
-        )
+    # pylint: disable-next=unused-variable
+    actions, sequences, tipping_point_by_action, colour_by_action = read_dataset(
+        basename_pathname
+    )
 
     colour_by_action_name = {
         action.name: colour for action, colour in colour_by_action.items()

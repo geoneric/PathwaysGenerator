@@ -8,7 +8,7 @@ from ..graph.conversion import (
     sequence_graph_to_pathway_map,
     sequences_to_sequence_graph,
 )
-from ..io import sqlite, text
+from ..io.dataset import read_dataset
 from ..plot import init_axes, plot_classic_pathway_map, save_plot
 from ..plot.util import action_level_by_first_occurrence
 from ..version import __version__ as version
@@ -18,16 +18,10 @@ from .main import main_function
 @main_function
 def plot_map(basename_pathname: str, plot_pathname: str) -> int:
 
-    if sqlite.dataset_exists(basename_pathname):
-        # pylint: disable-next=unused-variable
-        actions, sequences, tipping_point_by_action, colour_by_action = (
-            sqlite.read_dataset(basename_pathname)
-        )
-    else:
-        # pylint: disable-next=unused-variable
-        actions, sequences, tipping_point_by_action, colour_by_action = (
-            text.read_dataset(basename_pathname)
-        )
+    # pylint: disable-next=unused-variable
+    actions, sequences, tipping_point_by_action, colour_by_action = read_dataset(
+        basename_pathname
+    )
 
     colour_by_action_name = {
         action.name: colour for action, colour in colour_by_action.items()
