@@ -1313,38 +1313,38 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
         positions = classic_layout(pathway_map)
         self.assertEqual(len(positions), 10)
 
-    #         self.assert_equal_positions(
-    #             positions,
-    #             paths[0],
-    #             [
-    #                 ("[current", (2012, 0)),
-    #                 ("current]", (2020, 0)),
-    #                 ("[a", (2020, 2)),
-    #                 ("a]", (2030, 2)),
-    #                 ("[d", (2030, -2)),
-    #                 ("d]", (2100, -2)),
-    #             ],
-    #         )
-    #         self.assert_equal_positions(
-    #             positions,
-    #             paths[1],
-    #             [
-    #                 ("[current", (2012, 0)),
-    #                 ("current]", (2020, 0)),
-    #                 ("[b", (2020, 1)),
-    #                 ("b]", (2040, 1)),
-    #             ],
-    #         )
-    #         self.assert_equal_positions(
-    #             positions,
-    #             paths[2],
-    #             [
-    #                 ("[current", (2012, 0)),
-    #                 ("current]", (2020, 0)),
-    #                 ("[c", (2020, -1)),
-    #                 ("c]", (2050, -1)),
-    #             ],
-    #         )
+        self.assert_equal_positions(
+            positions,
+            paths[0],
+            [
+                ("[current", (2012, 0)),
+                ("current]", (2020, 0)),
+                ("[a", (2020, 2)),
+                ("a]", (2030, 2)),
+                ("[d", (2030, 2)),
+                ("d]", (2100, 2)),
+            ],
+        )
+        self.assert_equal_positions(
+            positions,
+            paths[1],
+            [
+                ("[current", (2012, 0)),
+                ("current]", (2020, 0)),
+                ("[b", (2020, 1)),
+                ("b]", (2040, 1)),
+            ],
+        )
+        self.assert_equal_positions(
+            positions,
+            paths[2],
+            [
+                ("[current", (2012, 0)),
+                ("current]", (2020, 0)),
+                ("[c", (2020, -1)),
+                ("c]", (2050, -1)),
+            ],
+        )
 
     def test_action_combination05(self):
         actions = """
@@ -1377,8 +1377,8 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
                 ("current]", (2020, 0)),
                 ("[a", (2020, 2)),
                 ("a]", (2030, 2)),
-                ("[d", (2030, -2)),
-                ("d]", (2100, -2)),
+                ("[d", (2030, -1)),
+                ("d]", (2100, -1)),
             ],
         )
         self.assert_equal_positions(
@@ -1397,10 +1397,10 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
             [
                 ("[current", (2012, 0)),
                 ("current]", (2020, 0)),
-                ("[c", (2020, -1)),
-                ("c]", (2050, -1)),
-                ("[d", (2050, -2)),
-                ("d]", (2100, -2)),
+                ("[c", (2020, -2)),
+                ("c]", (2050, -2)),
+                ("[d", (2050, -1)),
+                ("d]", (2100, -1)),
             ],
         )
 

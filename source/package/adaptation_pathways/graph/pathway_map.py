@@ -65,12 +65,14 @@ class PathwayMap(RootedGraph):
         action_begin: ActionBegin | None = None
 
         for action_begin in self.all_action_begins():
-            if action_begin.action == action_combination:
+            if action_begin.action.name == action_combination.name:
                 # Current action begin contains the action combination
 
                 for action_end, _ in self.graph.in_edges(action_begin):
                     assert isinstance(action_end, ActionEnd)
-                    if action_end.action in action_combination.actions:
+                    if action_end.action.name in [
+                        action.name for action in action_combination.actions
+                    ]:
                         result.append(action_end.action)
 
         return result

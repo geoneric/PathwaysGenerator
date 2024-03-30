@@ -324,7 +324,6 @@ def _distribute_vertically(
                 names_of_actions_to_distribute.append(action.name)
         else:
             continued_actions = pathway_map.continued_actions(action)
-            print(continued_actions)
 
             if len(continued_actions) == 1:
                 # Action is a combination of a single existing action with a new one

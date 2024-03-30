@@ -129,7 +129,6 @@ def read_actions(
 def _parse_sequence(
     line: str,
     actions: alias.Actions,
-    sequence_action_by_action: dict[Action, Action],
     action_by_name_and_edition: dict[tuple[str, int], Action],
 ) -> tuple[alias.Sequence, alias.TippingPoint]:
 
@@ -146,28 +145,15 @@ def _parse_sequence(
 
     def conditionally_add_node(name: str, edition: int):
         if (name, edition) not in action_by_name_and_edition:
-
-            # Corresponding instance in the actions collection. We need it to determine its type.
-            action = action_by_name(name)
-
-            if isinstance(action, ActionCombination):
-                # Create a new instance passing in the collection of combined actions created
-                # earlier for the sequence collection we are building. Note that combined
-                # actions can be combined actions themselves, etc.
-                sequence_action = ActionCombination(
-                    name,
-                    copy.deepcopy(action.actions),  # TODO Would also work?
-                    # [
-                    #     sequence_action_by_action[combined_action]
-                    #     for combined_action in action.actions
-                    # ],
-                    edition,
-                )
-            else:
-                sequence_action = Action(name, edition)  # type: ignore[assignment]
-
-            sequence_action_by_action[action] = sequence_action
-            action_by_name_and_edition[(name, edition)] = sequence_action
+            # Shallow copy of the corresponding action instance in the actions collection. The
+            # action instance will be new, which is what we want. Any layered
+            # action instances (in case of an action combination) will be copied by
+            # reference. Their identity thus corresponds with the instances in the actions
+            # collection. This implies that code should not depend on the identity of the
+            # combined actions, but on their name.
+            action_by_name_and_edition[(name, edition)] = copy.copy(
+                action_by_name(name)
+            )
 
     from_action_pattern = (
         rf"(?P<from_action_name>{action_name_pattern})"
@@ -235,7 +221,6 @@ def read_sequences(
     stream = open_stream(sequences_path)
     sequences: alias.Sequences = []
     tipping_point_by_action: alias.TippingPointByAction = {}
-    sequence_action_by_action: dict[Action, Action] = {}
     action_by_name_and_edition: dict[tuple[str, int], Action] = {}
 
     with stream:
@@ -249,7 +234,6 @@ def read_sequences(
                 sequence, tipping_point = _parse_sequence(
                     line_as_string,
                     actions,
-                    sequence_action_by_action,
                     action_by_name_and_edition,
                 )
 
