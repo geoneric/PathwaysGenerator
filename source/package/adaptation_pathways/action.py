@@ -11,17 +11,15 @@ class Action:
     """
 
     _name: str
-    _edition: int
 
-    def __init__(self, name: str, edition: int = 0) -> None:
+    def __init__(self, name: str) -> None:
         self._name = name
-        self._edition = edition
 
     def __str__(self) -> str:
-        return f"{self._name}[{self._edition}]"
+        return f"{self._name}"
 
     def __repr__(self) -> str:
-        return f'Action("{self._name}", {self._edition})'
+        return f'Action("{self._name}")'
 
     def __lt__(self, other) -> bool:
         return hash(self) < hash(other)
@@ -33,7 +31,3 @@ class Action:
     @name.setter
     def name(self, name: str) -> None:
         self._name = name
-
-    @property
-    def edition(self) -> int:
-        return self._edition
