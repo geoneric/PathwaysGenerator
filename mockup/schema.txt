@@ -1,0 +1,144 @@
+Project
+    id: String
+    name: String
+    organization: String
+    startYear: Number
+    endYear: Number
+    conditions: Metric[]
+    criteria: Metric[]
+    actions: Action[]
+    actionDependencies: ActionDependency[]
+    pathways: Pathway[]
+    scenarios: Scenario[]
+    ui_state: UIState
+
+Metric
+    id: String
+    name: String
+    unit: MetricUnit
+    current_value: Number
+    calculation: PathwayCalculationType
+
+MetricUnit
+    symbol: String
+    place_after_value: Boolean
+    value_format: String
+
+Action
+    id: String
+    name: String
+    color: String
+    icon: String
+
+ActionDependency
+    action: Action.id
+    relation: SequenceComparison
+    other_actions: Action.id[]
+    actions_in_order: Boolean
+
+SequenceComparison (ENUM)
+    STARTS_WITH
+    DOESNT_START_WITH
+    CONTAINS
+    DOESNT_CONTAIN
+    ENDS_WITH
+    DOESNT_END_WITH
+
+NumberComparison (ENUM)
+    EQUAL
+    DOESNT_EQUAL
+    LESS_THAN
+    LESS_THAN_OR_EQUAL
+    GREATER_THAN
+    GREATER_THAN_OR_EQUAL
+
+Pathway
+    id: String
+    actions: Action.id[]
+    metric_data: { Metric.id -> Number or None }
+
+Scenario
+    id: String
+    name: String
+    metric_data_over_time: { Metric.id -> TimeSeriesPoint[] }
+
+TimeSeriesPoint
+    time: Number
+    data: Number or None
+
+PathwayCalculationType (ENUM)
+    MANUAL
+    SUM
+    AVERAGE
+    MINIMUM
+    MAXIMUM
+
+UIState
+    layout: LayoutState
+    graph_panel: GraphPanelState
+    scenario_panel: ScenarioPanelState
+    pathways_panel: PathwaysPanelState
+    actions_panel: ActionsPanelState
+    action_dependencies_panel: ActionDependenciesPanel
+    metrics_panel: MetricsPanelState
+
+LayoutState
+    column_divider_position: Number
+    row_divider_position: Number
+
+GraphPanelState
+    selected_graph: GraphType
+    metro_map: MetroMapProperties
+    scenario_comparison: ScenarioComparisonProperties
+    metric_comparison: MetricComparisonProperties
+
+GraphType (ENUM)
+    METRO_MAP
+    SCENARIO_COMPARISON
+    METRIC_COMPARISON
+
+MetroMapProperties
+    selected_scenario: Scenario.id
+    maximum_pathways: Number
+
+ScenarioComparisonProperties
+    selected_pathway: Pathway.id
+    selected_metric: Metric.id
+    maximum_pathways: Number
+
+MetricComparisonProperties
+    selected_metric: Metric.id
+    maximum_pathways: Number
+
+ScenarioPanelState
+    selected_condition: Metric.id
+    sort_header_index: Number
+    sort_direction: Number
+
+PathwaysPanelState
+    sort_header_index: Number
+    sort_direction: Number
+    action_filters: ActionFilter[]
+    metric_filters: MetricFilter[]
+
+ActionFilter
+    relation: SequenceComparison
+    actions: Action.id[]
+    actions_in_order: Boolean
+
+MetricFilter
+    metric: Metric.id
+    relation: NumberComparison
+    value: Number
+
+ActionsPanelState
+    sort_header_index: Number
+    sort_direction: Number
+
+ActionDependenciesPanel
+    sort_header_index: Number
+    sort_direction: Number
+
+MetricsPanelState
+    sort_header_index: Number
+    sort_direction: Number
