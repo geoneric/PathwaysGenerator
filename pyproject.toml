@@ -38,6 +38,7 @@ dependencies = [
     "matplotlib",
     "networkx[default]",
     "pyside6",
+    "flet",
 ]
 
 [project.urls]
