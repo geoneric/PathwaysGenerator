@@ -2,6 +2,7 @@ from model.scenario import Scenario
 from model.metric import Metric
 
 class ScenarioService:
+    @staticmethod
     def estimate_metric_at_time(
             scenario: Scenario,
             metric: Metric,

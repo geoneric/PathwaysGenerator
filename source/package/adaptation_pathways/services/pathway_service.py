@@ -4,6 +4,7 @@ from model.action import Action
 from model.metric import Metric, MetricEstimate
 
 class PathwayService:
+    @staticmethod
     def filter_pathways(
             all_pathways: list[Pathway], 
             action_filters: list[ActionFilter], 
@@ -12,6 +13,7 @@ class PathwayService:
         # Replace with actual filtering code
         return all_pathways
     
+    @staticmethod
     def generate_pathways(
             all_actions: list[Action],
             all_metrics: list[Metric],
@@ -23,6 +25,7 @@ class PathwayService:
         # Estimate a value for each metric based on its Metric.estimate method
         return []
     
+    @staticmethod
     def estimate_metric(
             pathway: Pathway,
             metric: Metric,
