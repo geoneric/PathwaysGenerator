@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class SequenceComparison(Enum):
     STARTS_WITH = 1
     DOESNT_START_WITH = 2
@@ -7,6 +8,7 @@ class SequenceComparison(Enum):
     DOESNT_CONTAIN = 4
     ENDS_WITH = 5
     DOESNT_END_WITH = 6
+
 
 class NumberComparison(Enum):
     EQUAL = 1
