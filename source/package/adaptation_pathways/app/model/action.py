@@ -1,6 +1,10 @@
+import dataclasses
+
 from comparisons import SequenceComparison
 from metric import Metric, MetricValue
 
+
+@dataclasses.dataclass
 class Action:
     id: str
     name: str
@@ -8,6 +12,8 @@ class Action:
     icon: str
     metric_data: dict[Metric, MetricValue | None]
 
+
+@dataclasses.dataclass
 class ActionDependency:
     id: str
     action: Action

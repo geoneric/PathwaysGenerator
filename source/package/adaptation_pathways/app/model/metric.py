@@ -1,4 +1,6 @@
+import dataclasses
 from enum import Enum
+
 
 class MetricEstimate(Enum):
     MANUAL = 1
@@ -8,11 +10,15 @@ class MetricEstimate(Enum):
     MAXIMUM = 5
     LAST = 6
 
+
+@dataclasses.dataclass
 class MetricUnit:
     symbol: str
     place_after_value: bool
     value_format: str
 
+
+@dataclasses.dataclass
 class Metric:
     id: str
     name: str
@@ -20,6 +26,8 @@ class Metric:
     current_value: float
     estimate: MetricEstimate
 
+
+@dataclasses.dataclass
 class MetricValue:
     value: float
     is_estimate: bool
