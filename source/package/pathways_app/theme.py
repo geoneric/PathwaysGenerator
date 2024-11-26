@@ -1,5 +1,6 @@
 import flet as ft
 
+
 class DefaultThemeColors:
     true_white = "#FFFFFF"
     off_white = "#EFF3FC"
@@ -13,20 +14,25 @@ class DefaultThemeColors:
     secondary_light = "#91E0EC"
     secondary_medium = "#48BDCF"
 
+
 colors = DefaultThemeColors()
+
 
 class DefaultThemeTextStyles:
     logo = ft.TextStyle(size=16, height=1.1)
+
 
 class DefaultThemeVariables:
     small_radius = 3
     large_radius = 6
     panel_spacing = 6
 
+
 class DefaultThemeIcons:
     globe = "icons/icon_globe.svg"
 
-theme = ft.Theme(font_family = "Open Sans")
+
+theme = ft.Theme(font_family="Open Sans")
 icon = "images/deltares-logo-white.png"
 icons = DefaultThemeIcons()
 text = DefaultThemeTextStyles()

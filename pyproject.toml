@@ -5,7 +5,7 @@ sections = "FUTURE,STDLIB,THIRDPARTY,AP,FIRSTPARTY,LOCALFOLDER"
 profile = "black"
 
 [tool.pylint]
-disable = "C0103, C0114, C0115, C0116, C0302, E0401, W0212, W0511, R0801"
+disable = "C0103, C0114, C0115, C0116, C0302, E0401, W0212, W0511, R0801, R0903, R0917"
 extension-pkg-allow-list = [
     "matplotlib",
     "PySide6",
