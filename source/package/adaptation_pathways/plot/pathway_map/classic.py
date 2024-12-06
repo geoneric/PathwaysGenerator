@@ -490,6 +490,7 @@ def _distribute_vertically(
 
 def _layout(
     pathway_map: PathwayMap,
+    *,
     overlapping_lines_spread: float,
 ) -> dict[ActionBegin | ActionEnd, np.ndarray]:
     """
@@ -554,7 +555,7 @@ def plot(
     classic_pathway_map_plotter(
         axes,
         pathway_map,
-        _layout(pathway_map, overlapping_lines_spread),
+        _layout(pathway_map, overlapping_lines_spread=overlapping_lines_spread),
         arguments=arguments,
         legend_arguments=legend_arguments,
     )
