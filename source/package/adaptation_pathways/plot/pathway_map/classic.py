@@ -11,7 +11,7 @@ from ...action_combination import ActionCombination
 from ...graph import PathwayMap
 from ...graph.node import ActionBegin, ActionEnd
 from .. import alias
-from ..util import add_position
+from ..util import add_position, distribute
 
 
 def _plot_action_lines(
@@ -104,11 +104,11 @@ def _plot_action_tipping_points(
     path_collection = mpl.collections.PathCollection(None)
 
     if len(nodes) > 0:
-        # The last "tipping point" is skipped
-        node_pos = np.asarray([layout[v] for v in nodes][:-1])
+        # TODO Skip the tipping point at the end of each individual path way
+        node_pos = np.asarray([layout[v] for v in nodes])
         x, y = zip(*node_pos)
         x = np.array(x) + tipping_point_overshoot
-        colours = [colour_by_action_name[node.action.name] for node in nodes][:-1]
+        colours = [colour_by_action_name[node.action.name] for node in nodes]
 
         if tipping_point_marker.is_filled():
             scatter_arguments = {
@@ -311,11 +311,57 @@ def _distribute_horizontally(
         _distribute_horizontally(pathway_map, action_begin_new, position_by_node)
 
 
+def _spread_vertically(
+    pathway_map: PathwayMap,
+    position_by_node: dict[ActionBegin | ActionEnd, np.ndarray],
+    overlapping_lines_spread: float,
+) -> None:
+
+    # - If vertical spreading is enabled
+    # - Assign all action_end / action_begin combinations to bins
+    # - For those bins that contain more than one elements, tweak the x-coordinates
+    # - Make the magnitude of the tweak configurable (dependent on line width?)
+
+    nodes_by_x: dict[float, list[tuple[ActionEnd, ActionBegin]]] = {}
+
+    for action_end in pathway_map.all_action_ends():
+        action_begins = pathway_map.action_begins(action_end)
+        x = position_by_node[action_end][0]
+
+        if x not in nodes_by_x:
+            nodes_by_x[x] = []
+
+        for action_begin in action_begins:
+            assert position_by_node[action_begin][0] == x
+            nodes_by_x[x].append((action_end, action_begin))
+
+    min_x = min(nodes_by_x.keys())
+    max_x = max(nodes_by_x.keys())
+    range_x = max_x - min_x
+
+    # Root action end. This x coordinate needs no tweaking.
+    del nodes_by_x[min_x]
+
+    for x, nodes in nodes_by_x.items():
+        nr_nodes = len(nodes)
+
+        if nr_nodes > 1:
+            x_coordinates = distribute(
+                nr_nodes * [x], overlapping_lines_spread * range_x
+            )
+
+            for idx in range(nr_nodes):
+                action_end, action_begin = nodes[idx]
+                position_by_node[action_end][0] = x_coordinates[idx]
+                position_by_node[action_begin][0] = x_coordinates[idx]
+
+
 # pylint: disable-next=too-many-locals, too-many-branches
 def _distribute_vertically(
     pathway_map: PathwayMap,
     root_action_begin: ActionBegin,
     position_by_node: dict[ActionBegin | ActionEnd, np.ndarray],
+    overlapping_lines_spread: float,
 ) -> None:
 
     action_end = pathway_map.action_end(root_action_begin)
@@ -438,9 +484,14 @@ def _distribute_vertically(
         assert np.isnan(position_by_node[action_end][1])
         position_by_node[action_end][1] = y_coordinate
 
+    if overlapping_lines_spread > 0:
+        _spread_vertically(pathway_map, position_by_node, overlapping_lines_spread)
+
 
 def _layout(
     pathway_map: PathwayMap,
+    *,
+    overlapping_lines_spread: float,
 ) -> dict[ActionBegin | ActionEnd, np.ndarray]:
     """
     Layout that replicates the pathway map layout of the original (pre-2024) pathway generator
@@ -460,7 +511,7 @@ def _layout(
 
     The graph in the pathway map passed in must contain an attribute called "level_by_action",
     with a numeric value per action, which corresponds with the position in the above mentioned
-    stack.  Low numbers correspond with a high position in the stack (large y-coordinate). Such
+    stack. Low numbers correspond with a high position in the stack (large y-coordinate). Such
     actions will be positioned at the top of the pathway map.
     """
     position_by_node: dict[ActionBegin | ActionEnd, np.ndarray] = {}
@@ -478,7 +529,9 @@ def _layout(
         add_position(position_by_node, root_action_begin, (x_coordinate, 0))
 
         _distribute_horizontally(pathway_map, root_action_begin, position_by_node)
-        _distribute_vertically(pathway_map, root_action_begin, position_by_node)
+        _distribute_vertically(
+            pathway_map, root_action_begin, position_by_node, overlapping_lines_spread
+        )
 
     return position_by_node
 
@@ -497,10 +550,12 @@ def plot(
     if legend_arguments is None:
         legend_arguments = {}
 
+    overlapping_lines_spread: float = arguments.get("overlapping_lines_spread", 0)
+
     classic_pathway_map_plotter(
         axes,
         pathway_map,
-        _layout(pathway_map),
+        _layout(pathway_map, overlapping_lines_spread=overlapping_lines_spread),
         arguments=arguments,
         legend_arguments=legend_arguments,
     )

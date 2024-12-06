@@ -58,7 +58,7 @@ Plot pathway map
 
 Usage:
     {command} [--title=<title>] [--x_label=<label>] [--show_legend]
-        [--overshoot] <basename> <plot>
+        [--overshoot] [--spread=<spread>] <basename> <plot>
 
 Arguments:
     basename           Either, the name without postfix and extension of text
@@ -74,6 +74,10 @@ Options:
     --overshoot        Show tipping points as overshoots, extending a little
                        bit beyond the actual point
     --show_legend      Show legend
+    --spread=<spread>  Separate overlapping lines by a percentage [0, 1] of
+                       the range passed in. A value of 0.01 means 1% of the
+                       range of x-coordinates. Passing in a value > 0.02 is
+                       likely not useful.
     --title=<title>    Title
     --x_label=<label>  Label of x-axis
 
@@ -93,11 +97,13 @@ Examples:
     x_label = arguments["--x_label"] if arguments["--x_label"] is not None else ""
     show_legend = arguments["--show_legend"]
     overshoot = arguments["--overshoot"]
+    overlapping_lines_spread = float(arguments["--spread"])
 
     plot_arguments: dict[str, typing.Any] = {
         "title": title,
         "x_label": x_label,
         "show_legend": show_legend,
+        "overlapping_lines_spread": overlapping_lines_spread,
     }
 
     if overshoot:
