@@ -20,3 +20,5 @@ FillStyles = list[Style]
 
 ColourByAction = dict[Action, Colour]
 ColourByActionName = dict[str, Colour]
+
+Region = tuple[float, float]

@@ -11,7 +11,7 @@ from ...action_combination import ActionCombination
 from ...graph import PathwayMap
 from ...graph.node import ActionBegin, ActionEnd
 from .. import alias
-from ..util import add_position, distribute
+from ..util import add_position, distribute, group_overlapping_regions_with_payloads
 
 
 def _plot_action_lines(
@@ -127,76 +127,33 @@ def _plot_action_tipping_points(
     return path_collection
 
 
-def _actions_and_y_coordinates(
-    layout: dict[ActionBegin | ActionEnd, np.ndarray], action_names: list[str]
-):
-    """
-    Return collections of actions and their corresponding y-coordinates
-    """
-    actions = []
-    y_coordinates = []
-    action_by_y_coordinate: dict[float, set[Action]] = {}
-
-    # Action combinations that continue a single action end up at the same y-coordinate as
-    # the action which they continue. Coordinates and labels for only these specific combinations
-    # must be sieved out of the collections.
-    for action_name in action_names:
-        for _, action_node in enumerate(layout):
-            if action_node.action.name == action_name:
-                y_coordinate = layout[action_node][1]
-                action_by_y_coordinate.setdefault(y_coordinate, set()).add(
-                    action_node.action
-                )
-
-    for y_coordinate, actions_ in action_by_y_coordinate.items():
-        assert len(actions_) > 0
-
-        regular_actions = [
-            action for action in actions_ if not isinstance(action, ActionCombination)
-        ]
-
-        if len(actions_) > 1 and len(regular_actions) > 0:
-            # Combination of regular actions and action combinations at same y-coordinate
-            # Use regular action for label and colour
-            action = next(iter(regular_actions))
-        else:
-            # Only a single action or only multiple action combinations at same y-coordinate
-            # Use first action for label and colour
-            action = next(iter(actions_))
-
-        y_coordinates.append(y_coordinate)
-        actions.append(action)
-
-    assert len(actions) == len(y_coordinates)
-    return actions, y_coordinates
-
-
-# pylint: disable-next=too-many-locals
-def _plot_annotations(
+def _configure_title(
     axes,
-    pathway_map,
-    layout: dict[ActionBegin | ActionEnd, np.ndarray],
     *,
     arguments: dict[str, typing.Any],
-    legend_arguments: dict[str, typing.Any],
 ) -> None:
 
-    # Title
     title: str = arguments.get("title", "")
+
     if len(title) > 0:
         axes.set_title(title)
+
+
+def _configure_y_axes(
+    axes,
+    y_coordinate_by_action_name: dict[str, float],
+    *,
+    arguments: dict[str, typing.Any],
+):
 
     # Left y-axis
     axes.spines.left.set_visible(False)
     axes.tick_params(left=False)
 
-    actions = pathway_map.actions()
-    action_names: list[str] = [action.name for action in actions]
-    actions, y_coordinates = _actions_and_y_coordinates(layout, action_names)
-    y_labels = [action.name for action in actions]
-    colour_by_action_name: dict[Action, alias.Colour] = arguments[
-        "colour_by_action_name"
-    ]
+    y_labels = list(y_coordinate_by_action_name.keys())
+    y_coordinates = list(y_coordinate_by_action_name.values())
+
+    colour_by_action_name: dict[str, alias.Colour] = arguments["colour_by_action_name"]
     label_colours = [colour_by_action_name[label] for label in y_labels]
 
     axes.set_yticks(y_coordinates, labels=y_labels)
@@ -206,6 +163,16 @@ def _plot_annotations(
 
     # Right y-axis
     axes.spines.right.set_visible(False)
+
+    return y_labels, label_colours
+
+
+def _configure_x_axes(
+    axes,
+    layout: dict[ActionBegin | ActionEnd, np.ndarray],
+    *,
+    arguments: dict[str, typing.Any],
+):
 
     # Top x-axis
     axes.spines.top.set_visible(False)
@@ -228,33 +195,56 @@ def _plot_annotations(
         x_labels = [f"{int(tick)}" for tick in x_ticks]
         axes.set_xticks(x_ticks, labels=x_labels)
 
+
+def _configure_legend(axes, *, labels, colours, arguments):
+
+    # TODO Document this:
+    # - Use rcParams["legend.*"] to tweak the default appearance of the legend
+    # - Use kwargs to override the default appearance of the legend
+    # See also:
+    # - https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.legend.html#matplotlib.axes.Axes.legend
+
+    # Iterate over all actions that are shown on the y-axis. For each of these create a proxy artist. Then
+    # create the legend, passing in the proxy artists.
+
+    handles = []
+
+    # TODO Maybe we need to do something about the ordering(?)
+    for label, colour in zip(labels, colours):
+        handles.append(mlines.Line2D([], [], color=colour, label=label))
+
+    axes.legend(handles=handles, **arguments)
+
+
+def _plot_annotations(
+    axes,
+    layout: dict[ActionBegin | ActionEnd, np.ndarray],
+    y_coordinate_by_action_name: dict[str, float],
+    *,
+    arguments: dict[str, typing.Any],
+    legend_arguments: dict[str, typing.Any],
+) -> None:
+
+    _configure_title(axes, arguments=arguments)
+    y_labels, label_colours = _configure_y_axes(
+        axes, y_coordinate_by_action_name, arguments=arguments
+    )
+    _configure_x_axes(axes, layout, arguments=arguments)
+
     show_legend: bool = arguments.get("show_legend", False)
 
-    # Legend
     if show_legend:
-
-        # TODO Document this:
-        # - Use rcParams["legend.*"] to tweak the default appearance of the legend
-        # - Use kwargs to override the default appearance of the legend
-        # See also:
-        # - https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.legend.html#matplotlib.axes.Axes.legend
-
-        # Iterate over all actions that are shown on the y-axis. For each of these create a proxy artist. Then
-        # create the legend, passing in the proxy artists.
-
-        handles = []
-
-        # TODO Maybe we need to do something about the ordering(?)
-        for label, colour in zip(y_labels, label_colours):
-            handles.append(mlines.Line2D([], [], color=colour, label=label))
-
-        axes.legend(handles=handles, **legend_arguments)
+        _configure_legend(
+            axes, labels=y_labels, colours=label_colours, arguments=legend_arguments
+        )
 
 
+# pylint: disable-next=too-many-arguments
 def classic_pathway_map_plotter(
     axes,
     pathway_map,
     layout: dict[ActionBegin | ActionEnd, np.ndarray],
+    y_coordinate_by_action_name: dict[str, float],
     *,
     arguments: dict[str, typing.Any],
     legend_arguments: dict[str, typing.Any],
@@ -281,13 +271,87 @@ def classic_pathway_map_plotter(
 
     _plot_annotations(
         axes,
-        pathway_map,
         layout,
+        y_coordinate_by_action_name,
         arguments=arguments,
         legend_arguments=legend_arguments,
     )
 
     axes.autoscale_view()
+
+
+def _group_overlapping_regions(
+    regions: list[tuple[alias.Region, typing.Any]]
+) -> list[list[tuple[alias.Region, typing.Any]]]:
+
+    # Given a list of tuples of regions and their payload (additional information not relevant here):
+    # - Group the regions into overlapping regions
+    # - Return a list of overlapping regions, along with their payload
+
+    # Split list of tuple[Region, Payload] into list[Region] and list[Payload]
+    # Group the regions
+    # Re-associate each region with its payload again
+
+    grouped_regions, grouped_payloads = group_overlapping_regions_with_payloads(
+        *(list(tuples) for tuples in zip(*regions))
+    )
+    result: list[list[tuple[alias.Region, typing.Any]]] = []
+
+    for region_group, payload_group in zip(grouped_regions, grouped_payloads):
+        result.append(list(zip(region_group, payload_group)))
+
+    return result
+
+
+# pylint: disable-next=too-many-locals
+def _spread_vertically(
+    pathway_map: PathwayMap,
+    position_by_node: dict[ActionBegin | ActionEnd, np.ndarray],
+    overlapping_lines_spread: float,
+) -> None:
+
+    # - Assign all action_begin / action_end combinations to bins, by y-coordinate
+    # - For those bins that contain more than one element, tweak the y-coordinates
+    # - When tweaking y-coordinates take non-overlapping regions into account
+
+    # Per y-coordinate a list of regions (x-coordinates), action begin/end tuples
+    nodes_by_y: dict[
+        float, list[tuple[alias.Region, tuple[ActionBegin, ActionEnd]]]
+    ] = {}
+
+    for action_begin in pathway_map.all_action_begins():
+        action_end = pathway_map.action_end(action_begin)
+
+        x_begin, y_begin = position_by_node[action_begin]
+        x_end, y_end = position_by_node[action_end]
+        assert x_end >= x_begin
+        assert y_end == y_begin
+        region = x_begin, x_end
+
+        if y_begin not in nodes_by_y:
+            nodes_by_y[y_begin] = []
+
+        nodes_by_y[y_begin].append((region, (action_begin, action_end)))
+
+    min_y = min(nodes_by_y.keys())
+    max_y = max(nodes_by_y.keys())
+    range_y = max_y - min_y
+
+    for y_coordinate, regions in nodes_by_y.items():
+        grouped_regions = _group_overlapping_regions(regions)
+
+        for regions in grouped_regions:
+            nr_regions = len(regions)
+
+            if nr_regions > 1:
+                y_coordinates = distribute(
+                    nr_regions * [y_coordinate], overlapping_lines_spread * range_y
+                )
+
+                for idx in range(nr_regions):
+                    action_begin, action_end = regions[idx][1]
+                    position_by_node[action_begin][1] = y_coordinates[idx]
+                    position_by_node[action_end][1] = y_coordinates[idx]
 
 
 def _distribute_horizontally(
@@ -311,29 +375,37 @@ def _distribute_horizontally(
         _distribute_horizontally(pathway_map, action_begin_new, position_by_node)
 
 
-def _spread_vertically(
+# pylint: disable-next=too-many-locals
+def _spread_horizontally(
     pathway_map: PathwayMap,
     position_by_node: dict[ActionBegin | ActionEnd, np.ndarray],
     overlapping_lines_spread: float,
 ) -> None:
 
-    # - If vertical spreading is enabled
-    # - Assign all action_end / action_begin combinations to bins
-    # - For those bins that contain more than one elements, tweak the x-coordinates
-    # - Make the magnitude of the tweak configurable (dependent on line width?)
+    # - Assign all action_end / action_begin combinations to bins, by x-coordinate
+    # - For those bins that contain more than one element, tweak the x-coordinates
+    # - When tweaking x-coordinates take non-overlapping regions into account
 
-    nodes_by_x: dict[float, list[tuple[ActionEnd, ActionBegin]]] = {}
+    # Per x-coordinate a list of regions (y-coordinates), action end/begin tuples
+    nodes_by_x: dict[
+        float, list[tuple[alias.Region, tuple[ActionEnd, ActionBegin]]]
+    ] = {}
 
     for action_end in pathway_map.all_action_ends():
         action_begins = pathway_map.action_begins(action_end)
-        x = position_by_node[action_end][0]
 
-        if x not in nodes_by_x:
-            nodes_by_x[x] = []
+        if action_begins:
+            x_end, y_end = position_by_node[action_end]
 
-        for action_begin in action_begins:
-            assert position_by_node[action_begin][0] == x
-            nodes_by_x[x].append((action_end, action_begin))
+            if x_end not in nodes_by_x:
+                nodes_by_x[x_end] = []
+
+            for action_begin in action_begins:
+                x_begin, y_begin = position_by_node[action_begin]
+                assert x_end == x_begin
+                region = tuple(sorted([y_end, y_begin]))
+
+                nodes_by_x[x_end].append((region, (action_end, action_begin)))
 
     min_x = min(nodes_by_x.keys())
     max_x = max(nodes_by_x.keys())
@@ -342,18 +414,21 @@ def _spread_vertically(
     # Root action end. This x coordinate needs no tweaking.
     del nodes_by_x[min_x]
 
-    for x, nodes in nodes_by_x.items():
-        nr_nodes = len(nodes)
+    for x_coordinate, regions in nodes_by_x.items():
+        grouped_regions = _group_overlapping_regions(regions)
 
-        if nr_nodes > 1:
-            x_coordinates = distribute(
-                nr_nodes * [x], overlapping_lines_spread * range_x
-            )
+        for regions in grouped_regions:
+            nr_regions = len(regions)
 
-            for idx in range(nr_nodes):
-                action_end, action_begin = nodes[idx]
-                position_by_node[action_end][0] = x_coordinates[idx]
-                position_by_node[action_begin][0] = x_coordinates[idx]
+            if nr_regions > 1:
+                x_coordinates = distribute(
+                    nr_regions * [x_coordinate], overlapping_lines_spread * range_x
+                )
+
+                for idx in range(nr_regions):
+                    action_end, action_begin = regions[idx][1]
+                    position_by_node[action_end][0] = x_coordinates[idx]
+                    position_by_node[action_begin][0] = x_coordinates[idx]
 
 
 # pylint: disable-next=too-many-locals, too-many-branches
@@ -361,8 +436,7 @@ def _distribute_vertically(
     pathway_map: PathwayMap,
     root_action_begin: ActionBegin,
     position_by_node: dict[ActionBegin | ActionEnd, np.ndarray],
-    overlapping_lines_spread: float,
-) -> None:
+) -> dict[str, float]:
 
     action_end = pathway_map.action_end(root_action_begin)
     position_by_node[action_end][1] = position_by_node[root_action_begin][1]
@@ -402,7 +476,7 @@ def _distribute_vertically(
 
     # We now have the names of the actions to distribute. What is important here is that the
     # number of actions is correct.
-    y_coordinates = list(
+    y_coordinates: list[float] = list(
         range(
             math.floor(len(names_of_actions_to_distribute) / 2),
             -math.floor((len(names_of_actions_to_distribute) - 1) / 2) - 1,
@@ -461,8 +535,9 @@ def _distribute_vertically(
         )
     )
 
-    y_coordinate_by_action = dict(zip(names_of_actions_to_distribute, y_coordinates))
-    # y_coordinate_by_action[root_action_begin.action.name] = 0
+    y_coordinate_by_action_name = dict(
+        zip(names_of_actions_to_distribute, y_coordinates)
+    )
 
     for action_begin in pathway_map.all_action_begins()[1:]:  # Skip root node
         action = action_begin.action
@@ -475,7 +550,7 @@ def _distribute_vertically(
             # one action that is being continued
             action = action_combinations_sieved[action]
 
-        y_coordinate = y_coordinate_by_action[action.name]
+        y_coordinate = y_coordinate_by_action_name[action.name]
 
         assert np.isnan(position_by_node[action_begin][1])
         position_by_node[action_begin][1] = y_coordinate
@@ -484,15 +559,16 @@ def _distribute_vertically(
         assert np.isnan(position_by_node[action_end][1])
         position_by_node[action_end][1] = y_coordinate
 
-    if overlapping_lines_spread > 0:
-        _spread_vertically(pathway_map, position_by_node, overlapping_lines_spread)
+    y_coordinate_by_action_name[root_action_begin.action.name] = 0
+
+    return y_coordinate_by_action_name
 
 
 def _layout(
     pathway_map: PathwayMap,
     *,
     overlapping_lines_spread: float,
-) -> dict[ActionBegin | ActionEnd, np.ndarray]:
+) -> tuple[dict[ActionBegin | ActionEnd, np.ndarray], dict[str, float]]:
     """
     Layout that replicates the pathway map layout of the original (pre-2024) pathway generator
 
@@ -515,6 +591,7 @@ def _layout(
     actions will be positioned at the top of the pathway map.
     """
     position_by_node: dict[ActionBegin | ActionEnd, np.ndarray] = {}
+    y_coordinate_by_action_name: dict[str, float] = {}
 
     if pathway_map.nr_edges() > 0:
         root_action_begin = pathway_map.root_node
@@ -529,11 +606,17 @@ def _layout(
         add_position(position_by_node, root_action_begin, (x_coordinate, 0))
 
         _distribute_horizontally(pathway_map, root_action_begin, position_by_node)
-        _distribute_vertically(
-            pathway_map, root_action_begin, position_by_node, overlapping_lines_spread
+        y_coordinate_by_action_name = _distribute_vertically(
+            pathway_map, root_action_begin, position_by_node
         )
 
-    return position_by_node
+        if overlapping_lines_spread > 0:
+            _spread_horizontally(
+                pathway_map, position_by_node, overlapping_lines_spread
+            )
+            _spread_vertically(pathway_map, position_by_node, overlapping_lines_spread)
+
+    return position_by_node, y_coordinate_by_action_name
 
 
 def plot(
@@ -552,10 +635,15 @@ def plot(
 
     overlapping_lines_spread: float = arguments.get("overlapping_lines_spread", 0)
 
+    layout, y_coordinate_by_action_name = _layout(
+        pathway_map, overlapping_lines_spread=overlapping_lines_spread
+    )
+
     classic_pathway_map_plotter(
         axes,
         pathway_map,
-        _layout(pathway_map, overlapping_lines_spread=overlapping_lines_spread),
+        layout,
+        y_coordinate_by_action_name,
         arguments=arguments,
         legend_arguments=legend_arguments,
     )

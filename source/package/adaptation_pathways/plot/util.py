@@ -11,6 +11,7 @@ import networkx as nx
 import numpy as np
 
 from ..action import Action
+from . import alias
 from .colour import PlotColours
 
 
@@ -216,3 +217,89 @@ def action_level_by_first_occurrence(
             level_by_action[to_action] = idx - 0.01
 
     return level_by_action
+
+
+def group_overlapping_regions(regions: list[alias.Region]) -> list[list[alias.Region]]:
+    """
+    Given regions, defined by start and end coordinates, group the ones that overlap
+
+    Regions are considered to overlap when they share at least one (indefinitely small) point.
+    """
+
+    # Given that a region is defined by a min and max coordinate:
+    # - Sort by min coordinate
+    # - Iterate over all regions
+    # - Keep track of max coordinate
+    # - Each next region is within the group if its min coordinate lies within the previous min and overall
+    #   max coordinate. Otherwise it is the member of a new group
+
+    overlapping_regions: list[list[alias.Region]] = []
+
+    regions = sorted(regions, key=lambda region: region[0])
+
+    if regions:
+        region = regions[0]
+        min_coordinate, max_coordinate = region
+        assert min_coordinate <= max_coordinate, region
+
+        overlapping_regions.append([region])
+
+        for region in regions[1:]:
+            assert region[0] >= min_coordinate
+
+            if min_coordinate <= region[0] <= max_coordinate:
+                overlapping_regions[-1].append(region)
+            else:
+                overlapping_regions.append([region])
+
+            max_coordinate = max(max_coordinate, region[1])
+
+    return overlapping_regions
+
+
+def group_overlapping_regions_with_payloads(
+    regions: list[alias.Region], payloads: list[typing.Any]
+) -> tuple[list[list[alias.Region]], list[list[typing.Any]]]:
+    """
+    Given regions, defined by start and end coordinates, group the ones that overlap
+
+    Regions are considered to overlap when they share at least one (indefinitely small) point. Optionally, a
+    payload associated with each region can be passed in as well, which will be grouped similar to the
+    regions. This allows the payload and the region to be re-associated again.
+    """
+
+    overlapping_regions: list[list[alias.Region]] = []
+    overlapping_payloads: list[list[typing.Any]] = []
+
+    # First sort the payloads by increasing min_coordinate
+    payloads = [
+        payload
+        for _, payload in sorted(zip(regions, payloads), key=lambda pair: pair[0][0])
+    ]
+
+    # Sort the regions by increasing min_coordinate
+    regions = sorted(regions, key=lambda region: region[0])
+
+    # Payloads and regions are now in sync. First payload is the first region's payload, etc.
+
+    if regions:
+        region = regions[0]
+        min_coordinate, max_coordinate = region
+        assert min_coordinate <= max_coordinate, region
+
+        overlapping_regions.append([region])
+        overlapping_payloads.append([payloads[0]])
+
+        for region_idx, region in enumerate(regions[1:], 1):
+            assert region[0] >= min_coordinate
+
+            if min_coordinate <= region[0] <= max_coordinate:
+                overlapping_regions[-1].append(region)
+                overlapping_payloads[-1].append(payloads[region_idx])
+            else:
+                overlapping_regions.append([region])
+                overlapping_payloads.append([payloads[region_idx]])
+
+            max_coordinate = max(max_coordinate, region[1])
+
+    return overlapping_regions, overlapping_payloads

@@ -19,6 +19,7 @@ def plot_map(
     plot_pathname: str,
     *,
     arguments,
+    legend_arguments,
 ) -> int:
 
     # pylint: disable-next=unused-variable
@@ -45,7 +46,9 @@ def plot_map(
     # TODO This should be colour_by_action
     arguments["colour_by_action_name"] = colour_by_action_name
 
-    plot_classic_pathway_map(axes, pathway_map, arguments=arguments)
+    plot_classic_pathway_map(
+        axes, pathway_map, arguments=arguments, legend_arguments=legend_arguments
+    )
     save_plot(plot_pathname)
 
     return 0
@@ -77,7 +80,7 @@ Options:
     --spread=<spread>  Separate overlapping lines by a percentage [0, 1] of
                        the range passed in. A value of 0.01 means 1% of the
                        range of x-coordinates. Passing in a value > 0.02 is
-                       likely not useful.
+                       likely not useful. [default: 0]
     --title=<title>    Title
     --x_label=<label>  Label of x-axis
 
@@ -112,4 +115,15 @@ Examples:
     if len(os.path.splitext(plot_pathname)[1]) == 0:
         plot_pathname += ".pdf"
 
-    return plot_map(basename_pathname, plot_pathname, arguments=plot_arguments)
+    # https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.legend.html#matplotlib.axes.Axes.legend
+    legend_arguments = {
+        "framealpha": 0.2,
+        "fancybox": False,
+    }
+
+    return plot_map(
+        basename_pathname,
+        plot_pathname,
+        arguments=plot_arguments,
+        legend_arguments=legend_arguments,
+    )
