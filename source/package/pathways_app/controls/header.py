@@ -1,29 +1,31 @@
 # pylint: disable=too-many-arguments
 import flet as ft
-import theme
+from pathways_app import theme
 
 
-class Header(ft.Container):
+class SectionHeader(ft.Container):
     def __init__(
         self,
         icon=None,
         text="",
         size=16,
-        expand=True,
+        expand=False,
         color=theme.colors.primary_dark,
-        padding=0,
+        padding=ft.padding.symmetric(4, 0),
         border_radius=0,
         border: ft.Border | None = None,
         bgcolor: str | None = None,
     ):
         super().__init__(
-            height=(size + 2 * padding),
+            height=(size + padding.top + padding.bottom),
             padding=padding,
             expand=expand,
             bgcolor=bgcolor,
             border_radius=border_radius,
             border=border,
         )
+
+        self.clip_behavior = ft.ClipBehavior.NONE
 
         header_text_style = ft.TextStyle(
             size=size,
@@ -36,13 +38,18 @@ class Header(ft.Container):
             self.content = ft.Row(
                 expand=expand,
                 controls=[
-                    ft.Image(icon, width=size, height=size, color=color),
+                    ft.Icon(icon, size=size, color=color),
                     ft.Text(text, style=header_text_style),
                 ],
-                spacing=4,
+                spacing=8,
                 vertical_alignment=ft.CrossAxisAlignment.CENTER,
             )
         else:
             self.content = ft.Row(
                 expand=True, controls=[ft.Text(text, style=header_text_style)]
             )
+
+
+class SmallHeader(ft.Text):
+    def __init__(self, text: str):
+        super().__init__(value=text.upper(), style=ft.TextStyle(size=12))
