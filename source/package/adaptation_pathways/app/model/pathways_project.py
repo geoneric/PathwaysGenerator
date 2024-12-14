@@ -4,10 +4,10 @@ The single class that stores all data needed to work on a project
 """
 import dataclasses
 
-from action import Action
-from metric import Metric
-from pathway import Pathway
-from scenario import Scenario
+from .action import Action
+from .metric import Metric
+from .pathway import Pathway
+from .scenario import Scenario
 
 
 @dataclasses.dataclass
@@ -21,5 +21,4 @@ class PathwaysProject:
     criteria: list[Metric]
     scenarios: list[Scenario]
     actions: list[Action]
-    current_situation: Action
     root_pathway: Pathway

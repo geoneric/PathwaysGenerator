@@ -1,10 +1,21 @@
+import locale
 import logging
 
 import flet as ft
 import theme
-from controls.header import Header
+from controls.header import SectionHeader
+from controls.menu_bar import MenuBar
+from controls.metrics_panel import MetricsPanel
 from controls.panel import Panel
 from controls.tabbed_panel import TabbedPanel
+from pathways_app import example
+from pathways_app.controls.actions_panel import ActionsPanel
+from pathways_app.controls.graph_panel import GraphPanel
+from pathways_app.controls.pathways_panel import PathwaysPanel
+from pathways_app.controls.scenarios_panel import ScenariosPanel
+
+
+locale.setlocale(locale.LC_ALL, "")
 
 
 def main(page: ft.Page):
@@ -13,79 +24,34 @@ def main(page: ft.Page):
     # bitdojo_window could make a custom title bar
     # page.window.frameless = True
 
-    page.window_width = 1200
-    page.window_height = 800
-    page.window_resizable = True
+    page.window.width = 1200
+    page.window.height = 800
+    page.window.resizable = True
 
     page.title = "Pathways Generator"
-    page.fonts = {"Open Sans": "fonts/Open_Sans/static/OpenSans-Regular.ttf"}
+    page.fonts = theme.fonts
     page.bgcolor = theme.colors.primary_darker
     page.padding = 1
     page.spacing = 0
 
-    page.appbar = ft.Container(
-        height=50,
-        padding=ft.padding.symmetric(4, 5),
-        margin=0,
-        content=ft.Stack(
-            controls=[
-                ft.Row(
-                    [
-                        ft.Image(theme.icon),
-                        ft.Text("PATHWAYS\nGENERATOR", style=theme.text.logo),
-                    ]
-                ),
-                ft.Row(
-                    [
-                        ft.Container(
-                            bgcolor=theme.colors.primary_medium,
-                            border_radius=theme.variables.small_radius,
-                            alignment=ft.alignment.center,
-                            padding=ft.padding.symmetric(0, 15),
-                            width=300,
-                            content=ft.Stack(
-                                [
-                                    ft.Column(
-                                        controls=[
-                                            ft.Text("Sea Level Rise Adaptation"),
-                                            ft.Text(
-                                                "Cork City Council",
-                                                text_align=ft.TextAlign.CENTER,
-                                            ),
-                                        ],
-                                        spacing=0,
-                                        alignment=ft.MainAxisAlignment.CENTER,
-                                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                                    )
-                                ]
-                            ),
-                        )
-                    ],
-                    alignment=ft.MainAxisAlignment.CENTER,
-                    vertical_alignment=ft.MainAxisAlignment.CENTER,
-                ),
-            ]
-        ),
-        bgcolor=theme.colors.primary_dark,
-        border_radius=ft.border_radius.only(top_left=0, top_right=0),
-        border=ft.border.only(
-            bottom=ft.border.BorderSide(1, theme.colors.primary_darker)
-        ),
-    )
+    project = example.project
 
+    page.appbar = MenuBar(project)
     metrics_tab = (
-        Header(theme.icons.globe, "Metrics"),
-        ft.Column(expand=True, controls=[ft.Text("Metrics")]),
+        SectionHeader(ft.icons.TUNE, "Metrics"),
+        MetricsPanel(project.conditions, project.criteria),
     )
 
     actions_tab = (
-        Header(theme.icons.globe, "Actions"),
-        ft.Column(expand=True, controls=[ft.Text("These are actions")]),
+        SectionHeader(ft.icons.CONSTRUCTION_OUTLINED, "Actions"),
+        ActionsPanel(project.actions, [*project.conditions, *project.criteria]),
     )
 
-    pathways_tab = (
-        Header(theme.icons.globe, "Pathways"),
-        ft.Column(expand=True, controls=[ft.Text("Pathways")]),
+    scenarios_tab = (
+        SectionHeader(ft.icons.PUBLIC, "Scenarios"),
+        ScenariosPanel(
+            project.scenarios, project.conditions, project.start_year, project.end_year
+        ),
     )
 
     page.add(
@@ -103,7 +69,7 @@ def main(page: ft.Page):
                         controls=[
                             TabbedPanel(
                                 selected_index=0,
-                                tabs=[metrics_tab, actions_tab, pathways_tab],
+                                tabs=[metrics_tab, actions_tab, scenarios_tab],
                             )
                         ],
                     ),
@@ -112,14 +78,25 @@ def main(page: ft.Page):
                         spacing=theme.variables.panel_spacing,
                         horizontal_alignment=ft.CrossAxisAlignment.STRETCH,
                         controls=[
+                            Panel(GraphPanel(project.conditions)),
                             Panel(
-                                ft.Row(),
-                            ),
-                            Panel(
-                                ft.Column(
-                                    expand=True,
-                                    controls=[Header(theme.icons.globe, "Scenarios")],
-                                )
+                                content=ft.Column(
+                                    expand=False,
+                                    alignment=ft.MainAxisAlignment.START,
+                                    spacing=15,
+                                    controls=[
+                                        SectionHeader(
+                                            ft.icons.ACCOUNT_TREE_OUTLINED, "Pathways"
+                                        ),
+                                        PathwaysPanel(
+                                            root=project.root_pathway,
+                                            metrics=project.conditions
+                                            + project.criteria,
+                                            actions=project.actions,
+                                        ),
+                                    ],
+                                ),
+                                padding=theme.variables.panel_padding,
                             ),
                         ],
                     ),
@@ -132,4 +109,6 @@ def main(page: ft.Page):
 
 
 logging.basicConfig(level=logging.CRITICAL)
-ft.app(target=main, assets_dir="assets", view=ft.AppView.WEB_BROWSER, port=4001)
+ft.app(target=main, assets_dir="assets")
+
+print("Pathways App Started")

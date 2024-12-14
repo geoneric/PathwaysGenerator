@@ -1,7 +1,7 @@
 import dataclasses
 
-from comparisons import SequenceComparison
-from metric import Metric, MetricValue
+from .comparisons import SequenceComparison
+from .metric import Metric, MetricValue
 
 
 @dataclasses.dataclass
@@ -11,6 +11,12 @@ class Action:
     color: str
     icon: str
     metric_data: dict[Metric, MetricValue | None]
+
+    def get_data(self, metric) -> MetricValue | None:
+        if metric not in self.metric_data:
+            return None
+
+        return self.metric_data[metric]
 
 
 @dataclasses.dataclass
