@@ -14,10 +14,12 @@ class StyledDropdown(ft.Dropdown):
         height: ft.OptionalNumber = 28,
         text_style: ft.TextStyle | None = None,
         on_change=None,
+        on_blur=None,
     ):
         super().__init__(
             value=value,
             text_style=text_style,
+            expand=False,
             options=options,
             width=width,
             bgcolor=theme.colors.true_white,
@@ -26,6 +28,7 @@ class StyledDropdown(ft.Dropdown):
             height=height,
             border_color=theme.colors.primary_dark,
             icon_enabled_color=theme.colors.primary_dark,
+            on_blur=on_blur,
         )
 
         def update_icon():

@@ -28,7 +28,11 @@ class StyledTable(ft.DataTable):
             data_row_max_height=row_height,
             data_row_color={
                 ft.ControlState.HOVERED: theme.colors.off_white,
+                ft.ControlState.FOCUSED: theme.colors.off_white,
                 ft.ControlState.SELECTED: theme.colors.primary_white,
+                ft.ControlState.PRESSED: theme.colors.off_white,
+                ft.ControlState.DRAGGED: theme.colors.off_white,
+                ft.ControlState.SCROLLED_UNDER: theme.colors.off_white,
             },
             divider_thickness=0,
             horizontal_lines=ft.BorderSide(1, theme.colors.primary_lightest),
@@ -38,14 +42,17 @@ class StyledTable(ft.DataTable):
             border=ft.border.all(1, theme.colors.primary_light),
         )
 
+        self.set_columns(columns)
+        self.set_rows(rows)
+
+    def set_columns(self, columns: list[ft.DataColumn]):
         for column in columns:
             column.label = ft.Container(
                 content=column.label,
                 expand=True,
                 padding=theme.variables.table_cell_padding,
             )
-
-        self.set_rows(rows)
+        self.columns = columns
 
     def set_rows(self, rows: list[ft.DataRow]):
         for row in rows:

@@ -3,32 +3,6 @@ import dataclasses
 from enum import Enum
 
 
-class MetricEstimate(Enum):
-    MANUAL = 1
-    SUM = 2
-    AVERAGE = 3
-    MINIMUM = 4
-    MAXIMUM = 5
-    LAST = 6
-
-    def __repr__(self) -> str:
-        match self:
-            case MetricEstimate.MANUAL:
-                return "Manual"
-            case MetricEstimate.SUM:
-                return "Sum"
-            case MetricEstimate.AVERAGE:
-                return "Average"
-            case MetricEstimate.MINIMUM:
-                return "Minimum"
-            case MetricEstimate.MAXIMUM:
-                return "Max"
-            case MetricEstimate.LAST:
-                return "Last"
-            case _:
-                return "Unknown"
-
-
 @dataclasses.dataclass
 class MetricUnit:
     name: str
@@ -43,7 +17,7 @@ class MetricUnit:
         if self.short_name is not None:
             return self.short_name
 
-        return self.symbol
+        return self.name
 
     def get_symbol(self, value: float):
         return (
@@ -66,7 +40,6 @@ class Metric:
     id: str
     name: str
     current_value: float
-    estimate: MetricEstimate
     unit_or_default: MetricUnit | str
 
     @property
@@ -90,6 +63,44 @@ class MetricValue:
     is_estimate: bool = False
 
 
+class MetricOperation(Enum):
+    NONE = "None"
+    ADD = "Add"
+    MULTIPLY = "Multiply"
+    MINIMUM = "Min"
+    MAXIMUM = "Max"
+    REPLACE = "Replace"
+
+
+class MetricEffect:
+    value: float
+    operation: MetricOperation
+
+    def __init__(self, value: float, operation: MetricOperation = MetricOperation.ADD):
+        self.value = value
+        self.operation = operation
+
+    def __repr__(self):
+        return f"MetricEffect({self.operation} {self.value})"
+
+    def apply_to(self, value: float) -> float:
+        match self.operation:
+            case MetricOperation.NONE:
+                return value
+            case MetricOperation.ADD:
+                return value + self.value
+            case MetricOperation.MULTIPLY:
+                return value * self.value
+            case MetricOperation.MINIMUM:
+                return min(value, self.value)
+            case MetricOperation.MAXIMUM:
+                return max(value, self.value)
+            case MetricOperation.REPLACE:
+                return self.value
+            case _:
+                return value
+
+
 class DefaultUnits:
     FORMAT_SLIDER = "n"
 
@@ -111,12 +122,12 @@ class DefaultUnits:
 
     class Area:
         si = [
-            MetricUnit(name="Square Meter", symbol="m^2"),
-            MetricUnit(name="Square Kilometer", symbol="km^2"),
+            MetricUnit(name="Square Meter", symbol="m²"),
+            MetricUnit(name="Square Kilometer", symbol="km²"),
             MetricUnit(name="Hectare", symbol="ha"),
         ]
         imperial = [
-            MetricUnit(name="Square Feet", symbol="ft^2"),
+            MetricUnit(name="Square Feet", symbol="ft²"),
             MetricUnit(name="Acre", symbol="acre", symbol_plural="acres"),
             MetricUnit(name="Square Mile", symbol="sq mi"),
         ]
@@ -154,21 +165,21 @@ class DefaultUnits:
         si = [
             MetricUnit(name="Meters/Second", symbol="m/s"),
             MetricUnit(name="Kilometers/Hour", symbol="km/h"),
-            MetricUnit(name="Meters/Second^2", symbol="m/s^2"),
+            MetricUnit(name="Meters/Second²", symbol="m/s²"),
         ]
         imperial = [
             MetricUnit(name="Miles/Hour", symbol="mph"),
-            MetricUnit(name="Feet/Second^2", symbol="ft/s^2"),
+            MetricUnit(name="Feet/Second²", symbol="ft/s²"),
         ]
 
     velocity = Velocity()
 
     class Acceleration:
         si = [
-            MetricUnit(name="Meters/Second^2", symbol="m/s^2"),
+            MetricUnit(name="Meters/Second²", symbol="m/s²"),
         ]
         imperial = [
-            MetricUnit(name="Feet/Second^2", symbol="ft/s^2"),
+            MetricUnit(name="Feet/Second²", symbol="ft/s²"),
         ]
 
     acceleration = Acceleration()

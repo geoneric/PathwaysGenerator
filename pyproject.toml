@@ -6,7 +6,7 @@ profile = "black"
 
 [tool.pylint]
 max-line-length=240
-disable = "C0103, C0114, C0115, C0116, C0302, E0401, W0212, W0511, R0801, R0903, R0917"
+disable = "C0103, C0114, C0115, C0116, C0302, E0401, W0212, W0511, R0801, R0902, R0903, R0913, R0914, R0904, R0917"
 extension-pkg-allow-list = [
     "matplotlib",
     "PySide6",
