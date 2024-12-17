@@ -3,35 +3,33 @@ from pathways_app.controls.styled_button import StyledButton
 from pathways_app.controls.styled_dropdown import StyledDropdown
 from pathways_app.controls.styled_table import StyledTable
 
-from adaptation_pathways.app.model import Metric
-from adaptation_pathways.app.model.scenario import Scenario
+from adaptation_pathways.app.model.pathways_project import PathwaysProject
 
 
 class ScenariosPanel(ft.Column):
-    def __init__(
-        self,
-        scenarios: list[Scenario],
-        conditions: list[Metric],
-        start_year: int,
-        end_year: int,
-    ):
+    def __init__(self, project: PathwaysProject):
         super().__init__(
             expand=True,
             horizontal_alignment=ft.CrossAxisAlignment.STRETCH,
             scroll=ft.ScrollMode.AUTO,
         )
 
-        current_scenario = scenarios[0]
-        year_range = range(start_year, end_year)
+        self.project = project
+        year_range = range(self.project.start_year, self.project.end_year)
+        current_scenario = self.project.get_scenario(self.project.selected_scenario_id)
+        if current_scenario is None:
+            return
 
         self.controls = [
+            ft.Text("!! UNDER CONSTRUCTION !!", color="#FF0000"),
             ft.Row(
                 expand=False,
                 controls=[
                     StyledDropdown(
                         value=current_scenario.name,
                         options=[
-                            ft.dropdown.Option(scenario.name) for scenario in scenarios
+                            ft.dropdown.Option(key=scenario.id, text=scenario.name)
+                            for scenario in self.project.sorted_scenarios
                         ],
                     ),
                     ft.Container(expand=True),
@@ -43,7 +41,7 @@ class ScenariosPanel(ft.Column):
                     ft.DataColumn(label=ft.Text("Year")),
                     *(
                         ft.DataColumn(label=ft.Text(metric.name))
-                        for metric in conditions
+                        for metric in self.project.sorted_conditions
                     ),
                 ],
                 rows=[
@@ -57,7 +55,7 @@ class ScenariosPanel(ft.Column):
                                         or "None"
                                     )
                                 )
-                                for metric in conditions
+                                for metric in self.project.sorted_conditions
                             ),
                         ]
                     )
@@ -65,3 +63,6 @@ class ScenariosPanel(ft.Column):
                 ],
             ),
         ]
+
+    def redraw(self):
+        pass

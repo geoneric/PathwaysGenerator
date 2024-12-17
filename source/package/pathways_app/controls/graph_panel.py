@@ -1,14 +1,32 @@
 import flet as ft
+import matplotlib.pyplot
+from flet.matplotlib_chart import MatplotlibChart
 from pathways_app import theme
 from pathways_app.controls.styled_button import StyledButton
 from pathways_app.controls.styled_dropdown import StyledDropdown
 
-from adaptation_pathways.app.model.metric import Metric
+from adaptation_pathways.app.model.pathways_project import PathwaysProject
+from adaptation_pathways.app.service.plotting_service import PlottingService
 
 
 class GraphPanel(ft.Row):
-    def __init__(self, conditions: list[Metric]):
+    def __init__(self, project: PathwaysProject):
         super().__init__(expand=False, spacing=0)
+
+        self.project = project
+
+        self.graph_container = ft.Container(
+            expand=True, bgcolor=theme.colors.true_white
+        )
+
+        self.metric_dropdown = StyledDropdown(
+            value="",
+            options=[],
+            width=200,
+        )
+
+        self.update_parameters()
+
         self.controls = [
             ft.Container(
                 expand=False,
@@ -47,21 +65,31 @@ class GraphPanel(ft.Row):
                 ),
                 padding=ft.padding.only(bottom=10),
                 content=ft.Column(
-                    [
-                        ft.Container(expand=True, bgcolor=theme.colors.off_white),
-                        StyledDropdown(
-                            value="Time",
-                            options=[
-                                ft.dropdown.Option("Time"),
-                                *(
-                                    ft.dropdown.Option(metric.name)
-                                    for metric in conditions
-                                ),
-                            ],
-                            width=200,
-                        ),
-                    ],
+                    [self.graph_container, self.metric_dropdown],
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                 ),
             ),
         ]
+
+        self.update_graph()
+
+    def redraw(self):
+        self.update_parameters()
+        self.update_graph()
+        self.update()
+
+    def update_parameters(self):
+        self.metric_dropdown.options = [
+            *(
+                ft.dropdown.Option(
+                    key=metric.id, text=f"{metric.name} ({metric.unit.symbol})"
+                )
+                for metric in self.project.sorted_conditions
+            ),
+        ]
+        self.metric_dropdown.value = self.project.graph_metric_id
+
+    def update_graph(self):
+        figure, _ = PlottingService.draw_metro_map(self.project)
+        self.graph_container.content = MatplotlibChart(figure)
+        matplotlib.pyplot.close(figure)

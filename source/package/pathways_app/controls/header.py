@@ -11,7 +11,7 @@ class SectionHeader(ft.Container):
         size=16,
         expand=False,
         color=theme.colors.primary_dark,
-        padding=ft.padding.symmetric(4, 0),
+        padding=ft.padding.symmetric(6, 0),
         border_radius=0,
         border: ft.Border | None = None,
         bgcolor: str | None = None,

@@ -3,6 +3,8 @@ from enum import Enum
 import flet as ft
 from pathways_app import theme
 
+from adaptation_pathways.app.model.sorting import SortingInfo, SortTarget
+
 
 class SortMode(Enum):
     NONE = 0
@@ -57,10 +59,16 @@ class SortableHeader(ft.Container):
 
         self.on_click = on_click
 
+    @classmethod
+    def get_sort_mode(cls, sort_info: SortingInfo) -> SortMode:
+        if sort_info.target is SortTarget.NONE:
+            return SortMode.NONE
+        return SortMode.ASCENDING if sort_info.ascending else SortMode.DESCENDING
+
     def set_sort_mode(self, sort_mode: SortMode):
         self.sort_mode = sort_mode
         self.update_icon()
-        self.icon.update()
+        # self.icon.update()
 
     def update_icon(self):
         self.icon.name = self.sort_mode.get_icon()
