@@ -567,7 +567,7 @@ def _distribute_vertically(
 def _layout(
     pathway_map: PathwayMap,
     *,
-    overlapping_lines_spread: float,
+    overlapping_lines_spread: float | tuple[float, float],
 ) -> tuple[dict[ActionBegin | ActionEnd, np.ndarray], dict[str, float]]:
     """
     Layout that replicates the pathway map layout of the original (pre-2024) pathway generator
@@ -610,11 +610,18 @@ def _layout(
             pathway_map, root_action_begin, position_by_node
         )
 
-        if overlapping_lines_spread > 0:
-            _spread_horizontally(
-                pathway_map, position_by_node, overlapping_lines_spread
+        if not isinstance(overlapping_lines_spread, tuple):
+            overlapping_lines_spread = (
+                overlapping_lines_spread,
+                overlapping_lines_spread,
             )
-            _spread_vertically(pathway_map, position_by_node, overlapping_lines_spread)
+
+        horizontal_spread, vertical_spread = overlapping_lines_spread
+
+        if horizontal_spread > 0:
+            _spread_horizontally(pathway_map, position_by_node, horizontal_spread)
+        if vertical_spread > 0:
+            _spread_vertically(pathway_map, position_by_node, vertical_spread)
 
     return position_by_node, y_coordinate_by_action_name
 
@@ -633,7 +640,9 @@ def plot(
     if legend_arguments is None:
         legend_arguments = {}
 
-    overlapping_lines_spread: float = arguments.get("overlapping_lines_spread", 0)
+    overlapping_lines_spread: tuple[float, float] = arguments.get(
+        "overlapping_lines_spread", (0, 0)
+    )
 
     layout, y_coordinate_by_action_name = _layout(
         pathway_map, overlapping_lines_spread=overlapping_lines_spread
