@@ -54,6 +54,20 @@ def plot_map(
     return 0
 
 
+def parse_spread(spread: str) -> tuple[float, float]:
+    spreads = spread.split(",")
+
+    if len(spreads) == 1:
+        result = float(spreads[0]), float(spreads[0])
+    else:
+        assert (
+            len(spreads) == 2
+        ), "Pass in a single floating point value, or two separated by a comma"
+        result = float(spreads[0]), float(spreads[1])
+
+    return result
+
+
 def main() -> int:
     command = os.path.basename(sys.argv[0])
     usage = f"""\
@@ -78,9 +92,13 @@ Options:
                        bit beyond the actual point
     --show_legend      Show legend
     --spread=<spread>  Separate overlapping lines by a percentage [0, 1] of
-                       the range passed in. A value of 0.01 means 1% of the
-                       range of x-coordinates. Passing in a value > 0.02 is
-                       likely not useful. [default: 0]
+                       the data range. A value of 0.01 means 1% of the
+                       range. Passing in a value > 0.02 is likely not useful.
+                       Pass in a tuple of hspread,vspread to separate between
+                       horizontal and vertical spread. Horizontal spread is
+                       about the separation of vertical lines (transitions).
+                       Vertical spread is about horizontal lines (actions).
+                       [default: 0]
     --title=<title>    Title
     --x_label=<label>  Label of x-axis
 
@@ -100,7 +118,7 @@ Examples:
     x_label = arguments["--x_label"] if arguments["--x_label"] is not None else ""
     show_legend = arguments["--show_legend"]
     overshoot = arguments["--overshoot"]
-    overlapping_lines_spread = float(arguments["--spread"])
+    overlapping_lines_spread: tuple[float, float] = parse_spread(arguments["--spread"])
 
     plot_arguments: dict[str, typing.Any] = {
         "title": title,
