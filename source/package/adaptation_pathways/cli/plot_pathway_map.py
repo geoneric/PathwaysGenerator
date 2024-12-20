@@ -46,6 +46,21 @@ def plot_map(
     # TODO This should be colour_by_action
     arguments["colour_by_action_name"] = colour_by_action_name
 
+    # TODO Not sure if icons need to be supported here. Programmatically they work already. Test them with
+    #      different sizes. Assuming they are rectangular is fine I think.
+    icon_pathname = "/home/kor/cloud/geoneric/project/deltares/adaptation_pathways/project2/doc/20241024/87_PathwaysGenerator/data/logos/colorized/f_room_for_river.png"
+    arguments["icon_pathnames"] = list(
+        icon_pathname for _ in range(len(colour_by_action_name))
+    )
+    arguments["icon_pathnames"] = [
+        "/home/kor/cloud/geoneric/project/deltares/adaptation_pathways/project2/doc/20241024/87_PathwaysGenerator/data/logos/colorized/f_room_for_river.png",
+        "/home/kor/cloud/geoneric/project/deltares/adaptation_pathways/project2/doc/20241024/87_PathwaysGenerator/data/logos/colorized/f_resilient_crops.png",
+        "/home/kor/cloud/geoneric/project/deltares/adaptation_pathways/project2/doc/20241024/87_PathwaysGenerator/data/logos/colorized/f_wet_proofing_houses.png",
+        "/home/kor/cloud/geoneric/project/deltares/adaptation_pathways/project2/doc/20241024/87_PathwaysGenerator/data/logos/colorized/no_measure.png",
+        "/home/kor/cloud/geoneric/project/deltares/adaptation_pathways/project2/doc/20241024/87_PathwaysGenerator/data/logos/colorized/f_dike_elevation_l.png",
+        "/home/kor/cloud/geoneric/project/deltares/adaptation_pathways/project2/doc/20241024/87_PathwaysGenerator/data/logos/colorized/f_dike_elevation_s.png",
+    ]
+
     plot_classic_pathway_map(
         axes, pathway_map, arguments=arguments, legend_arguments=legend_arguments
     )

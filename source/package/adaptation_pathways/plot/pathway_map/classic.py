@@ -4,7 +4,12 @@ import typing
 import matplotlib as mpl
 import matplotlib.lines as mlines
 import matplotlib.markers as mmarkers
+import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.image import BboxImage
+from matplotlib.legend_handler import HandlerBase
+from matplotlib.offsetbox import AnnotationBbox, OffsetImage
+from matplotlib.transforms import Bbox, TransformedBbox
 
 from ...action import Action
 from ...action_combination import ActionCombination
@@ -139,10 +144,12 @@ def _configure_title(
         axes.set_title(title)
 
 
+# pylint: disable-next=too-many-locals
 def _configure_y_axes(
     axes,
     y_coordinate_by_action_name: dict[str, float],
     *,
+    icon_pathnames,
     arguments: dict[str, typing.Any],
 ):
 
@@ -150,16 +157,40 @@ def _configure_y_axes(
     axes.spines.left.set_visible(False)
     axes.tick_params(left=False)
 
-    y_labels = list(y_coordinate_by_action_name.keys())
     y_coordinates = list(y_coordinate_by_action_name.values())
-
+    y_labels = list(y_coordinate_by_action_name.keys())
     colour_by_action_name: dict[str, alias.Colour] = arguments["colour_by_action_name"]
     label_colours = [colour_by_action_name[label] for label in y_labels]
 
-    axes.set_yticks(y_coordinates, labels=y_labels)
+    show_icons = len(icon_pathnames) > 0
 
-    for colour, tick in zip(label_colours, axes.yaxis.get_major_ticks()):
-        tick.label1.set_color(colour)
+    if not show_icons:
+        axes.set_yticks(y_coordinates, labels=y_labels)
+
+        for colour, tick, label in zip(
+            label_colours, axes.yaxis.get_major_ticks(), y_labels
+        ):
+            tick.label1.set_color(colour)
+    else:
+        axes.set_yticks(y_coordinates, labels="")
+        ytick_labels = axes.get_yticklabels()
+
+        for idx, y_tick in enumerate(ytick_labels):
+            x_coordinate, y_coordinate = y_tick.get_position()
+            array = plt.imread(icon_pathnames[idx])
+            _, nr_cols, _ = array.shape
+            zoom = nr_cols * 3e-5
+            image = OffsetImage(array, zoom=zoom)
+            image.image.axes = axes
+            annotation = AnnotationBbox(
+                offsetbox=image,
+                xycoords=("axes fraction", "data"),
+                xy=(x_coordinate, y_coordinate),
+                boxcoords="offset points",
+                xybox=(-0.5 * zoom * nr_cols, 0),
+                frameon=False,
+            )
+            axes.add_artist(annotation)
 
     # Right y-axis
     axes.spines.right.set_visible(False)
@@ -196,7 +227,36 @@ def _configure_x_axes(
         axes.set_xticks(x_ticks, labels=x_labels)
 
 
-def _configure_legend(axes, *, labels, colours, arguments):
+class IconHandler(HandlerBase):
+
+    def __init__(self, *, pathname=""):
+        self.image_data = plt.imread(pathname)
+        self.space = 0  # 15
+        self.offset = 10
+
+        super().__init__()
+
+    # pylint: disable-next=too-many-arguments, too-many-positional-arguments
+    def create_artists(
+        self, legend, orig_handle, xdescent, ydescent, width, height, fontsize, trans
+    ):
+        bb = Bbox.from_bounds(
+            xdescent + (width + self.space) / 3.0 + self.offset,
+            ydescent,
+            height * self.image_data.shape[1] / self.image_data.shape[0],
+            height,
+        )
+
+        tbb = TransformedBbox(bb, trans)
+        image = BboxImage(tbb)
+        image.set_data(self.image_data)
+
+        self.update_prop(image, orig_handle, legend)
+
+        return [image]
+
+
+def _configure_legend(axes, *, labels, colours, icon_pathnames: list[str], arguments):
 
     # TODO Document this:
     # - Use rcParams["legend.*"] to tweak the default appearance of the legend
@@ -207,13 +267,22 @@ def _configure_legend(axes, *, labels, colours, arguments):
     # Iterate over all actions that are shown on the y-axis. For each of these create a proxy artist. Then
     # create the legend, passing in the proxy artists.
 
-    handles = []
-
     # TODO Maybe we need to do something about the ordering(?)
-    for label, colour in zip(labels, colours):
-        handles.append(mlines.Line2D([], [], color=colour, label=label))
 
-    axes.legend(handles=handles, **arguments)
+    show_icons = len(icon_pathnames) > 0
+    handles = []
+    handler_map = {}
+
+    for colour in colours:
+        handles.append(mlines.Line2D([], [], color=colour))
+
+    if show_icons:
+        # Install a custom handler that will draw an icon instead of the line just created
+        for idx, handle in enumerate(handles):
+            handler = IconHandler(pathname=icon_pathnames[idx])
+            handler_map[handle] = handler
+
+    axes.legend(handles=handles, labels=labels, handler_map=handler_map, **arguments)
 
 
 def _plot_annotations(
@@ -224,10 +293,14 @@ def _plot_annotations(
     arguments: dict[str, typing.Any],
     legend_arguments: dict[str, typing.Any],
 ) -> None:
+    icon_pathnames = arguments.get("icon_pathnames", [])
 
     _configure_title(axes, arguments=arguments)
     y_labels, label_colours = _configure_y_axes(
-        axes, y_coordinate_by_action_name, arguments=arguments
+        axes,
+        y_coordinate_by_action_name,
+        icon_pathnames=icon_pathnames,
+        arguments=arguments,
     )
     _configure_x_axes(axes, layout, arguments=arguments)
 
@@ -235,7 +308,11 @@ def _plot_annotations(
 
     if show_legend:
         _configure_legend(
-            axes, labels=y_labels, colours=label_colours, arguments=legend_arguments
+            axes,
+            labels=y_labels,
+            colours=label_colours,
+            icon_pathnames=icon_pathnames,
+            arguments=legend_arguments,
         )
 
 
