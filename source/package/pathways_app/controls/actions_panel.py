@@ -1,13 +1,15 @@
 # pylint: disable=too-many-arguments,too-many-instance-attributes
+import random
+
 import flet as ft
-from pathways_app import theme
-from pathways_app.controls.action_icon import ActionIcon
-from pathways_app.controls.editable_cell import EditableTextCell
-from pathways_app.controls.metric_effect import MetricEffectCell
-from pathways_app.controls.metric_value import MetricValueCell
-from pathways_app.controls.sortable_header import SortableHeader, SortMode
-from pathways_app.controls.styled_button import StyledButton
-from pathways_app.controls.styled_table import StyledTable
+import theme
+from controls.action_icon import ActionIcon
+from controls.editable_cell import EditableTextCell
+from controls.metric_effect import MetricEffectCell
+from controls.metric_value import MetricValueCell
+from controls.sortable_header import SortableHeader, SortMode
+from controls.styled_button import StyledButton
+from controls.styled_table import StyledTable
 
 from adaptation_pathways.app.model.action import Action
 from adaptation_pathways.app.model.pathways_project import PathwaysProject
@@ -104,7 +106,10 @@ class ActionsPanel(ft.Column):
         self.update()
 
     def on_new_action(self, _):
-        self.project.create_action()
+        self.project.create_action(
+            random.choice(theme.action_colors),
+            random.choice(theme.action_icons),
+        )
         self.project.notify_actions_changed()
         self.update()
 
@@ -232,7 +237,7 @@ class ActionsPanel(ft.Column):
                 ft.DataRow(
                     [
                         ft.DataCell(self.create_icon_editor(action)),
-                        EditableTextCell(action, "name", self.on_cell_edited),
+                        EditableTextCell(action, "name", self.on_name_edited),
                         *metric_cells,
                     ],
                     selected=action.id in self.project.selected_action_ids,

@@ -1,10 +1,10 @@
 from typing import Callable
 
 import flet as ft
-from pathways_app import theme
-from pathways_app.controls.editable_cell import EditableCell
-from pathways_app.controls.metric_value import FloatInputFilter
-from pathways_app.controls.styled_dropdown import StyledDropdown
+import theme
+from controls.editable_cell import EditableCell
+from controls.metric_value import FloatInputFilter
+from controls.styled_dropdown import StyledDropdown
 
 from adaptation_pathways.app.model.action import MetricEffect
 from adaptation_pathways.app.model.metric import Metric, MetricOperation

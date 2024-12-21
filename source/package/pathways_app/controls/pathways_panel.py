@@ -1,13 +1,12 @@
 import flet as ft
-from pathways_app import theme
-from pathways_app.controls.action_icon import ActionIcon
-from pathways_app.controls.header import SectionHeader
-from pathways_app.controls.metric_value import MetricValueCell
-from pathways_app.controls.sortable_header import SortableHeader, SortMode
-from pathways_app.controls.styled_button import StyledButton
-from pathways_app.controls.styled_table import StyledTable
+import theme
+from controls.action_icon import ActionIcon
+from controls.header import SectionHeader
+from controls.metric_value import MetricValueCell
+from controls.sortable_header import SortableHeader, SortMode
+from controls.styled_button import StyledButton
+from controls.styled_table import StyledTable
 
-from adaptation_pathways.app.model import Action
 from adaptation_pathways.app.model.pathway import Pathway
 from adaptation_pathways.app.model.pathways_project import PathwaysProject
 from adaptation_pathways.app.model.sorting import SortTarget
@@ -127,19 +126,24 @@ class PathwaysPanel(ft.Column):
 
     def get_pathway_row(self, pathway: Pathway, ancestors: list[Pathway]):
         children = [*self.project.get_children(pathway.id)]
+        pathway_action = self.project.get_action(pathway.action_id)
 
-        unused_actions = [
-            a
-            for a in self.project.sorted_actions
-            if not any(node.last_action == a for node in ancestors)
-            and not any(child.last_action == a for child in children)
+        unused_action_ids = [
+            action_id
+            for action_id in self.project.action_sorting.sorted_ids
+            if not any(ancestor.action_id == action_id for ancestor in ancestors)
+            and not any(child.action_id == action_id for child in children)
         ]
 
-        row_controls = [ActionIcon(node.last_action, size=26) for node in ancestors]
-        if pathway.parent_id is None:
-            row_controls.append(ft.Text("  Current  ", color=pathway.last_action.color))
+        row_controls = [
+            ActionIcon(self.project.get_action(ancestor.action_id), size=26)
+            for ancestor in ancestors
+        ]
 
-        if len(unused_actions) > 0:
+        if pathway.parent_id is None:
+            row_controls.append(ft.Text("  Current  ", color=pathway_action.color))
+
+        if len(unused_action_ids) > 0:
             row_controls.append(
                 ft.PopupMenuButton(
                     ft.Icon(
@@ -151,18 +155,22 @@ class PathwaysPanel(ft.Column):
                         ft.PopupMenuItem(
                             content=ft.Row(
                                 [
-                                    ActionIcon(a, display_tooltip=False),
+                                    ActionIcon(
+                                        action,
+                                        display_tooltip=False,
+                                    ),
                                     ft.Text(
-                                        a.name,
+                                        action.name,
                                         style=theme.text.normal,
                                     ),
                                 ]
                             ),
-                            on_click=lambda e, new_action=a: self.extend_pathway(
-                                pathway, new_action
+                            on_click=lambda e, action_id=action_id: self.extend_pathway(
+                                pathway, action_id
                             ),
                         )
-                        for a in unused_actions
+                        for action_id in unused_action_ids
+                        for action in [self.project.get_action(action_id)]
                     ],
                     tooltip=ft.Tooltip(
                         "Add",
@@ -210,7 +218,7 @@ class PathwaysPanel(ft.Column):
         row.on_select_changed = on_select_changed
         return row
 
-    def extend_pathway(self, pathway: Pathway, action: Action):
-        self.project.create_pathway(action, pathway)
+    def extend_pathway(self, pathway: Pathway, action_id: str):
+        self.project.create_pathway(action_id, pathway.id)
         self.project.sort_pathways()
         self.project.notify_pathways_changed()

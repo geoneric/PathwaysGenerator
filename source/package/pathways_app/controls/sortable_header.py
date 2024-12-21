@@ -1,7 +1,7 @@
 from enum import Enum
 
 import flet as ft
-from pathways_app import theme
+import theme
 
 from adaptation_pathways.app.model.sorting import SortingInfo, SortTarget
 

@@ -1,6 +1,6 @@
 import flet as ft
-from pathways_app import theme
-from pathways_app.controls.editable_cell import EditableCell
+import theme
+from controls.editable_cell import EditableCell
 
 from adaptation_pathways.app.model.metric import Metric, MetricValue
 

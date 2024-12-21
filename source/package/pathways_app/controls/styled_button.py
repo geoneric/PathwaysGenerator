@@ -1,5 +1,5 @@
 import flet as ft
-from pathways_app import theme
+import theme
 
 
 class StyledButton(ft.FilledButton):

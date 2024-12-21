@@ -1,5 +1,5 @@
 import flet as ft
-from pathways_app import theme
+import theme
 
 from adaptation_pathways.app.model.action import Action
 

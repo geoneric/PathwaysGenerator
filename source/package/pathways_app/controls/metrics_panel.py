@@ -1,11 +1,11 @@
 from typing import Callable
 
 import flet as ft
-from pathways_app.controls.editable_cell import EditableTextCell
-from pathways_app.controls.header import SmallHeader
-from pathways_app.controls.styled_button import StyledButton
-from pathways_app.controls.styled_table import StyledTable
-from pathways_app.controls.unit_cell import MetricUnitCell
+from controls.editable_cell import EditableTextCell
+from controls.header import SmallHeader
+from controls.styled_button import StyledButton
+from controls.styled_table import StyledTable
+from controls.unit_cell import MetricUnitCell
 
 from adaptation_pathways.app.model.metric import Metric
 from adaptation_pathways.app.model.pathways_project import PathwaysProject

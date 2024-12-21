@@ -1,9 +1,9 @@
 import flet as ft
 import matplotlib.pyplot
+import theme
+from controls.styled_button import StyledButton
+from controls.styled_dropdown import StyledDropdown
 from flet.matplotlib_chart import MatplotlibChart
-from pathways_app import theme
-from pathways_app.controls.styled_button import StyledButton
-from pathways_app.controls.styled_dropdown import StyledDropdown
 
 from adaptation_pathways.app.model.pathways_project import PathwaysProject
 from adaptation_pathways.app.service.plotting_service import PlottingService

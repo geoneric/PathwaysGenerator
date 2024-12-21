@@ -2,10 +2,7 @@
 """
 The single class that stores all data needed to work on a project
 """
-import random
 from typing import Callable, Iterable
-
-from pathways_app import theme
 
 from adaptation_pathways.app.model.sorting import SortingInfo, SortTarget
 
@@ -28,6 +25,7 @@ class PathwaysProject:
         scenarios: list[Scenario],
         actions: list[Action],
         pathways: list[Pathway],
+        root_action: Action,
         root_pathway_id: str,
     ):
         self.id = project_id
@@ -49,6 +47,7 @@ class PathwaysProject:
             self.scenarios_by_id[scenario.id] = scenario
 
         self.actions_by_id: dict[str, Action] = {}
+        self.actions_by_id[root_action.id] = root_action
         for action in actions:
             self.actions_by_id[action.id] = action
 
@@ -203,16 +202,16 @@ class PathwaysProject:
         self.scenario_sorting.sorted_ids.remove(scenario_id)
         return scenario
 
-    def get_action(self, action_id: str) -> Action | None:
-        return self.actions_by_id.get(action_id, None)
+    def get_action(self, action_id: str) -> Action:
+        return self.actions_by_id[action_id]
 
-    def create_action(self) -> Action:
+    def create_action(self, color, icon) -> Action:
         action_id = self._create_id()
         action = Action(
             action_id,
             "New Action",
-            random.choice(theme.action_colors),
-            random.choice(theme.action_icons),
+            color,
+            icon,
             {
                 metric.id: MetricEffect(0, MetricOperation.ADD)
                 for metric in self.all_metrics()
@@ -234,7 +233,7 @@ class PathwaysProject:
         for action_id in self.selected_action_ids:
             self.delete_action(action_id)
             for pathway in self.sorted_pathways:
-                if pathway.last_action.id == action_id:
+                if pathway.action_id == action_id:
                     pathway_ids_to_delete.append(pathway.id)
 
         self.selected_action_ids.clear()
@@ -277,20 +276,10 @@ class PathwaysProject:
     def get_pathway(self, pathway_id: str) -> Pathway | None:
         return self.pathways_by_id.get(pathway_id, None)
 
-    def _create_pathway_id(
-        self, action: Action, parent_pathway: Pathway | None = None
-    ) -> str:
-        return (
-            action.id if parent_pathway is None else f"{parent_pathway.id}->{action.id}"
-        )
-
     def create_pathway(
-        self, action: Action, parent_pathway: Pathway | None = None
+        self, action_id: str, parent_pathway_id: str | None = None
     ) -> Pathway:
-        new_id = self._create_pathway_id(action, parent_pathway)
-        pathway = Pathway(
-            new_id, action, parent_pathway.id if parent_pathway is not None else None
-        )
+        pathway = Pathway(action_id, parent_pathway_id)
         self.pathways_by_id[pathway.id] = pathway
         self.pathway_sorting.sorted_ids.append(pathway.id)
         for metric in self.all_metrics():
@@ -310,6 +299,7 @@ class PathwaysProject:
     def _update_pathway_value(
         self, pathway: Pathway, metric: Metric, updated_pathway_ids: set[str]
     ):
+        pathway_action = self.get_action(pathway.action_id)
         current_value = pathway.metric_data.get(metric.id, MetricValue(0, True))
         pathway.metric_data[metric.id] = current_value
 
@@ -333,9 +323,7 @@ class PathwaysProject:
         if parent.id not in updated_pathway_ids and parent_value.is_estimate:
             self._update_pathway_value(parent, metric, updated_pathway_ids)
 
-        current_value.value = pathway.last_action.apply_effect(
-            metric.id, parent_value.value
-        )
+        current_value.value = pathway_action.apply_effect(metric.id, parent_value.value)
         updated_pathway_ids.add(pathway.id)
 
     def delete_pathway(self, pathway_id: str) -> Pathway | None:

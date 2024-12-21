@@ -1,7 +1,7 @@
 from typing import Callable
 
 import flet as ft
-from pathways_app import theme
+import theme
 
 from adaptation_pathways.app.model.metric import Metric, MetricUnit, default_units
 

@@ -1,7 +1,7 @@
 import flet as ft
-from pathways_app.controls.styled_button import StyledButton
-from pathways_app.controls.styled_dropdown import StyledDropdown
-from pathways_app.controls.styled_table import StyledTable
+from controls.styled_button import StyledButton
+from controls.styled_dropdown import StyledDropdown
+from controls.styled_table import StyledTable
 
 from adaptation_pathways.app.model.pathways_project import PathwaysProject
 

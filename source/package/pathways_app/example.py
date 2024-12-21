@@ -30,7 +30,7 @@ metric_habitat_health = Metric(
 
 action_root = Action(
     "current-situation",
-    name="Current Situation",
+    name="Current",
     color="#999999",
     icon=ft.icons.HOME,
     metric_data={
@@ -76,7 +76,7 @@ action_nature_based = Action(
     },
 )
 
-root_pathway = Pathway(action_root.id, last_action=action_root)
+root_pathway = Pathway(action_root.id)
 
 project = PathwaysProject(
     project_id="test-id",
@@ -98,9 +98,10 @@ project = PathwaysProject(
     ],
     actions=[action_pump, action_sea_wall, action_nature_based],
     pathways=[root_pathway],
+    root_action=action_root,
     root_pathway_id=root_pathway.id,
 )
 
-project.create_pathway(action_pump, root_pathway)
-project.create_pathway(action_sea_wall, root_pathway)
-project.create_pathway(action_nature_based, root_pathway)
+project.create_pathway(action_pump.id, root_pathway.id)
+project.create_pathway(action_sea_wall.id, root_pathway.id)
+project.create_pathway(action_nature_based.id, root_pathway.id)

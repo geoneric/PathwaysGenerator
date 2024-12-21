@@ -1,7 +1,7 @@
 # pylint: disable=too-many-arguments
 import flet as ft
-from pathways_app import theme
-from pathways_app.utils import index_of_first
+import theme
+from utils import index_of_first
 
 
 class StyledDropdown(ft.Dropdown):

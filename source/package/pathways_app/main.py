@@ -1,18 +1,18 @@
 import locale
 import logging
 
+import example
 import flet as ft
 import theme
+from controls.actions_panel import ActionsPanel
+from controls.graph_panel import GraphPanel
 from controls.header import SectionHeader
 from controls.menu_bar import MenuBar
 from controls.metrics_panel import MetricsPanel
 from controls.panel import Panel
+from controls.pathways_panel import PathwaysPanel
+from controls.scenarios_panel import ScenariosPanel
 from controls.tabbed_panel import TabbedPanel
-from pathways_app import example
-from pathways_app.controls.actions_panel import ActionsPanel
-from pathways_app.controls.graph_panel import GraphPanel
-from pathways_app.controls.pathways_panel import PathwaysPanel
-from pathways_app.controls.scenarios_panel import ScenariosPanel
 
 
 locale.setlocale(locale.LC_ALL, "")

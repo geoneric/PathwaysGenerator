@@ -2,7 +2,7 @@ from abc import ABC
 from typing import Callable
 
 import flet as ft
-from pathways_app import theme
+import theme
 from pyparsing import abstractmethod
 
 
