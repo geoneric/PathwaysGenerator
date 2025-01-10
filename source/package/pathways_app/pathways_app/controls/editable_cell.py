@@ -2,12 +2,14 @@ from abc import ABC
 from typing import Callable
 
 import flet as ft
+import theme
+from pathways_app.controls.styled_table import TableCell
 from pyparsing import abstractmethod
 
 from .. import theme
 
 
-class EditableCell(ft.DataCell, ABC):
+class EditableCell(TableCell, ABC):
     def __init__(
         self,
         display_control: ft.Control,
@@ -33,7 +35,7 @@ class EditableCell(ft.DataCell, ABC):
 
         self.update_bg()
 
-        super().__init__(content=self.cell_content)
+        super().__init__(control=self.cell_content)
 
     def toggle_editing(self, _):
         self.is_editing = not self.is_editing
@@ -47,7 +49,7 @@ class EditableCell(ft.DataCell, ABC):
         self.input_content.visible = self.is_editing
 
         self.update_bg()
-        self.update()
+        self.control.update()
 
         if self.is_editing:
             self.input_content.focus()
@@ -65,7 +67,7 @@ class EditableCell(ft.DataCell, ABC):
     def set_calculated(self, is_calculated):
         self.is_calculated = is_calculated
         self.update_bg()
-        self.update()
+        self.control.update()
 
     @abstractmethod
     def update_display(self):

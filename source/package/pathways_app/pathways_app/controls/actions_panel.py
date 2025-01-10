@@ -2,6 +2,14 @@
 import random
 
 import flet as ft
+import theme
+from controls.action_icon import ActionIcon
+from controls.editable_cell import EditableTextCell
+from controls.metric_effect import MetricEffectCell
+from controls.metric_value import MetricValueCell
+from controls.sortable_header import SortableHeader, SortMode
+from controls.styled_button import StyledButton
+from controls.styled_table import StyledTable, TableCell, TableColumn
 
 from adaptation_pathways.app.model.action import Action
 from adaptation_pathways.app.model.pathways_project import PathwaysProject
@@ -115,34 +123,18 @@ class ActionsPanel(ft.Column):
         self.update()
 
     def update_table(self):
-        sort_mode = SortableHeader.get_sort_mode(self.project.action_sorting)
-        sort_key = self.project.action_sorting.sort_key
-
-        sortable_headers = [
-            SortableHeader(
-                sort_key="name",
-                name="Name",
-                sort_mode=SortMode.NONE if sort_key != "name" else sort_mode,
-                on_sort=self.on_sort_actions,
+        columns = [
+            TableColumn(
+                label="Icon",
+            ),
+            TableColumn(
+                label="Name",
             ),
             *(
-                SortableHeader(
-                    sort_key=metric.id,
-                    name=metric.name,
-                    sort_mode=SortMode.NONE if sort_key is not metric.id else sort_mode,
-                    on_sort=self.on_sort_actions,
+                TableColumn(
+                    label=metric.name, key=metric.id, on_sort=self.on_sort_actions
                 )
                 for metric in self.project.all_metrics()
-            ),
-        ]
-
-        columns = [
-            ft.DataColumn(
-                label=ft.Text("Icon", expand=True),
-            ),
-            *(
-                ft.DataColumn(label=header, numeric=header.sort_key != "name")
-                for header in sortable_headers
             ),
         ]
         self.action_table.set_columns(columns)
@@ -235,15 +227,11 @@ class ActionsPanel(ft.Column):
                 )
 
             rows.append(
-                ft.DataRow(
-                    [
-                        ft.DataCell(self.create_icon_editor(action)),
-                        EditableTextCell(action, "name", self.on_name_edited),
-                        *metric_cells,
-                    ],
-                    selected=action.id in self.project.selected_action_ids,
-                    on_select_changed=lambda _, a=action: self.on_action_selected(a),
-                )
+                [
+                    TableCell(self.create_icon_editor(action)),
+                    EditableTextCell(action, "name", self.on_name_edited),
+                    *metric_cells,
+                ]
             )
 
         self.action_table.set_rows(rows)

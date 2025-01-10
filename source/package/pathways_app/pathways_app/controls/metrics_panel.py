@@ -1,6 +1,11 @@
-from typing import Callable
+# from typing import Callable
 
 import flet as ft
+from controls.editable_cell import EditableTextCell
+from controls.header import SmallHeader
+from controls.styled_button import StyledButton
+from controls.styled_table import StyledTable, TableCell, TableColumn
+from controls.unit_cell import MetricUnitCell
 
 from adaptation_pathways.app.model.metric import Metric
 from adaptation_pathways.app.model.pathways_project import PathwaysProject
@@ -23,8 +28,8 @@ class MetricsPanel(ft.Column):
 
         self.conditions_table = StyledTable(
             columns=[
-                ft.DataColumn(label=ft.Text("Name")),
-                ft.DataColumn(label=ft.Text("Unit")),
+                TableColumn(label="Name"),
+                TableColumn(label="Unit"),
             ],
             rows=[],
             show_checkboxes=True,
@@ -32,8 +37,8 @@ class MetricsPanel(ft.Column):
 
         self.criteria_table = StyledTable(
             columns=[
-                ft.DataColumn(label=ft.Text("Name")),
-                ft.DataColumn(label=ft.Text("Unit")),
+                TableColumn(label="Name"),
+                TableColumn(label="Unit"),
             ],
             rows=[],
             show_checkboxes=True,
@@ -96,7 +101,6 @@ class MetricsPanel(ft.Column):
         self.update()
 
     def on_metric_updated(self, _):
-        print(self)
         self.project.notify_conditions_changed()
 
     def on_condition_selected(self, metric: Metric):
@@ -138,17 +142,13 @@ class MetricsPanel(ft.Column):
     def get_metric_row(
         self,
         metric: Metric,
-        selected_ids: set[str],
-        on_metric_selected: Callable[[Metric], None],
-    ) -> ft.DataRow:
-        row = ft.DataRow(
-            [
-                EditableTextCell(metric, "name", self.on_metric_updated),
-                MetricUnitCell(metric, self.on_metric_updated),
-            ],
-            selected=metric.id in selected_ids,
-        )
-        row.on_select_changed = lambda e: on_metric_selected(metric)
+        # selected_ids: set[str],
+        # on_metric_selected: Callable[[Metric], None],
+    ) -> list[TableCell]:
+        row = [
+            EditableTextCell(metric, "name", self.on_metric_updated),
+            MetricUnitCell(metric, self.on_metric_updated),
+        ]
         return row
 
     def update_metrics(self):
@@ -156,8 +156,8 @@ class MetricsPanel(ft.Column):
             [
                 self.get_metric_row(
                     metric,
-                    self.project.selected_condition_ids,
-                    self.on_condition_selected,
+                    # self.project.selected_condition_ids,
+                    # self.on_condition_selected,
                 )
                 for metric in self.project.sorted_conditions
             ]
@@ -169,8 +169,8 @@ class MetricsPanel(ft.Column):
             [
                 self.get_metric_row(
                     metric,
-                    self.project.selected_criteria_ids,
-                    self.on_criteria_selected,
+                    # self.project.selected_criteria_ids,
+                    # self.on_criteria_selected,
                 )
                 for metric in self.project.sorted_criteria
             ]
