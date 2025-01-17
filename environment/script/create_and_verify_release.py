@@ -81,7 +81,6 @@ def verify_wheel(release_directory_path: Path) -> None:
         "pip3 install -f dist adaptation_pathways --quiet",
         "ap_plot_graphs --version",
         "ap_plot_pathway_map --version",
-        "ap_pathway_generator --version",
         'python3 -c "'
         "import adaptation_pathways as ap;"
         f'assert ap.__version__ == \\"{ap.__version__}\\";'

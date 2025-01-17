@@ -9,7 +9,6 @@ max-line-length=240
 disable = "C0103, C0114, C0115, C0116, C0302, E0401, W0212, W0511, R0801, R0902, R0903, R0913, R0914, R0904, R0917"
 extension-pkg-allow-list = [
     "matplotlib",
-    "PySide6",
 ]
 
 [build-system]
@@ -37,7 +36,6 @@ dependencies = [
     # "docopt",  # TODO flet build can't find docopt...
     "matplotlib",
     "networkx[default]",
-    # "pyside6",
 ]
 
 [project.urls]
@@ -47,7 +45,6 @@ dependencies = [
 [project.scripts]
 ap_export = "adaptation_pathways.cli.export:main"
 ap_import = "adaptation_pathways.cli.import_:main"
-ap_pathway_generator = "adaptation_pathways.cli.pathway_generator:main"
 ap_plot_graphs = "adaptation_pathways.cli.plot_graphs:main"
 ap_plot_pathway_map = "adaptation_pathways.cli.plot_pathway_map:main"
 
