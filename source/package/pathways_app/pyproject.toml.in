@@ -1,0 +1,31 @@
+[tool.flet]
+org = "nl.deltares"
+product = "TODO"
+company = "TODO"
+copyright = "@AP_COPYRIGHT@"
+
+# [tool.flet.app]
+# module = "main"
+# path = "package/pathways_app"
+
+[tool.flet.compile]
+app = false
+packages = false
+cleanup = false
+
+# [tool.flet.web]
+# base_url = "TODO"
+# renderer = "canvaskit"
+# use_color_emoji = false
+# route_url_strategy = "path"
+
+[project]
+name = "Pathways Generator"
+version = "@CMAKE_PROJECT_VERSION@"
+description = "@CMAKE_PROJECT_DESCRIPTION@"
+authors = "@AP_AUTHORS@"
+dependencies = [
+    "adaptation_pathways==@CMAKE_PROJECT_VERSION@",
+    "pyparsing",
+    "flet>=0.25.1"
+]

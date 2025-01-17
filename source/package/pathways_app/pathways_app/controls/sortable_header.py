@@ -1,9 +1,10 @@
 from enum import Enum
 
 import flet as ft
-import theme
 
 from adaptation_pathways.app.model.sorting import SortingInfo, SortTarget
+
+from .. import theme
 
 
 class SortMode(Enum):

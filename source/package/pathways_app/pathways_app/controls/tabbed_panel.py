@@ -1,6 +1,7 @@
 import flet as ft
-import theme
-from controls.header import SectionHeader
+
+from .. import theme
+from .header import SectionHeader
 
 
 class TabbedPanel(ft.Column):

@@ -11,15 +11,8 @@ import re
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "@CMAKE_PROJECT_NAME@"
-copyright = "2024, TODO"
-author = ", ".join(
-    [
-        # TODO Add everybody
-        "Marjolijn Haasnoot (Deltares, NL)",
-        "Willem van Deursen (Carthago Consultancy, NL)",
-        "Kor de Jong (Geoneric, NL)",
-    ]
-)
+copyright = "@AP_COPYRIGHT@"
+author = "@AP_AUTHORS@"
 version = "@CMAKE_PROJECT_VERSION_MAJOR@.@CMAKE_PROJECT_VERSION_MINOR@"
 
 # -- General configuration ---------------------------------------------------

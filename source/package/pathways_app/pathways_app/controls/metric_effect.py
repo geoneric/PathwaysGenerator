@@ -1,13 +1,14 @@
 from typing import Callable
 
 import flet as ft
-import theme
-from controls.editable_cell import EditableCell
-from controls.metric_value import FloatInputFilter
-from controls.styled_dropdown import StyledDropdown
 
 from adaptation_pathways.app.model.action import MetricEffect
 from adaptation_pathways.app.model.metric import Metric, MetricOperation
+
+from .. import theme
+from .editable_cell import EditableCell
+from .metric_value import FloatInputFilter
+from .styled_dropdown import StyledDropdown
 
 
 class MetricEffectCell(EditableCell):

@@ -2,8 +2,9 @@ from abc import ABC
 from typing import Callable
 
 import flet as ft
-import theme
 from pyparsing import abstractmethod
+
+from .. import theme
 
 
 class EditableCell(ft.DataCell, ABC):

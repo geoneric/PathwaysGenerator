@@ -1,6 +1,7 @@
 # pylint: disable=too-many-arguments
 import flet as ft
-import theme
+
+from .. import theme
 
 
 class StyledTable(ft.DataTable):

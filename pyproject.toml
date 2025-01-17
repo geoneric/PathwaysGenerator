@@ -34,11 +34,10 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "docopt",
+    # "docopt",  # TODO flet build can't find docopt...
     "matplotlib",
     "networkx[default]",
-    "pyside6",
-    "flet",
+    # "pyside6",
 ]
 
 [project.urls]

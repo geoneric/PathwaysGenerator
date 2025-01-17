@@ -1,9 +1,10 @@
 import flet as ft
-from controls.styled_button import StyledButton
-from controls.styled_dropdown import StyledDropdown
-from controls.styled_table import StyledTable
 
 from adaptation_pathways.app.model.pathways_project import PathwaysProject
+
+from .styled_button import StyledButton
+from .styled_dropdown import StyledDropdown
+from .styled_table import StyledTable
 
 
 class ScenariosPanel(ft.Column):

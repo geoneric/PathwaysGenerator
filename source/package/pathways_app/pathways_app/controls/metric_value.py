@@ -1,8 +1,9 @@
 import flet as ft
-import theme
-from controls.editable_cell import EditableCell
 
 from adaptation_pathways.app.model.metric import Metric, MetricValue
+
+from .. import theme
+from .editable_cell import EditableCell
 
 
 class FloatInputFilter(ft.InputFilter):

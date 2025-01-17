@@ -1,5 +1,6 @@
 import flet as ft
-import theme
+
+from .. import theme
 
 
 class StyledButton(ft.FilledButton):

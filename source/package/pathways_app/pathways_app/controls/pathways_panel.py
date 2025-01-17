@@ -1,15 +1,16 @@
 import flet as ft
-import theme
-from controls.action_icon import ActionIcon
-from controls.header import SectionHeader
-from controls.metric_value import MetricValueCell
-from controls.sortable_header import SortableHeader, SortMode
-from controls.styled_button import StyledButton
-from controls.styled_table import StyledTable
 
 from adaptation_pathways.app.model.pathway import Pathway
 from adaptation_pathways.app.model.pathways_project import PathwaysProject
 from adaptation_pathways.app.model.sorting import SortTarget
+
+from .. import theme
+from .action_icon import ActionIcon
+from .header import SectionHeader
+from .metric_value import MetricValueCell
+from .sortable_header import SortableHeader, SortMode
+from .styled_button import StyledButton
+from .styled_table import StyledTable
 
 
 class PathwaysPanel(ft.Column):

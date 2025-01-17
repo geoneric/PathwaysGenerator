@@ -1,7 +1,8 @@
 import flet as ft
-import theme
 
 from adaptation_pathways.app.model import PathwaysProject
+
+from .. import theme
 
 
 class MenuBar(ft.Container):

@@ -7,6 +7,14 @@ project(AdaptationPathways
     HOMEPAGE_URL "https://publicwiki.deltares.nl/display/AP/Adaptation+Pathways"
 )
 
+set(AP_COPYRIGHT "2025 by TODO")
+string(JOIN ", " AP_AUTHORS
+    # TODO Add everybody, in some order (alphabet?)
+    "Kor de Jong (Geoneric, NL)"
+    "Marjolijn Haasnoot (Deltares, NL)"
+    "Willem van Deursen (Carthago Consultancy, NL)"
+)
+
 enable_testing()
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/environment/cmake)

@@ -1,14 +1,15 @@
 from typing import Callable
 
 import flet as ft
-from controls.editable_cell import EditableTextCell
-from controls.header import SmallHeader
-from controls.styled_button import StyledButton
-from controls.styled_table import StyledTable
-from controls.unit_cell import MetricUnitCell
 
 from adaptation_pathways.app.model.metric import Metric
 from adaptation_pathways.app.model.pathways_project import PathwaysProject
+
+from .editable_cell import EditableTextCell
+from .header import SmallHeader
+from .styled_button import StyledButton
+from .styled_table import StyledTable
+from .unit_cell import MetricUnitCell
 
 
 class MetricsPanel(ft.Column):

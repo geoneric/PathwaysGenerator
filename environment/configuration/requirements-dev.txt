@@ -1,6 +1,7 @@
 build
 cairosvg
 cmake
+flet>=0.25.1
 furo
 linkchecker
 ninja

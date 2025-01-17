@@ -1,12 +1,13 @@
 import flet as ft
 import matplotlib.pyplot
-import theme
-from controls.styled_button import StyledButton
-from controls.styled_dropdown import StyledDropdown
 from flet.matplotlib_chart import MatplotlibChart
 
 from adaptation_pathways.app.model.pathways_project import PathwaysProject
 from adaptation_pathways.app.service.plotting_service import PlottingService
+
+from .. import theme
+from .styled_button import StyledButton
+from .styled_dropdown import StyledDropdown
 
 
 class GraphPanel(ft.Row):

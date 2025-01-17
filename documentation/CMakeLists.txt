@@ -30,7 +30,7 @@ add_custom_target(apidoc
                     --module-first
                     -d 1
                     -o ${CMAKE_CURRENT_BINARY_DIR}/api
-                    ${PROJECT_SOURCE_DIR}/source/package/adaptation_pathways
+                    ${PROJECT_SOURCE_DIR}/source/package
 )
 
 # https://www.sphinx-doc.org/en/master/man/sphinx-build.html

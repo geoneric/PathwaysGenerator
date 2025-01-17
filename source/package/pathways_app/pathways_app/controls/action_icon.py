@@ -1,7 +1,8 @@
 import flet as ft
-import theme
 
 from adaptation_pathways.app.model.action import Action
+
+from .. import theme
 
 
 class ActionIcon(ft.Container):

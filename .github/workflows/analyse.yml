@@ -17,7 +17,7 @@ jobs:
       matrix:
         python_version: ["3.12"]
         platform:
-          - { os: "ubuntu-22.04", arch: x64 }
+          - { os: "ubuntu-24.04", arch: x64 }
     steps:
       - name: Checkout
         uses: actions/checkout@v4
