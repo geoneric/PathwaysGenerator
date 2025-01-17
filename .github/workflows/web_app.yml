@@ -41,6 +41,7 @@ jobs:
         run: |
           flutter pub get
       - name: Create web app
+        run: |
           mkdir build
           cd build
           cmake -S .. -G Ninja
