@@ -1,6 +1,4 @@
 foreach(name IN ITEMS
-        generator.png
-        generator.rst
         get_started.rst
         import_export.rst
         index.rst

@@ -2,12 +2,7 @@ Get started
 ===========
 
 Here, we assume that you want to get started using the ``adaptation_pathways`` Python package
-distributed as a so-called Python Wheel. There are other ways the package can be distributed,
-for example as a portable application, containing the Pathway Generator GUI application and all
-its dependencies. Installing that package is simply a matter of unzipping the file. The advantage
-is the simplicity to get the Pathway Generator application up and running, but to be able to
-use all functionality from the ``adaptation_pathways`` package, the Wheel should be installed
-as described on the rest of this page.
+distributed as a so-called Python Wheel.
 
 The ``adaptation_pathways`` Python package can be used by performing these steps in turn:
 
@@ -79,7 +74,6 @@ Once the software is installed correctly, the following should work:
 
    # Use an installed script
    ap_plot_pathway_map --help
-   ap_pathway_generator --help
 
    # Use the package
    python3 -c "import adaptation_pathways as ap; print(ap.__version__)"

@@ -55,7 +55,7 @@ In commands:
    # Note: commit .pre-commit-config.yaml if any hooks actually got updated
    pre-commit autoupdate
 
-   source/script/ap_pathway_generator.py --help
+   source/script/ap_plot_pathway_map.py --help
 
 
 The project contains code for generating :ref:`targets <sec-cmake>`, like documentation and the
