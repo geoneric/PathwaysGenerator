@@ -21,7 +21,7 @@ jobs:
         platform:
           - { os: "macos-14", arch: arm64 }
           - { os: "macos-13", arch: x64 }
-          - { os: "ubuntu-22.04", arch: x64 }
+          - { os: "ubuntu-24.04", arch: x64 }
           - { os: "windows-2022", arch: x64 }
     steps:
       - name: Setup Linux platform
