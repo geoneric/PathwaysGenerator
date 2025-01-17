@@ -4,8 +4,6 @@ configure_file(
     @ONLY
 )
 
-message(${Flet_EXECUTABLE})
-
 add_custom_target(web_app
     COMMAND
         ${CMAKE_COMMAND} -E copy_directory_if_different
