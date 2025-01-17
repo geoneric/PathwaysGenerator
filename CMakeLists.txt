@@ -20,6 +20,7 @@ enable_testing()
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/environment/cmake)
 
 find_package(CairoSVG REQUIRED)
+find_package(Flet REQUIRED)
 find_package(PyInstaller REQUIRED)
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 find_package(QtTools)
