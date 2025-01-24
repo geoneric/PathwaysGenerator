@@ -13,11 +13,12 @@ app = false
 packages = false
 cleanup = false
 
-# [tool.flet.web]
-# base_url = "TODO"
+[tool.flet.web]
+#
+base_url = "PathwaysGenerator"
 # renderer = "canvaskit"
 # use_color_emoji = false
-# route_url_strategy = "path"
+route_url_strategy = "path"
 
 [project]
 name = "Pathways Generator"
