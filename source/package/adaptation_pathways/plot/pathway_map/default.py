@@ -54,7 +54,7 @@ def _distribute_vertically(
     #       incoming actions ends into account
     #     - Take some minimum distance into account. Move nodes that are too close to each other.
 
-    assert isinstance(action_begin, ActionBegin)
+    assert isinstance(action_begin, ActionBegin), action_begin
 
     min_distance = 1.0
     nodes = pathway_map.all_action_begins_and_ends(action_begin)
@@ -115,11 +115,13 @@ def _layout(
     position_by_node: dict[Node, np.ndarray] = {}
 
     if pathway_map.nr_edges() > 0:
-        action_begin = pathway_map.root_node
-        add_position(position_by_node, action_begin, (0, 0))
 
-        _distribute_horizontally(pathway_map, action_begin, position_by_node)
-        _distribute_vertically(pathway_map, action_begin, position_by_node)
+        action_begins = pathway_map.root_nodes
+
+        for action_begin in action_begins:
+            add_position(position_by_node, action_begin, (0, 0))
+            _distribute_horizontally(pathway_map, action_begin, position_by_node)
+            _distribute_vertically(pathway_map, action_begin, position_by_node)
 
     return position_by_node
 

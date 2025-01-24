@@ -434,16 +434,15 @@ def _spread_horizontally(
 # pylint: disable-next=too-many-locals, too-many-branches
 def _distribute_vertically(
     pathway_map: PathwayMap,
-    root_action_begin: ActionBegin,
+    root_actions_begins: list[ActionBegin],
     position_by_node: dict[ActionBegin | ActionEnd, np.ndarray],
 ) -> dict[str, float]:
 
-    action_end = pathway_map.action_end(root_action_begin)
-    position_by_node[action_end][1] = position_by_node[root_action_begin][1]
+    for root_action_begin in root_actions_begins:
+        action_end = pathway_map.action_end(root_action_begin)
+        position_by_node[action_end][1] = position_by_node[root_action_begin][1]
 
-    # min_distance = 1.0
-
-    # All unique action instances in the graph
+    # All action instances in the graph
     actions = pathway_map.actions()
 
     # Sieve out combined actions that combine a single *existing* action with a *new* one. These
@@ -484,16 +483,17 @@ def _distribute_vertically(
         )
     )
 
-    # Nodes related to the root action are already positioned
-    # Delete the y-coordinate of the root action
-    assert y_coordinates[math.floor(len(names_of_actions_to_distribute) / 2)] == 0.0
-    del y_coordinates[math.floor(len(names_of_actions_to_distribute) / 2)]
-
-    # Delete the name of the root action
-    assert (
-        names_of_actions_to_distribute[0] == root_action_begin.action.name
-    ), names_of_actions_to_distribute[0]
-    del names_of_actions_to_distribute[0]
+    # Nodes related to the root action are already positioned, at y == 0.0. Delete those coordinates and the
+    # root action names.
+    y_coordinates = [coordinate for coordinate in y_coordinates if coordinate != 0.0]
+    root_actions = [
+        root_action_begin.action for root_action_begin in root_actions_begins
+    ]
+    root_action_names = [action.name for action in root_actions]
+    names_of_actions_to_distribute = [
+        name for name in names_of_actions_to_distribute if name not in root_action_names
+    ]
+    assert len(y_coordinates) == len(names_of_actions_to_distribute)
 
     # Now it is time to re-order the actions to distribute, based on their level, if any was set
     level_by_action = (
@@ -559,7 +559,8 @@ def _distribute_vertically(
         assert np.isnan(position_by_node[action_end][1])
         position_by_node[action_end][1] = y_coordinate
 
-    y_coordinate_by_action_name[root_action_begin.action.name] = 0
+    for root_action_begin in root_actions_begins:
+        y_coordinate_by_action_name[root_action_begin.action.name] = 0
 
     return y_coordinate_by_action_name
 
@@ -594,20 +595,32 @@ def _layout(
     y_coordinate_by_action_name: dict[str, float] = {}
 
     if pathway_map.nr_edges() > 0:
-        root_action_begin = pathway_map.root_node
-        root_action_end = pathway_map.action_end(root_action_begin)
-        tipping_point = root_action_end.tipping_point
 
         min_tipping_point, max_tipping_point = pathway_map.tipping_point_range()
         tipping_point_range = max_tipping_point - min_tipping_point
         assert tipping_point_range >= 0
-        x_coordinate = tipping_point - 0.1 * tipping_point_range
 
-        add_position(position_by_node, root_action_begin, (x_coordinate, 0))
+        root_actions_begins = pathway_map.root_nodes
+        root_actions_ends = [
+            pathway_map.action_end(root_action_begin)
+            for root_action_begin in root_actions_begins
+        ]
+        root_actions_tipping_points = [
+            root_action_end.tipping_point for root_action_end in root_actions_ends
+        ]
+        x_coordinates = [
+            tipping_point - 0.1 * tipping_point_range
+            for tipping_point in root_actions_tipping_points
+        ]
 
-        _distribute_horizontally(pathway_map, root_action_begin, position_by_node)
+        for root_action_begin, x_coordinate in zip(root_actions_begins, x_coordinates):
+            add_position(position_by_node, root_action_begin, (x_coordinate, 0))
+
+        for root_action_begin, x_coordinate in zip(root_actions_begins, x_coordinates):
+            _distribute_horizontally(pathway_map, root_action_begin, position_by_node)
+
         y_coordinate_by_action_name = _distribute_vertically(
-            pathway_map, root_action_begin, position_by_node
+            pathway_map, root_actions_begins, position_by_node
         )
 
         if not isinstance(overlapping_lines_spread, tuple):
