@@ -2,18 +2,19 @@ import datetime
 from functools import partial
 
 import flet as ft
-from controls.styled_dropdown import StyledDropdown
-from controls.styled_table import StyledTable, TableColumn, TableRow
-from pathways_app import theme
-from pathways_app.controls.editable_cell import EditableIntCell, EditableTextCell
-from pathways_app.controls.header import SmallHeader
-from pathways_app.controls.metric_value import MetricValueCell
-from pathways_app.controls.panel_header import PanelHeader
-from pathways_app.utils import find_index
 
 from adaptation_pathways.app.model.metric import Metric
 from adaptation_pathways.app.model.pathways_project import PathwaysProject
 from adaptation_pathways.app.model.scenario import YearDataPoint
+
+from .. import theme
+from ..utils import find_index
+from .editable_cell import EditableIntCell, EditableTextCell
+from .header import SmallHeader
+from .metric_value import MetricValueCell
+from .panel_header import PanelHeader
+from .styled_dropdown import StyledDropdown
+from .styled_table import StyledTable, TableColumn, TableRow
 
 
 class ScenariosEditor(ft.Column):

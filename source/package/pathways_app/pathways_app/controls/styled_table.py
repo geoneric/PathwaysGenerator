@@ -2,10 +2,10 @@
 from typing import Callable
 
 import flet as ft
-import theme
-from pathways_app.controls.styled_button import StyledButton
 
+from .. import theme
 from .sortable_header import SortableHeader, SortMode
+from .styled_button import StyledButton
 
 
 class TableColumn:
@@ -132,11 +132,11 @@ class StyledTable(ft.Container):
         sort_column_index: int | None = None,
         sort_ascending: bool = True,
         on_sorted: Callable[[], None] | None = None,
-        on_add: Callable[[], TableRow] | None = None,
+        on_add: Callable[[], None] | None = None,
         add_label="Add",
-        on_delete: Callable[[], list[TableRow]] | None = None,
+        on_delete: Callable[[list[TableRow]], None] | None = None,
         delete_label="Delete",
-        on_copy: Callable[[list[TableRow]], list[TableRow]] | None = None,
+        on_copy: Callable[[list[TableRow]], None] | None = None,
         copy_label="Duplicate",
         pre_operation_content: ft.Control | None = None,
         show_checkboxes=False,

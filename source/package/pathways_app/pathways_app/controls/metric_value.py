@@ -1,9 +1,10 @@
 import flet as ft
-import theme
-from controls.editable_cell import EditableCell
-from pathways_app.controls.input_filters import FloatInputFilter
 
 from adaptation_pathways.app.model.metric import Metric, MetricValue, MetricValueState
+
+from .. import theme
+from .editable_cell import EditableCell
+from .input_filters import FloatInputFilter
 
 
 class MetricValueCell(EditableCell):

@@ -1,15 +1,16 @@
 import flet as ft
-import theme
-from controls.actions_editor import ActionsEditor
-from controls.graph_editor import GraphEditor
-from controls.header import SectionHeader
-from controls.metrics_editor import MetricsEditor
-from controls.panel import Panel
-from controls.pathways_editor import PathwaysPanel
-from controls.scenarios_editor import ScenariosEditor
-from controls.tabbed_panel import TabbedPanel
 
 from adaptation_pathways.app.model.pathways_project import PathwaysProject
+
+from .. import theme
+from .actions_editor import ActionsEditor
+from .graph_editor import GraphEditor
+from .header import SectionHeader
+from .metrics_editor import MetricsEditor
+from .panel import Panel
+from .pathways_editor import PathwaysPanel
+from .scenarios_editor import ScenariosEditor
+from .tabbed_panel import TabbedPanel
 
 
 class EditorPage(ft.Row):

@@ -1,7 +1,8 @@
 # pylint: disable=too-many-arguments
 import flet as ft
-import theme
-from utils import find_index
+
+from .. import theme
+from ..utils import find_index
 
 
 class StyledDropdown(ft.Dropdown):

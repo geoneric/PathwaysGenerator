@@ -1,10 +1,10 @@
 from typing import Callable
 
 import flet as ft
-import theme
 
 from adaptation_pathways.app.model.metric import Metric, MetricUnit, default_units
 
+from .. import theme
 from .styled_table import TableCell
 
 

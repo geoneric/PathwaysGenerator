@@ -1,11 +1,12 @@
 import flet as ft
-import theme
-from pathways_app.app import App
-from pathways_app.config import Config
+
+from .. import theme
+from ..config import Config
+from ..pathways_app import PathwaysApp
 
 
 class MenuBar(ft.Container):
-    def __init__(self, app: App):
+    def __init__(self, app: PathwaysApp):
         self.app = app
 
         super().__init__(

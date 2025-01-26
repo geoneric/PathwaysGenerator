@@ -2,10 +2,10 @@ from abc import ABC
 from typing import Callable
 
 import flet as ft
-import theme
 from pathways_app.controls.input_filters import IntInputFilter
 from pyparsing import abstractmethod
 
+from .. import theme
 from .styled_table import TableCell
 
 

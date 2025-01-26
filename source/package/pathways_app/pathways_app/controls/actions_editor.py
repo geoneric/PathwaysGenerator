@@ -2,13 +2,6 @@
 import random
 
 import flet as ft
-import theme
-from controls.action_icon import ActionIcon
-from controls.editable_cell import EditableTextCell
-from controls.metric_effect import MetricEffectCell
-from controls.metric_value import MetricValueCell
-from controls.styled_table import StyledTable, TableCell, TableColumn, TableRow
-from pathways_app.controls.panel_header import PanelHeader
 
 from adaptation_pathways.app.model.action import Action
 from adaptation_pathways.app.model.pathways_project import PathwaysProject
@@ -18,9 +11,8 @@ from .action_icon import ActionIcon
 from .editable_cell import EditableTextCell
 from .metric_effect import MetricEffectCell
 from .metric_value import MetricValueCell
-from .sortable_header import SortableHeader, SortMode
-from .styled_button import StyledButton
-from .styled_table import StyledTable
+from .panel_header import PanelHeader
+from .styled_table import StyledTable, TableCell, TableColumn, TableRow
 
 
 class ActionsEditor(ft.Column):

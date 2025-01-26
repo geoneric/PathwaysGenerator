@@ -1,9 +1,10 @@
 import flet as ft
-from pathways_app import example
-from pathways_app.config import Config
+
+from . import example
+from .config import Config
 
 
-class App:
+class PathwaysApp:
     def __init__(self, page: ft.Page):
         self.page = page
         self.project = example.project

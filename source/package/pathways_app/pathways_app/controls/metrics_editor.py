@@ -1,20 +1,15 @@
 # from typing import Callable
 
 import flet as ft
-from controls.editable_cell import EditableTextCell
-from controls.header import SmallHeader
-from controls.styled_table import StyledTable, TableColumn, TableRow
-from controls.unit_cell import MetricUnitCell
-from pathways_app import theme
-from pathways_app.controls.panel_header import PanelHeader
 
 from adaptation_pathways.app.model.metric import Metric
 from adaptation_pathways.app.model.pathways_project import PathwaysProject
 
+from .. import theme
 from .editable_cell import EditableTextCell
 from .header import SmallHeader
-from .styled_button import StyledButton
-from .styled_table import StyledTable
+from .panel_header import PanelHeader
+from .styled_table import StyledTable, TableColumn, TableRow
 from .unit_cell import MetricUnitCell
 
 
@@ -107,24 +102,24 @@ class MetricsEditor(ft.Column):
 
         self.redraw()
 
-    def on_new_condition(self, _):
+    def on_new_condition(self):
         metric = self.project.create_condition()
         self.project.update_pathway_values(metric.id)
         self.project.notify_conditions_changed()
 
-    def on_delete_conditions(self, _):
-        for metric_id in self.project.selected_condition_ids:
-            self.project.delete_condition(metric_id)
+    def on_delete_conditions(self, rows: list[TableRow]):
+        for row in rows:
+            self.project.delete_condition(row.row_id)
         self.project.notify_conditions_changed()
 
-    def on_new_criteria(self, _):
+    def on_new_criteria(self):
         metric = self.project.create_criteria()
         self.project.update_pathway_values(metric.id)
         self.project.notify_criteria_changed()
 
-    def on_delete_criteria(self, _):
-        for metric_id in self.project.selected_criteria_ids:
-            self.project.delete_criteria(metric_id)
+    def on_delete_criteria(self, rows: list[TableRow]):
+        for row in rows:
+            self.project.delete_criteria(row.row_id)
         self.project.notify_criteria_changed()
 
     def get_metric_row(
