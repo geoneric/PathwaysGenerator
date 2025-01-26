@@ -1,8 +1,9 @@
 from enum import Enum
+from typing import Callable
 
 import flet as ft
 
-from adaptation_pathways.app.model.sorting import SortingInfo, SortTarget
+from adaptation_pathways.app.model.sorting import SortingInfo
 
 from .. import theme
 
@@ -16,11 +17,11 @@ class SortMode(Enum):
     def get_icon(self):
         match self:
             case SortMode.ASCENDING:
-                return ft.icons.KEYBOARD_ARROW_UP
+                return ft.Icons.KEYBOARD_ARROW_UP
             case SortMode.DESCENDING:
-                return ft.icons.KEYBOARD_ARROW_DOWN
+                return ft.Icons.KEYBOARD_ARROW_DOWN
             case SortMode.UNSORTED:
-                return ft.icons.UNFOLD_MORE
+                return ft.Icons.UNFOLD_MORE
             case _:
                 return None
 
@@ -31,7 +32,7 @@ class SortableHeader(ft.Container):
         sort_key: str,
         name: str,
         sort_mode: SortMode = SortMode.NONE,
-        on_sort=None,
+        on_sort: Callable[["SortableHeader"], None] | None = None,
         expand: bool | int | None = True,
         col: int | None = None,
         bgcolor: str | None = None,
@@ -61,9 +62,6 @@ class SortableHeader(ft.Container):
         )
 
         def on_click(_):
-            if self.sort_mode == SortMode.NONE:
-                pass
-
             new_sort_mode = (
                 SortMode.ASCENDING
                 if self.sort_mode == SortMode.UNSORTED
@@ -78,18 +76,17 @@ class SortableHeader(ft.Container):
             if on_sort is not None:
                 on_sort(self)
 
-        self.on_click = on_click
+        if self.sort_mode != SortMode.NONE:
+            self.on_click = on_click
 
     @classmethod
     def get_sort_mode(cls, sort_info: SortingInfo) -> SortMode:
-        if sort_info.target is SortTarget.NONE:
-            return SortMode.NONE
         return SortMode.ASCENDING if sort_info.ascending else SortMode.DESCENDING
 
     def set_sort_mode(self, sort_mode: SortMode):
         self.sort_mode = sort_mode
         self.update_icon()
-        # self.icon.update()
+        self.icon.update()
 
     def update_icon(self):
         self.icon.name = self.sort_mode.get_icon()

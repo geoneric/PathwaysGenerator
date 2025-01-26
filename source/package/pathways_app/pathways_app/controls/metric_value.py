@@ -1,22 +1,16 @@
 import flet as ft
+import theme
+from controls.editable_cell import EditableCell
+from pathways_app.controls.input_filters import FloatInputFilter
 
 from adaptation_pathways.app.model.metric import Metric, MetricValue, MetricValueState
-
-from .. import theme
-from .editable_cell import EditableCell
-
-
-class FloatInputFilter(ft.InputFilter):
-    def __init__(self):
-        super().__init__(
-            regex_string=r"^$|^[-+]?\d*(\.\d*)?$", allow=True, replacement_string=""
-        )
 
 
 class MetricValueCell(EditableCell):
     def __init__(self, metric: Metric, value: MetricValue, on_finished_editing=None):
         self.metric = metric
         self.value = value
+        self.sort_value = value.value
         self.finished_editing_callback = on_finished_editing
 
         self.display_content = ft.Text("")
@@ -49,6 +43,7 @@ class MetricValueCell(EditableCell):
             can_reset=value.state == MetricValueState.OVERRIDE,
             on_finished_editing=self.on_edited,
             alignment=ft.alignment.center_right,
+            sort_value=self.value.value,
         )
 
     def on_edited(self, _):
@@ -56,15 +51,16 @@ class MetricValueCell(EditableCell):
 
         if new_value != self.value.value and self.value.is_estimate:
             self.value.state = MetricValueState.OVERRIDE
+
         self.value.value = new_value
+        self.sort_value = self.value.value
 
         if self.finished_editing_callback is not None:
             self.finished_editing_callback(self)
 
-    def on_reset_to_calculated(self):
+    def on_reset_to_calculated(self, _):
         self.value.state = MetricValueState.ESTIMATE
-        self.set_not_editing()
-        print(self.value)
+        self.update_controls()
 
     def update_display(self):
         self.display_content.value = self.metric.unit.format(self.value.value)

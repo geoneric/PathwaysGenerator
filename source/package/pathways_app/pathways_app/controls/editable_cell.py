@@ -3,10 +3,10 @@ from typing import Callable
 
 import flet as ft
 import theme
-from .styled_table import TableCell
+from pathways_app.controls.input_filters import IntInputFilter
 from pyparsing import abstractmethod
 
-from .. import theme
+from .styled_table import TableCell
 
 
 class EditableCell(TableCell, ABC):
@@ -19,13 +19,14 @@ class EditableCell(TableCell, ABC):
         can_reset=False,
         alignment: ft.Alignment | None = ft.alignment.center_left,
         padding: int | ft.Padding | None = theme.variables.table_cell_padding,
+        sort_value: str | int | float | None = None,
         on_finished_editing: Callable[["EditableCell"], None] | None = None,
     ):
         self.display_content = display_control
         self.input_content = edit_control
         self.calculated_icon = ft.Container(
             ft.Icon(
-                ft.icons.CALCULATE,
+                ft.Icons.CALCULATE,
                 size=theme.variables.calculated_icon_size,
                 color=theme.colors.calculated_icon,
             ),
@@ -33,12 +34,23 @@ class EditableCell(TableCell, ABC):
             alignment=ft.alignment.top_left,
         )
         self.reset_button = ft.Container(
-            ft.Icon(
-                ft.icons.CALCULATE,
-                size=theme.variables.calculated_icon_size,
-                color=theme.colors.calculated_icon,
+            ft.Container(
+                ft.Icon(
+                    ft.Icons.RESTART_ALT,
+                    size=theme.variables.calculated_icon_size,
+                    color=theme.colors.calculated_icon,
+                    tooltip=ft.Tooltip(
+                        "Recalculate",
+                        bgcolor=theme.colors.calculated_icon,
+                        wait_duration=0,
+                        vertical_offset=15,
+                        text_style=theme.text.action_tooltip,
+                    ),
+                ),
+                on_click=self.on_reset_to_calculated,
             ),
-            on_click=self.on_reset_to_calculated,
+            expand=True,
+            alignment=ft.alignment.top_left,
         )
 
         self.is_editing = is_editing
@@ -53,11 +65,14 @@ class EditableCell(TableCell, ABC):
             content=ft.Stack(
                 [
                     self.display_content,
-                    ft.Row(
-                        [self.reset_button, self.input_content],
+                    ft.Stack(
+                        [
+                            self.input_content,
+                        ],
                         expand=True,
                     ),
                     self.calculated_icon,
+                    self.reset_button,
                 ],
                 expand=True,
                 alignment=alignment,
@@ -67,7 +82,7 @@ class EditableCell(TableCell, ABC):
             on_click=self.set_editing,
         )
 
-        super().__init__(control=self.cell_content)
+        super().__init__(control=self.cell_content, sort_value=sort_value)
 
     def set_editing(self, _):
         self.is_editing = True
@@ -96,9 +111,9 @@ class EditableCell(TableCell, ABC):
         self.display_content.visible = not self.is_editing
         self.input_content.visible = self.is_editing
         self.calculated_icon.visible = self.is_calculated and not self.is_editing
-        self.reset_button.visible = self.can_reset and self.is_editing
+        self.reset_button.visible = self.can_reset and not self.is_editing
 
-    def on_reset_to_calculated(self):
+    def on_reset_to_calculated(self, _):
         pass
 
     @abstractmethod
@@ -135,6 +150,7 @@ class EditableTextCell(EditableCell):
 
         def on_finished_editing_internal(_):
             self.value = self.input_content.value
+            self.sort_value = self.value
             if on_finished_editing is not None:
                 on_finished_editing(self)
 
@@ -143,6 +159,7 @@ class EditableTextCell(EditableCell):
             self.input_content,
             on_finished_editing=on_finished_editing_internal,
         )
+        self.sort_value = self.value
 
     @property
     def value(self) -> str:
@@ -157,3 +174,61 @@ class EditableTextCell(EditableCell):
 
     def update_display(self):
         self.display_content.value = self.input_content.value
+
+    def on_reset_to_calculated(self, _):
+        pass
+
+
+class EditableIntCell(EditableCell):
+    def __init__(self, source: object, value_attribute: str, on_finished_editing=None):
+        self.source = source
+        self.value_attribute = value_attribute
+
+        self.display_content = ft.Text(self.value, expand=True)
+        self.input_content = ft.TextField(
+            dense=True,
+            enable_suggestions=False,
+            value=self.value,
+            keyboard_type=ft.KeyboardType.NUMBER,
+            input_filter=IntInputFilter(),
+            bgcolor=theme.colors.true_white,
+            border_color=theme.colors.primary_medium,
+            focused_border_color=theme.colors.primary_light,
+            cursor_color=theme.colors.primary_medium,
+            text_style=theme.text.textfield,
+            prefix_style=theme.text.textfield_symbol,
+            suffix_style=theme.text.textfield_symbol,
+            expand=True,
+            content_padding=ft.padding.symmetric(4, 6),
+            on_blur=self.set_not_editing,
+        )
+
+        def on_finished_editing_internal(_):
+            self.value = int(self.input_content.value)
+            self.sort_value = self.value
+            if on_finished_editing is not None:
+                on_finished_editing(self)
+
+        super().__init__(
+            self.display_content,
+            self.input_content,
+            on_finished_editing=on_finished_editing_internal,
+        )
+        self.sort_value = self.value
+
+    @property
+    def value(self) -> int:
+        return getattr(self.source, self.value_attribute)
+
+    @value.setter
+    def value(self, value: int):
+        setattr(self.source, self.value_attribute, value)
+
+    def update_input(self):
+        self.input_content.value = self.display_content.value
+
+    def update_display(self):
+        self.display_content.value = self.input_content.value
+
+    def on_reset_to_calculated(self, _):
+        pass

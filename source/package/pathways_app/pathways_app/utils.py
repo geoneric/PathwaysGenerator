@@ -1,7 +1,10 @@
-from typing import Any, Callable
+from typing import Callable, TypeVar
 
 
-def index_of_first(element_list: list[Any], pred: Callable[[Any], bool]) -> int | None:
+T = TypeVar("T")
+
+
+def find_index(element_list: list[T], pred: Callable[[T], bool]) -> int | None:
     for index, value in enumerate(element_list):
         if pred(value):
             return index

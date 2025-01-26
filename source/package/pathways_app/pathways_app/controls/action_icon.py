@@ -9,7 +9,7 @@ class ActionIcon(ft.Container):
     def __init__(self, action: Action, display_tooltip=True, size=36):
         self.icon = ft.Icon(action.icon, size=(size * 0.5), color=action.color)
         self.ring = ft.Icon(
-            ft.icons.CIRCLE_OUTLINED,
+            ft.Icons.CIRCLE_OUTLINED,
             size=size,
             color=action.color,
             tooltip=(

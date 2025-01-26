@@ -1,20 +1,67 @@
 import flet as ft
-
-from adaptation_pathways.app.model import PathwaysProject
-
-from .. import theme
+import theme
+from pathways_app.app import App
+from pathways_app.config import Config
 
 
 class MenuBar(ft.Container):
-    def __init__(self, project: PathwaysProject):
+    def __init__(self, app: App):
+        self.app = app
+
         super().__init__(
             content=ft.Stack(
                 [
                     ft.Row(
                         [
-                            ft.Image(theme.icon),
+                            ft.Image(theme.icon, height=36, width=36),
                             ft.Text("PATHWAYS\nGENERATOR", style=theme.text.logo),
-                        ]
+                            ft.Container(width=15),
+                            ft.SubmenuButton(
+                                ft.Text("Project", style=theme.text.menu_button),
+                                controls=[
+                                    ft.MenuItemButton(
+                                        content=ft.Text("New"),
+                                        on_click=self.on_new_project,
+                                    ),
+                                    ft.MenuItemButton(
+                                        content=ft.Text("Open..."),
+                                        on_click=self.on_open_project,
+                                    ),
+                                    ft.MenuItemButton(
+                                        content=ft.Text("Save As..."),
+                                        on_click=self.on_save_project,
+                                    ),
+                                ],
+                                # style=theme.buttons.menu_bar_button,
+                            ),
+                            ft.SubmenuButton(
+                                ft.Text("Help", style=theme.text.menu_button),
+                                controls=[
+                                    ft.MenuItemButton(
+                                        content=ft.Text("About Pathways"),
+                                        on_click=lambda e: app.open_link(
+                                            Config.about_url
+                                        ),
+                                    ),
+                                    ft.MenuItemButton(
+                                        content=ft.Text("GitHub Repository"),
+                                        on_click=lambda e: app.open_link(
+                                            Config.github_url
+                                        ),
+                                    ),
+                                    ft.Container(
+                                        content=ft.Text(
+                                            "version 1.0.0",
+                                            color=theme.colors.primary_light,
+                                        ),
+                                        padding=ft.padding.symmetric(5, 10),
+                                    ),
+                                ],
+                                # style=theme.buttons.menu_bar_button,
+                                menu_style=theme.buttons.submenu,
+                            ),
+                        ],
+                        expand=True,
                     ),
                     ft.Row(
                         [
@@ -29,11 +76,11 @@ class MenuBar(ft.Container):
                                         ft.Column(
                                             controls=[
                                                 ft.Text(
-                                                    project.name,
+                                                    app.project.name,
                                                     color=theme.colors.true_white,
                                                 ),
                                                 ft.Text(
-                                                    project.organization,
+                                                    app.project.organization,
                                                     text_align=ft.TextAlign.CENTER,
                                                     color=theme.colors.true_white,
                                                 ),
@@ -60,3 +107,12 @@ class MenuBar(ft.Container):
                 bottom=ft.border.BorderSide(1, theme.colors.primary_darker)
             ),
         )
+
+    def on_new_project(self):
+        pass
+
+    def on_open_project(self, _):
+        self.app.open_project()
+
+    def on_save_project(self):
+        pass

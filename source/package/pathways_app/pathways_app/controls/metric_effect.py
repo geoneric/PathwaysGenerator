@@ -115,3 +115,6 @@ class MetricEffectCell(EditableCell):
             self.input_content.suffix_text = None
 
         self.value_input.value = self.effect.value
+
+    def on_reset_to_calculated(self):
+        pass

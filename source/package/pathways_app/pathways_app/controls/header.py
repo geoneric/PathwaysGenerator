@@ -7,8 +7,8 @@ from .. import theme
 class SectionHeader(ft.Container):
     def __init__(
         self,
-        icon=None,
-        text="",
+        icon: str | None = None,
+        text: str | None = None,
         size=16,
         expand=False,
         color=theme.colors.primary_dark,
@@ -35,20 +35,21 @@ class SectionHeader(ft.Container):
             weight=ft.FontWeight.W_600,
         )
 
-        if icon is not None:
-            self.content = ft.Row(
-                expand=expand,
-                controls=[
-                    ft.Icon(icon, size=size, color=color),
-                    ft.Text(text, style=header_text_style),
-                ],
-                spacing=8,
-                vertical_alignment=ft.CrossAxisAlignment.CENTER,
-            )
-        else:
-            self.content = ft.Row(
-                expand=True, controls=[ft.Text(text, style=header_text_style)]
-            )
+        self.icon = ft.Icon(icon, size=size, color=color)
+        self.icon.visible = icon is not None
+
+        self.text = ft.Text(text, style=header_text_style)
+        self.text.visible = text is not None
+
+        self.content = ft.Row(
+            expand=expand,
+            controls=[
+                self.icon,
+                self.text,
+            ],
+            spacing=8,
+            vertical_alignment=ft.CrossAxisAlignment.CENTER,
+        )
 
 
 class SmallHeader(ft.Text):
