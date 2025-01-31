@@ -6,4 +6,4 @@ from .action import Action, ActionDependency
 from .metric import Metric
 from .pathway import Pathway
 from .pathways_project import PathwaysProject
-from .scenario import Scenario, TimeSeriesPoint
+from .scenario import Scenario

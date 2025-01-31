@@ -11,7 +11,9 @@ from matplotlib.figure import Figure
 
 from adaptation_pathways.action import Action
 from adaptation_pathways.alias import Sequence, TippingPointByAction
+from adaptation_pathways.app.model.pathway import Pathway
 from adaptation_pathways.app.model.pathways_project import PathwaysProject
+from adaptation_pathways.app.model.scenario import Scenario
 from adaptation_pathways.graph.convert import sequence_graph_to_pathway_map
 from adaptation_pathways.graph.node.action import Action as ActionNode
 from adaptation_pathways.graph.sequence_graph import SequenceGraph
@@ -31,25 +33,39 @@ class PlottingService:
         action_nodes: dict[str, ActionNode] = {}
         tipping_points: TippingPointByAction = {}
         action_colors: dict[str, str] = {}
+        root_pathway = project.root_pathway
         metric = project.graph_metric
+        scenario: Scenario | None = (
+            None if not project.graph_is_time else project.graph_scenario
+        )
+
+        def get_tipping_point(pathway: Pathway) -> float:
+            metric_value = pathway.metric_data.get(metric.id, None)
+            if metric_value is None:
+                metric_value = root_pathway.metric_data.get(metric.id, None)
+
+            if metric_value is None:
+                return 0
+
+            if scenario is not None:
+                return scenario.estimate_tipping_point(metric.id, metric_value.value)
+
+            return metric_value.value
 
         # Create action node for each pathway
-        for pathway in project.sorted_pathways:
+        for pathway in project.all_pathways:
             pathway_action = project.get_action(pathway.action_id)
             action = Action(pathway_action.name)
             action_node = ActionNode(action)
             action_nodes[pathway.id] = action_node
             action_colors[action.name] = pathway_action.color
-
-            metric_value = pathway.metric_data.get(metric.id, None)
-            value = metric.current_value if metric_value is None else metric_value.value
-            tipping_points[action] = value
+            tipping_points[action] = get_tipping_point(pathway)
 
         # Populate sequences
         sequence_graph = SequenceGraph()
         sequences: list[Sequence] = []
 
-        for pathway in project.sorted_pathways:
+        for pathway in project.all_pathways:
             if pathway.parent_id is None:
                 continue
 

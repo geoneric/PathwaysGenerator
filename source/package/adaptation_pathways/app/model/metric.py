@@ -39,7 +39,6 @@ class MetricUnit:
 class Metric:
     id: str
     name: str
-    current_value: float
     unit_or_default: MetricUnit | str
 
     @property
@@ -57,10 +56,20 @@ class Metric:
         return self.id.__hash__()
 
 
+class MetricValueState(Enum):
+    BASE = 0
+    ESTIMATE = (1,)
+    OVERRIDE = 2
+
+
 @dataclasses.dataclass
 class MetricValue:
     value: float
-    is_estimate: bool = False
+    state: MetricValueState = MetricValueState.BASE
+
+    @property
+    def is_estimate(self):
+        return self.state == MetricValueState.ESTIMATE
 
 
 class MetricOperation(Enum):
@@ -138,14 +147,15 @@ class DefaultUnits:
         si = [
             MetricUnit(name="Milliliter", symbol="ml"),
             MetricUnit(name="Liter", symbol="l"),
-            MetricUnit(name="Cubic Centimeter", symbol="cm^3"),
-            MetricUnit(name="Cubic Meter", symbol="m^3"),
+            MetricUnit(name="Cubic Centimeter", symbol="cm³"),
+            MetricUnit(name="Cubic Meter", symbol="m³"),
         ]
         imperial = [
             MetricUnit(name="Fluid Ounce", symbol="fl oz"),
             MetricUnit(name="Pint", symbol="pt"),
             MetricUnit(name="Quart", symbol="qt"),
             MetricUnit(name="Gallon", symbol="gal"),
+            MetricUnit(name="Acre Feet", symbol="ac-ft"),
         ]
 
     volume = Volume()
@@ -224,7 +234,7 @@ class DefaultUnits:
     ]
 
     relative = [
-        MetricUnit(name="Percent", symbol="%", value_format=".2%"),
+        MetricUnit(name="Percent", symbol="%", value_format=".2"),
         MetricUnit(
             name="Impact", symbol="", short_name="Impact", value_format=FORMAT_SLIDER
         ),
