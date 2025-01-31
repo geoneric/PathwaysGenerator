@@ -2,9 +2,8 @@
 """
 The single class that stores all data needed to work on a project
 """
-from typing import Callable, Iterable
-
-from adaptation_pathways.app.model.sorting import SortingInfo
+from json import JSONEncoder
+from typing import Iterable
 
 from .action import Action
 from .metric import Metric, MetricEffect, MetricOperation, MetricValue, MetricValueState
@@ -20,13 +19,22 @@ class PathwaysProject:
         organization: str,
         start_year: int,
         end_year: int,
-        conditions: list[Metric],
-        criteria: list[Metric],
-        scenarios: list[Scenario],
-        actions: list[Action],
-        pathways: list[Pathway],
-        root_action: Action,
-        root_pathway_id: str,
+        conditions_by_id: dict[str, Metric] | None = None,
+        condition_ids: list[str] | None = None,
+        criteria_by_id: dict[str, Metric] | None = None,
+        criteria_ids: list[str] | None = None,
+        actions_by_id: dict[str, Action] | None = None,
+        action_ids: list[str] | None = None,
+        scenarios_by_id: dict[str, Scenario] | None = None,
+        scenario_ids: list[str] | None = None,
+        pathways_by_id: dict[str, Pathway] | None = None,
+        pathway_ids: list[str] | None = None,
+        root_action_id: str = "",
+        root_pathway_id: str = "",
+        values_scenario_id: str | None = None,
+        graph_metric_id: str | None = None,
+        graph_scenario_id: str | None = None,
+        graph_is_time=False,
     ):
         self.id = project_id
         self.name = name
@@ -35,108 +43,50 @@ class PathwaysProject:
         self.end_year = end_year
         self._current_id = 0
 
-        self.conditions_by_id: dict[str, Metric] = {}
-        for metric in conditions:
-            self.conditions_by_id[metric.id] = metric
+        self.condition_ids = condition_ids or []
+        self.conditions_by_id = conditions_by_id or {}
+        self.criteria_ids = criteria_ids or []
+        self.criteria_by_id = criteria_by_id or {}
 
-        self.criteria_by_id: dict[str, Metric] = {}
-        for metric in criteria:
-            self.criteria_by_id[metric.id] = metric
+        self.scenario_ids = scenario_ids or []
+        self.scenarios_by_id = scenarios_by_id or {}
 
-        self.scenarios_by_id: dict[str, Scenario] = {}
-        for scenario in scenarios:
-            self.scenarios_by_id[scenario.id] = scenario
+        self.action_ids = action_ids or []
+        self.actions_by_id = actions_by_id or {}
 
-        self.actions_by_id: dict[str, Action] = {}
-        self.actions_by_id[root_action.id] = root_action
-        for action in actions:
-            self.actions_by_id[action.id] = action
+        self.pathway_ids = pathway_ids or []
+        self.pathways_by_id = pathways_by_id or {}
 
-        self.pathways_by_id: dict[str, Pathway] = {}
-        for pathway in pathways:
-            self.pathways_by_id[pathway.id] = pathway
+        self.root_pathway_id = root_pathway_id or ""
+        self.root_action_id = root_action_id or ""
 
-        self.condition_sorting = SortingInfo()
-        self.criteria_sorting = SortingInfo()
-        self.scenario_sorting = SortingInfo()
-        self.action_sorting = SortingInfo()
-        self.pathway_sorting = SortingInfo()
-
-        self.root_pathway_id = root_pathway_id
-        self.selected_condition_ids: set[str] = set()
-        self.selected_criteria_ids: set[str] = set()
-        self.selected_action_ids: set[str] = set()
-        self.selected_pathway_ids: set[str] = set()
-        self.selected_scenario_ids: set[str] = set()
-
-        self.values_scenario_id: str | None = (
-            None if len(scenarios) == 0 else scenarios[0].id
-        )
-
-        self.graph_metric_id: str | None = (
-            conditions[0].id if len(conditions) > 0 else None
-        )
-        self.graph_is_time: bool = self.graph_metric_id is not None
-        self.graph_scenario_id: str | None = (
-            scenarios[0].id if len(scenarios) > 0 else None
-        )
-
-        self.on_conditions_changed: list[Callable[[], None]] = []
-        self.on_criteria_changed: list[Callable[[], None]] = []
-        self.on_scenarios_changed: list[Callable[[], None]] = []
-        self.on_actions_changed: list[Callable[[], None]] = []
-        self.on_action_color_changed: list[Callable[[], None]] = []
-        self.on_pathways_changed: list[Callable[[], None]] = []
-
-        for metric in self.all_metrics():
-            self.update_pathway_values(metric.id)
+        self.values_scenario_id = values_scenario_id or "none"
+        self.graph_metric_id = graph_metric_id or "none"
+        self.graph_scenario_id = graph_scenario_id or "none"
+        self.graph_is_time = graph_is_time
 
     def __hash__(self):
         return self.id.__hash__()
 
-    def notify_conditions_changed(self):
-        for listener in self.on_conditions_changed:
-            listener()
-
-    def notify_criteria_changed(self):
-        for listener in self.on_criteria_changed:
-            listener()
-
-    def notify_scenarios_changed(self):
-        for listener in self.on_scenarios_changed:
-            listener()
-
-    def notify_actions_changed(self):
-        for listener in self.on_actions_changed:
-            listener()
-
-    def notify_action_color_changed(self):
-        for listener in self.on_action_color_changed:
-            listener()
-
-    def notify_pathways_changed(self):
-        for listener in self.on_pathways_changed:
-            listener()
+    @property
+    def all_conditions(self) -> Iterable[Metric]:
+        return (self.conditions_by_id[metric_id] for metric_id in self.condition_ids)
 
     @property
-    def all_actions(self):
-        return self.actions_by_id.values()
+    def all_criteria(self) -> Iterable[Metric]:
+        return (self.criteria_by_id[metric_id] for metric_id in self.criteria_ids)
 
     @property
-    def all_conditions(self):
-        return self.conditions_by_id.values()
+    def all_scenarios(self) -> Iterable[Scenario]:
+        return (self.scenarios_by_id[scenario_id] for scenario_id in self.scenario_ids)
 
     @property
-    def all_criteria(self):
-        return self.criteria_by_id.values()
+    def all_actions(self) -> Iterable[Action]:
+        return (self.actions_by_id[action_id] for action_id in self.action_ids)
 
     @property
-    def all_scenarios(self):
-        return self.scenarios_by_id.values()
-
-    @property
-    def all_pathways(self):
-        return self.pathways_by_id.values()
+    def all_pathways(self) -> Iterable[Pathway]:
+        return (self.pathways_by_id[pathway_id] for pathway_id in self.pathway_ids)
 
     @property
     def root_pathway(self):
@@ -168,10 +118,13 @@ class PathwaysProject:
         yield from self.all_conditions
         yield from self.all_criteria
 
-    def _create_metric(self, name: str, metrics_by_id: dict[str, Metric]) -> Metric:
+    def _create_metric(
+        self, name: str, metrics_by_id: dict[str, Metric], metric_ids: list[str]
+    ) -> Metric:
         metric_id = self._create_id()
         metric = Metric(metric_id, name, "")
         metrics_by_id[metric_id] = metric
+        metric_ids.append(metric_id)
 
         for action in self.all_actions:
             action.metric_data[metric_id] = MetricEffect(0, MetricOperation.ADD)
@@ -180,21 +133,28 @@ class PathwaysProject:
         return metric
 
     def create_condition(self) -> Metric:
-        metric = self._create_metric("New Condition", self.conditions_by_id)
+        metric = self._create_metric(
+            "New Condition", self.conditions_by_id, self.condition_ids
+        )
+        if self.graph_metric_id == "none":
+            self.graph_metric_id = metric.id
+
         return metric
 
     def create_criteria(self) -> Metric:
-        metric = self._create_metric("New Criteria", self.criteria_by_id)
+        metric = self._create_metric(
+            "New Criteria", self.criteria_by_id, self.criteria_ids
+        )
         return metric
 
     def delete_condition(self, metric_id: str) -> Metric | None:
         metric = self.conditions_by_id.pop(metric_id)
-        self.selected_condition_ids.remove(metric_id)
+        self.condition_ids.remove(metric_id)
         return metric
 
     def delete_criteria(self, metric_id: str) -> Metric | None:
         metric = self.criteria_by_id.pop(metric_id)
-        self.selected_criteria_ids.remove(metric_id)
+        self.criteria_ids.remove(metric_id)
         return metric
 
     def get_scenario(self, scenario_id: str) -> Scenario | None:
@@ -204,8 +164,11 @@ class PathwaysProject:
         scenario_id = self._create_id()
         scenario = Scenario(scenario_id, name)
         self.scenarios_by_id[scenario.id] = scenario
-        if self.graph_scenario_id is None:
+        self.scenario_ids.append(scenario.id)
+
+        if self.graph_scenario_id == "none":
             self.graph_scenario_id = scenario_id
+
         return scenario
 
     def copy_scenario(self, scenario_id: str, suffix=" (Copy)") -> Scenario | None:
@@ -225,8 +188,11 @@ class PathwaysProject:
 
     def delete_scenario(self, scenario_id: str) -> Scenario | None:
         scenario = self.scenarios_by_id.pop(scenario_id)
-        if self.graph_scenario_id is scenario_id:
-            self.graph_scenario_id = next(self.all_scenarios, None)
+        self.scenario_ids.remove(scenario_id)
+        if self.graph_scenario_id == scenario_id:
+            self.graph_scenario_id = (
+                self.scenario_ids[0] if len(self.scenario_ids) > 0 else "none"
+            )
         return scenario
 
     def delete_scenarios(self, scenario_ids: Iterable[str]):
@@ -240,11 +206,11 @@ class PathwaysProject:
     def get_action(self, action_id: str) -> Action:
         return self.actions_by_id[action_id]
 
-    def create_action(self, color, icon) -> Action:
+    def create_action(self, color: str, icon: str, name: str | None = None) -> Action:
         action_id = self._create_id()
         action = Action(
             action_id,
-            "New Action",
+            name or f"New Action ({action_id})",
             color,
             icon,
             {
@@ -254,10 +220,12 @@ class PathwaysProject:
         )
 
         self.actions_by_id[action.id] = action
+        self.action_ids.append(action.id)
         return action
 
     def delete_action(self, action_id: str) -> Action | None:
         action = self.actions_by_id.pop(action_id)
+        self.action_ids.remove(action_id)
         return action
 
     def delete_actions(self, action_ids: Iterable[str]):
@@ -281,6 +249,8 @@ class PathwaysProject:
     ) -> Pathway:
         pathway = Pathway(action_id, parent_pathway_id)
         self.pathways_by_id[pathway.id] = pathway
+        self.pathway_ids.append(pathway.id)
+
         for metric in self.all_metrics():
             self.update_pathway_values(metric.id)
 
@@ -340,12 +310,12 @@ class PathwaysProject:
 
     def delete_pathway(self, pathway_id: str) -> Pathway | None:
         pathway = self.pathways_by_id.pop(pathway_id, None)
+        self.pathway_ids.append(pathway_id)
         return pathway
 
     def delete_pathways(self, pathway_ids: Iterable[str]):
         ids_to_delete: set[str] = set()
         ids_to_delete.update(pathway_ids)
-        print(ids_to_delete)
 
         # Delete any orphaned children
         for pathway in self.all_pathways:
@@ -357,12 +327,7 @@ class PathwaysProject:
                     ids_to_delete.add(pathway.id)
 
         for pathway_id in ids_to_delete:
-            print(pathway_id)
             self.delete_pathway(pathway_id)
-
-    def delete_selected_pathways(self):
-        self.delete_pathways(self.selected_pathway_ids)
-        self.selected_pathway_ids.clear()
 
     def get_children(self, pathway_id: str):
         return (
@@ -388,3 +353,8 @@ class PathwaysProject:
                 current_pathway = self.get_pathway(current_pathway.parent_id)
             else:
                 current_pathway = None
+
+
+class PathwaysProjectEncoder(JSONEncoder):
+    def default(self, o):
+        return o.__dict__

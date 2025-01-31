@@ -114,8 +114,8 @@ class Scenario:
     ) -> tuple[int, MetricValue, int] | None:
         for index in range(year_index - 1, -1, -1):
             data = self.yearly_data[index]
-            metric_value = data.metric_data[metric_id]
-            if not metric_value.is_estimate:
+            metric_value = data.metric_data.get(metric_id, None)
+            if metric_value is not None and not metric_value.is_estimate:
                 return (data.year, metric_value, index)
         return None
 
@@ -124,8 +124,8 @@ class Scenario:
     ) -> tuple[int, MetricValue, int] | None:
         for index in range(year_index + 1, len(self.yearly_data)):
             data = self.yearly_data[index]
-            metric_value = data.metric_data[metric_id]
-            if not metric_value.is_estimate:
+            metric_value = data.metric_data.get(metric_id, None)
+            if metric_value is not None and not metric_value.is_estimate:
                 return (data.year, metric_value, index)
 
         return None
