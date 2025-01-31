@@ -17,7 +17,7 @@ cleanup = false
 base_url = "@AP_BASE_URL@"
 # renderer = "canvaskit"
 # use_color_emoji = false
-route_url_strategy = "path"
+route_url_strategy = "hash"
 
 [project]
 name = "Pathways Generator"

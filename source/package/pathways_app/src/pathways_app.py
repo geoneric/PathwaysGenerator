@@ -1,14 +1,12 @@
-import base64
 import json
 from typing import Callable
 
 import flet as ft
-import jsonpickle
 from pyodide.code import run_js
 from src.config import Config
 from src.data import create_empty_project
 
-from adaptation_pathways.app.model.pathways_project import PathwaysProject
+from adaptation_pathways.app.service.project_service import ProjectService
 
 
 is_web = True
@@ -41,10 +39,14 @@ class PathwaysApp:
             old_send = flet_js.send
 
             def new_send(data: str):
-                message = json.loads(data)
+                message: dict = json.loads(data)
                 action = message.get("action", None)
                 if action == "open_project_result":
-                    self.on_project_text_received(message.payload)
+                    project_text = message.get("payload", None)
+                    if project_text is None:
+                        print("Open project failed: no payload received")
+                    else:
+                        self.on_project_text_received(project_text)
                 else:
                     old_send(data)
 
@@ -82,9 +84,6 @@ class PathwaysApp:
         for listener in self.on_project_info_changed:
             listener()
 
-    def on_event(self, event):
-        print(event)
-
     def open_link(self, url: str):
         self.page.launch_url(url)
 
@@ -95,11 +94,7 @@ class PathwaysApp:
 
     def open_project(self):
         if is_web:
-            run_js(
-                """
-                self.postMessage('open_project');
-            """
-            )
+            run_js('self.postMessage(\'{ "action": "open_project" }\');')
         else:
             self.file_opener.pick_files(
                 "Choose a Project File",
@@ -112,34 +107,33 @@ class PathwaysApp:
         if len(event.files) == 0:
             return
 
-        print(event.files[0].path)
         with open(event.files[0].path, encoding="utf-8") as file:
             text = file.read()
             file.close()
 
-            self.project = jsonpickle.decode(text)
+            self.project = ProjectService.from_json(text)
             self.page.go("/project")
             self.notify_project_changed()
 
     def on_project_text_received(self, content: str):
-        project_dict = json.loads(content)
-        self.project = PathwaysProject(**project_dict)
+        self.project = ProjectService.from_json(content)
         self.page.go("/project")
         self.notify_project_changed()
 
     def save_project(self):
+        filename = f"{self.project.name}.{Config.project_extension}"
+
         if is_web:
-            text: str = jsonpickle.encode(self.project)
-            text_bytes = text.encode("uft-8")
-            text_64_bytes = base64.b64encode(text_bytes)
-            text_64_text = text_64_bytes.decode("utf-8")
-            self.open_link(f"data:text/plain;base64,{text_64_text}")
+            project_json = ProjectService.to_json(self.project)
+            # Escapes quotes properly
+            project_json = json.dumps(project_json)
+
+            message_json = f'{{ "action": "save_project", "filename":"{filename}", "content":{project_json} }}'
+            message_json = json.dumps(message_json)
+
+            run_js(f"self.postMessage({message_json});")
         else:
-            print("Saving on desktop")
-            self.file_saver.save_file(
-                "Save Pathways Project",
-                f"{self.project.name}.{Config.project_extension}",
-            )
+            self.file_saver.save_file("Save Pathways Project", filename)
 
     def on_file_saved(self, event: ft.FilePickerResultEvent):
         if event.path is None:
@@ -148,7 +142,7 @@ class PathwaysApp:
 
         try:
             with open(event.path, "w", encoding="utf-8") as file:
-                text = jsonpickle.encode(self.project)
+                text = ProjectService.to_json(self.project)
                 file.write(text)
                 file.close()
         except Exception as error:

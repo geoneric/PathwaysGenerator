@@ -19,7 +19,7 @@ enable_testing()
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/environment/cmake)
 
-set(AP_BASE_URL "AdaptationPathways" CACHE STRING
+set(AP_BASE_URL "PathwaysGenerator" CACHE STRING
     "Base url for web app. Use empty string for testing locally."
 )
 

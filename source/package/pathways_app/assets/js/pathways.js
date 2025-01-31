@@ -1,9 +1,21 @@
 setTimeout(function () {
     var oldMessageHandler = pythonWorker.onmessage;
     pythonWorker.onmessage = function (message) {
-        if (message.data == "open_project") {
-            openFile();
-        } else {
+        try {
+            msgObj = JSON.parse(message.data);
+            switch (msgObj.action) {
+                case "open_project":
+                    openFile();
+                    break;
+                case "save_project":
+                    saveFile(msgObj.content, msgObj.filename);
+                    break;
+                default:
+                    oldMessageHandler(message);
+                    break;
+            }
+        } catch (e) {
+            console.error(e);
             oldMessageHandler(message);
         }
     };
@@ -16,11 +28,10 @@ file_open_input.multiple = false;
 
 function openFile() {
     file_open_input.onchange = (e) => {
-        // getting a hold of the file reference
-        var file = e.target.files[0];
-        console.log(file);
+        if (e.target.files.length == 0) return;
 
-        // setting up the reader
+        var file = e.target.files[0];
+
         var reader = new FileReader();
         reader.readAsText(file, "UTF-8");
 
@@ -36,4 +47,15 @@ function openFile() {
     };
 
     file_open_input.click();
+}
+
+var file_download_link = document.createElement("a");
+
+function saveFile(data, filename) {
+    var blob = new Blob([data], {
+        type: "text/plain;charset=utf-8",
+    });
+    file_download_link.href = URL.createObjectURL(blob);
+    file_download_link.download = filename;
+    file_download_link.click();
 }
