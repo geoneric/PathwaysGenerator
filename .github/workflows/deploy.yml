@@ -52,7 +52,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake -S .. -G Ninja
+          cmake -S .. -G Ninja -D AP_BASE_URL PathwaysGenerator
       - name: Build web app
         run: |
           cmake --build build --target web_app

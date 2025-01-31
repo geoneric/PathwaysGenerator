@@ -19,14 +19,13 @@ enable_testing()
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/environment/cmake)
 
-set(AP_BASE_URL "PathwaysGenerator" CACHE STRING
-    "Base url for web app. Use empty string for testing locally."
+set(AP_BASE_URL "" CACHE STRING
+    "Base url for web app. Use empty string (the default) for testing locally."
 )
 
 find_package(Flet REQUIRED)
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 find_package(Quarto)
-find_package(Sed)
 find_package(Sphinx REQUIRED)
 
 set(AP_PLOT_GRAPHS
