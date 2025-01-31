@@ -121,7 +121,10 @@ class DefaultThemeTextStyles:
     )
 
     menu_button = ft.TextStyle(
-        font_family=font_family, size=14, color=colors.true_white
+        font_family=font_family,
+        size=14,
+        color=colors.true_white,
+        overflow=ft.TextOverflow.VISIBLE,
     )
 
     button = ft.TextStyle(

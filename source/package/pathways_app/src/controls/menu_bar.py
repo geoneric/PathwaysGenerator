@@ -36,7 +36,9 @@ class MenuBar(ft.Container):
                                 controls=[
                                     ft.SubmenuButton(
                                         ft.Text(
-                                            "Project", style=theme.text.menu_button
+                                            "Project",
+                                            style=theme.text.menu_button,
+                                            no_wrap=True,
                                         ),
                                         controls=[
                                             ft.MenuItemButton(
@@ -56,7 +58,11 @@ class MenuBar(ft.Container):
                                     ),
                                     ft.Container(width=10),
                                     ft.SubmenuButton(
-                                        ft.Text("Help", style=theme.text.menu_button),
+                                        ft.Text(
+                                            "Help",
+                                            style=theme.text.menu_button,
+                                            no_wrap=True,
+                                        ),
                                         controls=[
                                             ft.MenuItemButton(
                                                 content=ft.Text("About Pathways"),

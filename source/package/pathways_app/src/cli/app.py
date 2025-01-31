@@ -77,4 +77,4 @@ def main(page: ft.Page):
     app.on_project_changed.append(rerender)
 
     page.on_route_change = render_route
-    page.go("/project")
+    page.go("/")
