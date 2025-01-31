@@ -114,14 +114,14 @@ class PathwayMapDefaultLayoutTest(PathwayLayoutTestBase):
         self.assertEqual(len(paths), 3)
 
         positions = default_layout(pathway_map)
-        self.assertEqual(len(positions), 8)
+        self.assertEqual(len(positions), 12)
 
         self.assert_equal_positions(
             positions,
             paths[0],
             [
-                ("[current", (0, 0)),
-                ("current]", (1, 0)),
+                ("[current", (0, 1)),
+                ("current]", (1, 1)),
                 ("[a", (2, 1)),
                 ("a]", (3, 1)),
             ],
@@ -140,8 +140,8 @@ class PathwayMapDefaultLayoutTest(PathwayLayoutTestBase):
             positions,
             paths[2],
             [
-                ("[current", (0, 0)),
-                ("current]", (1, 0)),
+                ("[current", (0, -1)),
+                ("current]", (1, -1)),
                 ("[c", (2, -1)),
                 ("c]", (3, -1)),
             ],
@@ -173,14 +173,14 @@ class PathwayMapDefaultLayoutTest(PathwayLayoutTestBase):
         self.assertEqual(len(paths), 3)
 
         positions = default_layout(pathway_map)
-        self.assertEqual(len(positions), 14)
+        self.assertEqual(len(positions), 18)
 
         self.assert_equal_positions(
             positions,
             paths[0],
             [
-                ("[current", (0, 0)),
-                ("current]", (1, 0)),
+                ("[current", (0, 1)),
+                ("current]", (1, 1)),
                 ("[a", (2, 1)),
                 ("a]", (3, 1)),
                 ("[d", (4, 1)),
@@ -203,8 +203,8 @@ class PathwayMapDefaultLayoutTest(PathwayLayoutTestBase):
             positions,
             paths[2],
             [
-                ("[current", (0, 0)),
-                ("current]", (1, 0)),
+                ("[current", (0, -1)),
+                ("current]", (1, -1)),
                 ("[c", (2, -1)),
                 ("c]", (3, -1)),
                 ("[d", (4, -1)),
@@ -249,14 +249,14 @@ class PathwayMapDefaultLayoutTest(PathwayLayoutTestBase):
         self.assertEqual(len(paths), 4)
 
         positions = default_layout(pathway_map)
-        self.assertEqual(len(positions), 24)
+        self.assertEqual(len(positions), 30)
 
         self.assert_equal_positions(
             positions,
             paths[0],
             [
-                ("[current", (0, 0)),
-                ("current]", (1, 0)),
+                ("[current", (0, 1.5)),
+                ("current]", (1, 1.5)),
                 ("[a", (2, 1.5)),
                 ("a]", (3, 1.5)),
                 ("[e", (4, 1.5)),
@@ -267,8 +267,8 @@ class PathwayMapDefaultLayoutTest(PathwayLayoutTestBase):
             positions,
             paths[1],
             [
-                ("[current", (0, 0)),
-                ("current]", (1, 0)),
+                ("[current", (0, 0.5)),
+                ("current]", (1, 0.5)),
                 ("[b", (2, 0.5)),
                 ("b]", (3, 0.5)),
                 ("[f", (4, 0.5)),
@@ -281,8 +281,8 @@ class PathwayMapDefaultLayoutTest(PathwayLayoutTestBase):
             positions,
             paths[2],
             [
-                ("[current", (0, 0)),
-                ("current]", (1, 0)),
+                ("[current", (0, -0.5)),
+                ("current]", (1, -0.5)),
                 ("[c", (2, -0.5)),
                 ("c]", (3, -0.5)),
                 ("[f", (4, -0.5)),
@@ -295,8 +295,8 @@ class PathwayMapDefaultLayoutTest(PathwayLayoutTestBase):
             positions,
             paths[3],
             [
-                ("[current", (0, 0)),
-                ("current]", (1, 0)),
+                ("[current", (0, -1.5)),
+                ("current]", (1, -1.5)),
                 ("[d", (2, -1.5)),
                 ("d]", (3, -1.5)),
                 ("[f", (4, -1.5)),
@@ -310,31 +310,44 @@ class PathwayMapDefaultLayoutTest(PathwayLayoutTestBase):
         sequence_graph = SequenceGraph()
         current = Action("current")
         a = Action("a")
-        b1 = Action("b1")
-        b2 = Action("b2")
+        b = Action("b")
         c = Action("c")
         d = Action("d")
 
         current_node = ActionNode(current)
-        a_node = ActionNode(a)
-        b1_node = ActionNode(b1)
-        b2_node = ActionNode(b2)
-        c_node = ActionNode(c)
-        d_node = ActionNode(d)
+        a1_node = ActionNode(a)
+        a2_node = ActionNode(a)
+        a3_node = ActionNode(a)
+        a4_node = ActionNode(a)
+        a5_node = ActionNode(a)
+        a6_node = ActionNode(a)
+        b1_node = ActionNode(b)
+        b2_node = ActionNode(b)
+        b3_node = ActionNode(b)
+        c1_node = ActionNode(c)
+        c2_node = ActionNode(c)
+        d1_node = ActionNode(d)
+        d2_node = ActionNode(d)
+        d3_node = ActionNode(d)
+        d4_node = ActionNode(d)
 
         sequence_graph.add_sequences(
             [
-                (current_node, a_node),
+                (current_node, a1_node),
                 (current_node, b1_node),
-                (current_node, c_node),
-                (current_node, d_node),
-                (b1_node, a_node),
-                (b1_node, c_node),
-                (b1_node, d_node),
-                (c_node, b2_node),
-                (b2_node, a_node),
-                (c_node, a_node),
-                (c_node, d_node),
+                (b1_node, a2_node),
+                (b1_node, c2_node),
+                (c2_node, b2_node),
+                (b2_node, a3_node),
+                (c2_node, a4_node),
+                (c2_node, d3_node),
+                (b1_node, d2_node),
+                (current_node, c1_node),
+                (c1_node, b3_node),
+                (b3_node, a5_node),
+                (c1_node, a6_node),
+                (c1_node, d4_node),
+                (current_node, d1_node),
             ]
         )
 
@@ -342,144 +355,133 @@ class PathwayMapDefaultLayoutTest(PathwayLayoutTestBase):
         paths = list(pathway_map.all_paths())
         self.assertEqual(len(paths), 10)
 
-        pathway_map.assign_tipping_points(
-            {
-                current: 2030,
-                a: 2100,
-                b1: 2040,
-                c: 2050,
-                d: 2100,
-                b2: 2070,
-            }
-        )
-
         positions = default_layout(pathway_map)
-        self.assertEqual(len(positions), 32)
+        self.assertEqual(len(positions), 66)
 
         self.assert_equal_positions(
             positions,
             paths[0],
             [
-                ("[current", (0, 0)),
-                ("current]", (1, 0)),
-                ("[a", (2, 1.5)),
-                ("a]", (3, 1.5)),
+                ("[current", (0, 4.5)),
+                ("current]", (1, 4.5)),
+                ("[a", (2, 4.5)),
+                ("a]", (3, 4.5)),
             ],
         )
         self.assert_equal_positions(
             positions,
             paths[1],
             [
-                ("[current", (0, 0)),
-                ("current]", (1, 0)),
-                ("[b1", (2, 0.5)),
-                ("b1]", (3, 0.5)),
-                ("[a", (4, 2.5)),
-                ("a]", (5, 2.5)),
+                ("[current", (0, 3.5)),
+                ("current]", (1, 3.5)),
+                ("[b", (2, 3.5)),
+                ("b]", (3, 3.5)),
+                ("[a", (4, 3.5)),
+                ("a]", (5, 3.5)),
             ],
         )
         self.assert_equal_positions(
             positions,
             paths[2],
             [
-                ("[current", (0, 0)),
-                ("current]", (1, 0)),
-                ("[b1", (2, 0.5)),
-                ("b1]", (3, 0.5)),
-                ("[c", (4, 1.5)),
-                ("c]", (5, 1.5)),
-                ("[b2", (6, 2)),
-                ("b2]", (7, 2)),
-                ("[a", (8, 2)),
-                ("a]", (9, 2)),
+                ("[current", (0, 2.5)),
+                ("current]", (1, 2.5)),
+                ("[b", (2, 2.5)),
+                ("b]", (3, 2.5)),
+                ("[c", (4, 2.5)),
+                ("c]", (5, 2.5)),
+                ("[b", (6, 2.5)),
+                ("b]", (7, 2.5)),
+                ("[a", (8, 2.5)),
+                ("a]", (9, 2.5)),
             ],
         )
         self.assert_equal_positions(
             positions,
             paths[3],
             [
-                ("[current", (0, 0)),
-                ("current]", (1, 0)),
-                ("[b1", (2, 0.5)),
-                ("b1]", (3, 0.5)),
+                ("[current", (0, 1.5)),
+                ("current]", (1, 1.5)),
+                ("[b", (2, 1.5)),
+                ("b]", (3, 1.5)),
                 ("[c", (4, 1.5)),
                 ("c]", (5, 1.5)),
-                ("[a", (6, 1)),
-                ("a]", (7, 1)),
+                ("[a", (6, 1.5)),
+                ("a]", (7, 1.5)),
             ],
         )
         self.assert_equal_positions(
             positions,
             paths[4],
             [
-                ("[current", (0, 0)),
-                ("current]", (1, 0)),
-                ("[b1", (2, 0.5)),
-                ("b1]", (3, 0.5)),
-                ("[c", (4, 1.5)),
-                ("c]", (5, 1.5)),
-                ("[d", (6, 0)),
-                ("d]", (7, 0)),
+                ("[current", (0, 0.5)),
+                ("current]", (1, 0.5)),
+                ("[b", (2, 0.5)),
+                ("b]", (3, 0.5)),
+                ("[c", (4, 0.5)),
+                ("c]", (5, 0.5)),
+                ("[d", (6, 0.5)),
+                ("d]", (7, 0.5)),
             ],
         )
         self.assert_equal_positions(
             positions,
             paths[5],
             [
-                ("[current", (0, 0)),
-                ("current]", (1, 0)),
-                ("[b1", (2, 0.5)),
-                ("b1]", (3, 0.5)),
-                ("[d", (4, 0.5)),
-                ("d]", (5, 0.5)),
+                ("[current", (0, -0.5)),
+                ("current]", (1, -0.5)),
+                ("[b", (2, -0.5)),
+                ("b]", (3, -0.5)),
+                ("[d", (4, -0.5)),
+                ("d]", (5, -0.5)),
             ],
         )
         self.assert_equal_positions(
             positions,
             paths[6],
             [
-                ("[current", (0, 0)),
-                ("current]", (1, 0)),
-                ("[c", (2, -0.5)),
-                ("c]", (3, -0.5)),
-                ("[b2", (4, -0.5)),
-                ("b2]", (5, -0.5)),
-                ("[a", (6, -1)),
-                ("a]", (7, -1)),
+                ("[current", (0, -1.5)),
+                ("current]", (1, -1.5)),
+                ("[c", (2, -1.5)),
+                ("c]", (3, -1.5)),
+                ("[b", (4, -1.5)),
+                ("b]", (5, -1.5)),
+                ("[a", (6, -1.5)),
+                ("a]", (7, -1.5)),
             ],
         )
         self.assert_equal_positions(
             positions,
             paths[7],
             [
-                ("[current", (0, 0)),
-                ("current]", (1, 0)),
-                ("[c", (2, -0.5)),
-                ("c]", (3, -0.5)),
-                ("[a", (4, -1.5)),
-                ("a]", (5, -1.5)),
+                ("[current", (0, -2.5)),
+                ("current]", (1, -2.5)),
+                ("[c", (2, -2.5)),
+                ("c]", (3, -2.5)),
+                ("[a", (4, -2.5)),
+                ("a]", (5, -2.5)),
             ],
         )
         self.assert_equal_positions(
             positions,
             paths[8],
             [
-                ("[current", (0, 0)),
-                ("current]", (1, 0)),
-                ("[c", (2, -0.5)),
-                ("c]", (3, -0.5)),
-                ("[d", (4, -2.5)),
-                ("d]", (5, -2.5)),
+                ("[current", (0, -3.5)),
+                ("current]", (1, -3.5)),
+                ("[c", (2, -3.5)),
+                ("c]", (3, -3.5)),
+                ("[d", (4, -3.5)),
+                ("d]", (5, -3.5)),
             ],
         )
         self.assert_equal_positions(
             positions,
             paths[9],
             [
-                ("[current", (0, 0)),
-                ("current]", (1, 0)),
-                ("[d", (2, -1.5)),
-                ("d]", (3, -1.5)),
+                ("[current", (0, -4.5)),
+                ("current]", (1, -4.5)),
+                ("[d", (2, -4.5)),
+                ("d]", (3, -4.5)),
             ],
         )
 
@@ -511,14 +513,14 @@ class PathwayMapDefaultLayoutTest(PathwayLayoutTestBase):
         self.assertEqual(len(paths), 3)
 
         positions = default_layout(pathway_map)
-        self.assertEqual(len(positions), 10)
+        self.assertEqual(len(positions), 14)
 
         self.assert_equal_positions(
             positions,
             paths[0],
             [
-                ("[current", (0, 0)),
-                ("current]", (1, 0)),
+                ("[current", (0, 1)),
+                ("current]", (1, 1)),
                 ("[a", (2, 1)),
                 ("a]", (3, 1)),
                 ("[d", (4, 1)),
@@ -539,8 +541,8 @@ class PathwayMapDefaultLayoutTest(PathwayLayoutTestBase):
             positions,
             paths[2],
             [
-                ("[current", (0, 0)),
-                ("current]", (1, 0)),
+                ("[current", (0, -1)),
+                ("current]", (1, -1)),
                 ("[c", (2, -1)),
                 ("c]", (3, -1)),
             ],
@@ -575,14 +577,14 @@ class PathwayMapDefaultLayoutTest(PathwayLayoutTestBase):
         self.assertEqual(len(paths), 3)
 
         positions = default_layout(pathway_map)
-        self.assertEqual(len(positions), 12)
+        self.assertEqual(len(positions), 16)
 
         self.assert_equal_positions(
             positions,
             paths[0],
             [
-                ("[current", (0, 0)),
-                ("current]", (1, 0)),
+                ("[current", (0, 1)),
+                ("current]", (1, 1)),
                 ("[a", (2, 1)),
                 ("a]", (3, 1)),
                 ("[d", (4, 1)),
@@ -605,8 +607,8 @@ class PathwayMapDefaultLayoutTest(PathwayLayoutTestBase):
             positions,
             paths[2],
             [
-                ("[current", (0, 0)),
-                ("current]", (1, 0)),
+                ("[current", (0, -1)),
+                ("current]", (1, -1)),
                 ("[c", (2, -1)),
                 ("c]", (3, -1)),
             ],
@@ -637,14 +639,14 @@ class PathwayMapDefaultLayoutTest(PathwayLayoutTestBase):
         self.assertEqual(len(paths), 2)
 
         positions = default_layout(pathway_map)
-        self.assertEqual(len(positions), 8)
+        self.assertEqual(len(positions), 10)
 
         self.assert_equal_positions(
             positions,
             paths[0],
             [
-                ("[current", (0, 0)),
-                ("current]", (1, 0)),
+                ("[current", (0, 0.5)),
+                ("current]", (1, 0.5)),
                 ("[a", (2, 0.5)),
                 ("a]", (3, 0.5)),
             ],
@@ -653,8 +655,8 @@ class PathwayMapDefaultLayoutTest(PathwayLayoutTestBase):
             positions,
             paths[1],
             [
-                ("[current", (0, 0)),
-                ("current]", (1, 0)),
+                ("[current", (0, -0.5)),
+                ("current]", (1, -0.5)),
                 ("[b", (2, -0.5)),
                 ("b]", (3, -0.5)),
                 ("[a", (4, -0.5)),
@@ -784,7 +786,7 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
         )
 
         positions, _ = classic_layout(pathway_map, overlapping_lines_spread=0)
-        self.assertEqual(len(positions), 8)
+        self.assertEqual(len(positions), 12)
 
         self.assert_equal_positions(
             positions,
@@ -817,6 +819,81 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
             ],
         )
 
+    def test_converging_pathways(self):
+        sequence_graph = SequenceGraph()
+        current = Action("current")
+        a = Action("a")
+        b = Action("b")
+        c = Action("c")
+        d = Action("d")
+
+        current_node = ActionNode(current)
+        a_node = ActionNode(a)
+        b_node = ActionNode(b)
+        c_node = ActionNode(c)
+        d_node = ActionNode(d)
+
+        sequence_graph.add_sequence(current_node, a_node)
+        sequence_graph.add_sequence(current_node, b_node)
+        sequence_graph.add_sequence(current_node, c_node)
+        sequence_graph.add_sequence(a_node, d_node)
+        sequence_graph.add_sequence(b_node, d_node)
+        sequence_graph.add_sequence(c_node, d_node)
+
+        pathway_map = sequence_graph_to_pathway_map(sequence_graph)
+        paths = list(pathway_map.all_paths())
+        self.assertEqual(len(paths), 3)
+
+        pathway_map.assign_tipping_points(
+            {
+                current: 2030,
+                a: 2040,
+                b: 2050,
+                c: 2060,
+                d: 2070,
+            }
+        )
+
+        positions, _ = classic_layout(pathway_map, overlapping_lines_spread=0)
+        self.assertEqual(len(positions), 18)
+
+        self.assert_equal_positions(
+            positions,
+            paths[0],
+            [
+                ("[current", (2026, 0)),
+                ("current]", (2030, 0)),
+                ("[a", (2030, 2)),
+                ("a]", (2040, 2)),
+                ("[d", (2040, -2)),
+                ("d]", (2070, -2)),
+            ],
+        )
+        self.assert_equal_positions(
+            positions,
+            paths[1],
+            [
+                ("[current", (2026, 0)),
+                ("current]", (2030, 0)),
+                ("[b", (2030, 1)),
+                ("b]", (2050, 1)),
+                ("[d", (2050, -2)),
+                ("d]", (2070, -2)),
+            ],
+        )
+        self.assert_equal_positions(
+            positions,
+            paths[2],
+            [
+                ("[current", (2026, 0)),
+                ("current]", (2030, 0)),
+                ("[c", (2030, -1)),
+                ("c]", (2060, -1)),
+                ("[d", (2060, -2)),
+                ("d]", (2070, -2)),
+            ],
+        )
+
     def test_use_case_01(self):
         actions = """
             current #ff4c566a
@@ -846,7 +923,7 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
         self.assertEqual(len(paths), 4)
 
         positions, _ = classic_layout(pathway_map, overlapping_lines_spread=0)
-        self.assertEqual(len(positions), 24)
+        self.assertEqual(len(positions), 30)
 
         self.assert_equal_positions(
             positions,
@@ -938,7 +1015,7 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
         self.assertEqual(len(paths), 10)
 
         positions, _ = classic_layout(pathway_map, overlapping_lines_spread=0)
-        self.assertEqual(len(positions), 32)
+        self.assertEqual(len(positions), 66)
 
         self.assert_equal_positions(
             positions,
@@ -1104,7 +1181,7 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
             }
         )
         positions, _ = classic_layout(pathway_map, overlapping_lines_spread=0)
-        self.assertEqual(len(positions), 10)
+        self.assertEqual(len(positions), 14)
 
         self.assert_equal_positions(
             positions,
@@ -1160,7 +1237,7 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
         self.assertEqual(len(paths), 3)
 
         positions, _ = classic_layout(pathway_map, overlapping_lines_spread=0)
-        self.assertEqual(len(positions), 12)
+        self.assertEqual(len(positions), 16)
 
         self.assert_equal_positions(
             positions,
@@ -1235,7 +1312,7 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
             }
         )
         positions, _ = classic_layout(pathway_map, overlapping_lines_spread=0)
-        self.assertEqual(len(positions), 12)
+        self.assertEqual(len(positions), 16)
 
         self.assert_equal_positions(
             positions,
@@ -1310,7 +1387,7 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
             }
         )
         positions, _ = classic_layout(pathway_map, overlapping_lines_spread=0)
-        self.assertEqual(len(positions), 10)
+        self.assertEqual(len(positions), 14)
 
         self.assert_equal_positions(
             positions,
@@ -1366,7 +1443,7 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
         self.assertEqual(len(paths), 3)
 
         positions, _ = classic_layout(pathway_map, overlapping_lines_spread=0)
-        self.assertEqual(len(positions), 12)
+        self.assertEqual(len(positions), 16)
 
         self.assert_equal_positions(
             positions,
@@ -1423,7 +1500,7 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
         self.assertEqual(len(paths), 3)
 
         positions, _ = classic_layout(pathway_map, overlapping_lines_spread=0)
-        self.assertEqual(len(positions), 10)
+        self.assertEqual(len(positions), 14)
 
         self.assert_equal_positions(
             positions,
@@ -1491,7 +1568,7 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
             }
         )
         positions, _ = classic_layout(pathway_map, overlapping_lines_spread=0)
-        self.assertEqual(len(positions), 8)
+        self.assertEqual(len(positions), 10)
 
         self.assert_equal_positions(
             positions,

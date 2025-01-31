@@ -1,6 +1,6 @@
 from .node import ActionBegin, ActionEnd, ActionPeriod
 from .node.action import Action as ActionNode
-from .pathway_graph import PathwayGraph
+from .pathway_graph import ActionConversion, PathwayGraph
 from .pathway_map import PathwayMap
 from .sequence_graph import SequenceGraph
 
@@ -37,36 +37,28 @@ def pathway_graph_to_pathway_map(pathway_graph: PathwayGraph) -> PathwayMap:
     """
     Convert a pathway graph to a pathway map
     """
-
-    def visit_graph(
-        pathway_graph: PathwayGraph,
-        pathway_map: PathwayMap,
-        action_period: ActionPeriod,
-        action_ends: dict[ActionNode, ActionEnd],
-    ) -> ActionBegin:
-        begin = ActionBegin(action_period.action)
-        end = ActionEnd(action_period.action)
-
-        pathway_map.add_period(begin, end)
-
-        for conversion in pathway_graph.to_conversions(action_period):
-            begin_new = visit_graph(
-                pathway_graph,
-                pathway_map,
-                pathway_graph.to_action_period(conversion),
-                action_ends,
-            )
-            pathway_map.add_conversion(end, begin_new)
-
-        return begin
-
     pathway_map = PathwayMap()
 
     if pathway_graph.nr_nodes() > 0:
-        action_period = pathway_graph.root_node
-        action_ends: dict[ActionNode, ActionEnd] = {}
-        visit_graph(pathway_graph, pathway_map, action_period, action_ends)
+        # For each individual path, add a graph to the pathway map
+        for path in pathway_graph.all_paths():
+            action_period = path[0]
+            begin = ActionBegin(action_period.action)
+            end = ActionEnd(action_period.action)
+            pathway_map.add_period(begin, end)
 
+            for action_conversion_idx in range(1, len(path), 2):
+                action_conversion = path[action_conversion_idx]
+                action_period = path[action_conversion_idx + 1]
+                assert isinstance(action_conversion, ActionConversion)
+                assert isinstance(action_period, ActionPeriod)
+
+                begin = ActionBegin(action_period.action)
+                pathway_map.add_conversion(end, begin)
+                end = ActionEnd(action_period.action)
+                pathway_map.add_period(begin, end)
+
+    # print(pathway_map)
     return pathway_map
 
 

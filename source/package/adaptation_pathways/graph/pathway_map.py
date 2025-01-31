@@ -1,10 +1,10 @@
 from ..action import Action
 from ..action_combination import ActionCombination
+from .multi_rooted_graph import MultiRootedGraph
 from .node import ActionBegin, ActionEnd, TippingPoint
-from .rooted_graph import RootedGraph
 
 
-class PathwayMap(RootedGraph):
+class PathwayMap(MultiRootedGraph):
     """
     A PathwayMap represents a collection of adaptation pathways. These pathways are encoded
     in a directed rooted graph in which the nodes represent...
@@ -37,24 +37,28 @@ class PathwayMap(RootedGraph):
         return self.all_to_nodes(begin)
 
     def all_action_begins(self) -> list[ActionBegin]:
-        assert isinstance(self.root_node, ActionBegin)
+        result = []
 
-        result = [self.root_node]
+        for root_node in self.root_nodes:
+            assert isinstance(root_node, ActionBegin)
 
-        for node in self.all_to_nodes(self.root_node):
-            if isinstance(node, ActionBegin):
-                result.append(node)
+            result.append(root_node)
+
+            for node in self.all_to_nodes(root_node):
+                if isinstance(node, ActionBegin):
+                    result.append(node)
 
         return result
 
     def all_action_ends(self) -> list[ActionEnd]:
-        assert isinstance(self.root_node, ActionBegin)
-
         result = []
 
-        for node in self.all_to_nodes(self.root_node):
-            if isinstance(node, ActionEnd):
-                result.append(node)
+        for root_node in self.root_nodes:
+            assert isinstance(root_node, ActionBegin)
+
+            for node in self.all_to_nodes(root_node):
+                if isinstance(node, ActionEnd):
+                    result.append(node)
 
         return result
 
@@ -135,20 +139,31 @@ class PathwayMap(RootedGraph):
         return list(dict.fromkeys(result))
 
     def tipping_point_range(self) -> tuple[TippingPoint, TippingPoint]:
-        result: tuple[TippingPoint, TippingPoint] = (0, 0)
+        min_tipping_point = 0.0
+        max_tipping_point = 0.0
 
         if self.nr_nodes() > 0:
-            min_tipping_point = self.action_end(self.root_node).tipping_point
+            root_nodes = self.root_nodes
+
+            # Initialize min tipping point to a value in the actual range of the tipping points
+            min_tipping_point = self.action_end(root_nodes[0]).tipping_point
+
+            for root_node in root_nodes[1:]:
+                min_tipping_point = min(
+                    min_tipping_point, self.action_end(root_node).tipping_point
+                )
+
+            # Initialize max tipping point to a value in the actual range of the tipping points
             max_tipping_point = min_tipping_point
 
             for end_node in self.leaf_nodes():
                 max_tipping_point = max(max_tipping_point, end_node.tipping_point)
 
-            result = (min_tipping_point, max_tipping_point)
+        assert (
+            min_tipping_point <= max_tipping_point
+        ), f"{min_tipping_point} < {max_tipping_point}"
 
-        assert result[0] <= result[1], result
-
-        return result
+        return min_tipping_point, max_tipping_point
 
     # def set_node_attribute(self, name: str, value: dict[Action, typing.Any]) -> None:
     #     """

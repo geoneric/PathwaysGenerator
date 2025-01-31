@@ -308,6 +308,7 @@ def _spread_vertically(
     pathway_map: PathwayMap,
     position_by_node: dict[ActionBegin | ActionEnd, np.ndarray],
     overlapping_lines_spread: float,
+    spread_root_action: bool,
 ) -> None:
 
     # - Assign all action_begin / action_end combinations to bins, by y-coordinate
@@ -319,19 +320,22 @@ def _spread_vertically(
         float, list[tuple[alias.Region, tuple[ActionBegin, ActionEnd]]]
     ] = {}
 
+    action_begins_to_skip = pathway_map.root_nodes if not spread_root_action else []
+
     for action_begin in pathway_map.all_action_begins():
-        action_end = pathway_map.action_end(action_begin)
+        if action_begin not in action_begins_to_skip:
+            action_end = pathway_map.action_end(action_begin)
 
-        x_begin, y_begin = position_by_node[action_begin]
-        x_end, y_end = position_by_node[action_end]
-        assert x_end >= x_begin
-        assert y_end == y_begin
-        region = x_begin, x_end
+            x_begin, y_begin = position_by_node[action_begin]
+            x_end, y_end = position_by_node[action_end]
+            assert x_end >= x_begin
+            assert y_end == y_begin
+            region = x_begin, x_end
 
-        if y_begin not in nodes_by_y:
-            nodes_by_y[y_begin] = []
+            if y_begin not in nodes_by_y:
+                nodes_by_y[y_begin] = []
 
-        nodes_by_y[y_begin].append((region, (action_begin, action_end)))
+            nodes_by_y[y_begin].append((region, (action_begin, action_end)))
 
     min_y = min(nodes_by_y.keys())
     max_y = max(nodes_by_y.keys())
@@ -380,6 +384,7 @@ def _spread_horizontally(
     pathway_map: PathwayMap,
     position_by_node: dict[ActionBegin | ActionEnd, np.ndarray],
     overlapping_lines_spread: float,
+    spread_root_action: bool,
 ) -> None:
 
     # - Assign all action_end / action_begin combinations to bins, by x-coordinate
@@ -408,11 +413,13 @@ def _spread_horizontally(
                 nodes_by_x[x_end].append((region, (action_end, action_begin)))
 
     min_x = min(nodes_by_x.keys())
-    max_x = max(nodes_by_x.keys())
+    max_x = max(
+        position_by_node[action_end][0] for action_end in pathway_map.leaf_nodes()
+    )
     range_x = max_x - min_x
 
-    # Root action end. This x coordinate needs no tweaking.
-    del nodes_by_x[min_x]
+    if not spread_root_action:
+        del nodes_by_x[min_x]
 
     for x_coordinate, regions in nodes_by_x.items():
         grouped_regions = _group_overlapping_regions(regions)
@@ -434,16 +441,15 @@ def _spread_horizontally(
 # pylint: disable-next=too-many-locals, too-many-branches
 def _distribute_vertically(
     pathway_map: PathwayMap,
-    root_action_begin: ActionBegin,
+    root_actions_begins: list[ActionBegin],
     position_by_node: dict[ActionBegin | ActionEnd, np.ndarray],
 ) -> dict[str, float]:
 
-    action_end = pathway_map.action_end(root_action_begin)
-    position_by_node[action_end][1] = position_by_node[root_action_begin][1]
+    for root_action_begin in root_actions_begins:
+        action_end = pathway_map.action_end(root_action_begin)
+        position_by_node[action_end][1] = position_by_node[root_action_begin][1]
 
-    # min_distance = 1.0
-
-    # All unique action instances in the graph
+    # All action instances in the graph
     actions = pathway_map.actions()
 
     # Sieve out combined actions that combine a single *existing* action with a *new* one. These
@@ -484,16 +490,17 @@ def _distribute_vertically(
         )
     )
 
-    # Nodes related to the root action are already positioned
-    # Delete the y-coordinate of the root action
-    assert y_coordinates[math.floor(len(names_of_actions_to_distribute) / 2)] == 0.0
-    del y_coordinates[math.floor(len(names_of_actions_to_distribute) / 2)]
-
-    # Delete the name of the root action
-    assert (
-        names_of_actions_to_distribute[0] == root_action_begin.action.name
-    ), names_of_actions_to_distribute[0]
-    del names_of_actions_to_distribute[0]
+    # Nodes related to the root action are already positioned, at y == 0.0. Delete those coordinates and the
+    # root action names.
+    y_coordinates = [coordinate for coordinate in y_coordinates if coordinate != 0.0]
+    root_actions = [
+        root_action_begin.action for root_action_begin in root_actions_begins
+    ]
+    root_action_names = [action.name for action in root_actions]
+    names_of_actions_to_distribute = [
+        name for name in names_of_actions_to_distribute if name not in root_action_names
+    ]
+    assert len(y_coordinates) == len(names_of_actions_to_distribute)
 
     # Now it is time to re-order the actions to distribute, based on their level, if any was set
     level_by_action = (
@@ -539,27 +546,29 @@ def _distribute_vertically(
         zip(names_of_actions_to_distribute, y_coordinates)
     )
 
+    for root_action_begin in root_actions_begins:
+        y_coordinate_by_action_name[root_action_begin.action.name] = 0
+
     for action_begin in pathway_map.all_action_begins()[1:]:  # Skip root node
-        action = action_begin.action
+        if action_begin not in root_actions_begins:
+            action = action_begin.action
 
-        if (
-            isinstance(action, ActionCombination)
-            and action in action_combinations_sieved
-        ):
-            # In this case we want the combination to end up at the same y-coordinate as the
-            # one action that is being continued
-            action = action_combinations_sieved[action]
+            if (
+                isinstance(action, ActionCombination)
+                and action in action_combinations_sieved
+            ):
+                # In this case we want the combination to end up at the same y-coordinate as the
+                # one action that is being continued
+                action = action_combinations_sieved[action]
 
-        y_coordinate = y_coordinate_by_action_name[action.name]
+            y_coordinate = y_coordinate_by_action_name[action.name]
 
-        assert np.isnan(position_by_node[action_begin][1])
-        position_by_node[action_begin][1] = y_coordinate
-        action_end = pathway_map.action_end(action_begin)
+            assert np.isnan(position_by_node[action_begin][1])
+            position_by_node[action_begin][1] = y_coordinate
+            action_end = pathway_map.action_end(action_begin)
 
-        assert np.isnan(position_by_node[action_end][1])
-        position_by_node[action_end][1] = y_coordinate
-
-    y_coordinate_by_action_name[root_action_begin.action.name] = 0
+            assert np.isnan(position_by_node[action_end][1])
+            position_by_node[action_end][1] = y_coordinate
 
     return y_coordinate_by_action_name
 
@@ -568,6 +577,7 @@ def _layout(
     pathway_map: PathwayMap,
     *,
     overlapping_lines_spread: float | tuple[float, float],
+    spread_root_action: bool = False,
 ) -> tuple[dict[ActionBegin | ActionEnd, np.ndarray], dict[str, float]]:
     """
     Layout that replicates the pathway map layout of the original (pre-2024) pathway generator
@@ -594,20 +604,32 @@ def _layout(
     y_coordinate_by_action_name: dict[str, float] = {}
 
     if pathway_map.nr_edges() > 0:
-        root_action_begin = pathway_map.root_node
-        root_action_end = pathway_map.action_end(root_action_begin)
-        tipping_point = root_action_end.tipping_point
 
         min_tipping_point, max_tipping_point = pathway_map.tipping_point_range()
         tipping_point_range = max_tipping_point - min_tipping_point
         assert tipping_point_range >= 0
-        x_coordinate = tipping_point - 0.1 * tipping_point_range
 
-        add_position(position_by_node, root_action_begin, (x_coordinate, 0))
+        root_actions_begins = pathway_map.root_nodes
+        root_actions_ends = [
+            pathway_map.action_end(root_action_begin)
+            for root_action_begin in root_actions_begins
+        ]
+        root_actions_tipping_points = [
+            root_action_end.tipping_point for root_action_end in root_actions_ends
+        ]
+        x_coordinates = [
+            tipping_point - 0.1 * tipping_point_range
+            for tipping_point in root_actions_tipping_points
+        ]
 
-        _distribute_horizontally(pathway_map, root_action_begin, position_by_node)
+        for root_action_begin, x_coordinate in zip(root_actions_begins, x_coordinates):
+            add_position(position_by_node, root_action_begin, (x_coordinate, 0))
+
+        for root_action_begin, x_coordinate in zip(root_actions_begins, x_coordinates):
+            _distribute_horizontally(pathway_map, root_action_begin, position_by_node)
+
         y_coordinate_by_action_name = _distribute_vertically(
-            pathway_map, root_action_begin, position_by_node
+            pathway_map, root_actions_begins, position_by_node
         )
 
         if not isinstance(overlapping_lines_spread, tuple):
@@ -619,9 +641,13 @@ def _layout(
         horizontal_spread, vertical_spread = overlapping_lines_spread
 
         if horizontal_spread > 0:
-            _spread_horizontally(pathway_map, position_by_node, horizontal_spread)
+            _spread_horizontally(
+                pathway_map, position_by_node, horizontal_spread, spread_root_action
+            )
         if vertical_spread > 0:
-            _spread_vertically(pathway_map, position_by_node, vertical_spread)
+            _spread_vertically(
+                pathway_map, position_by_node, vertical_spread, spread_root_action
+            )
 
     return position_by_node, y_coordinate_by_action_name
 
@@ -644,8 +670,12 @@ def plot(
         "overlapping_lines_spread", (0, 0)
     )
 
+    spread_root_action: bool = arguments.get("spread_root_action", False)
+
     layout, y_coordinate_by_action_name = _layout(
-        pathway_map, overlapping_lines_spread=overlapping_lines_spread
+        pathway_map,
+        overlapping_lines_spread=overlapping_lines_spread,
+        spread_root_action=spread_root_action,
     )
 
     classic_pathway_map_plotter(
