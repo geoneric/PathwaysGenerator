@@ -308,34 +308,28 @@ def _spread_vertically(
     pathway_map: PathwayMap,
     position_by_node: dict[ActionBegin | ActionEnd, np.ndarray],
     overlapping_lines_spread: float,
-    spread_root_action: bool,
 ) -> None:
 
     # - Assign all action_begin / action_end combinations to bins, by y-coordinate
     # - For those bins that contain more than one element, tweak the y-coordinates
     # - When tweaking y-coordinates take non-overlapping regions into account
+    # - Additionally, only tweak y-coordinates of sections that don't share a route from the root node
 
     # Per y-coordinate a list of regions (x-coordinates), action begin/end tuples
     nodes_by_y: dict[
         float, list[tuple[alias.Region, tuple[ActionBegin, ActionEnd]]]
     ] = {}
 
-    action_begins_to_skip = pathway_map.root_nodes if not spread_root_action else []
-
     for action_begin in pathway_map.all_action_begins():
-        if action_begin not in action_begins_to_skip:
-            action_end = pathway_map.action_end(action_begin)
+        action_end = pathway_map.action_end(action_begin)
 
-            x_begin, y_begin = position_by_node[action_begin]
-            x_end, y_end = position_by_node[action_end]
-            assert x_end >= x_begin
-            assert y_end == y_begin
-            region = x_begin, x_end
+        x_begin, y_begin = position_by_node[action_begin]
+        x_end, y_end = position_by_node[action_end]
+        assert x_end >= x_begin
+        assert y_end == y_begin
+        region = x_begin, x_end
 
-            if y_begin not in nodes_by_y:
-                nodes_by_y[y_begin] = []
-
-            nodes_by_y[y_begin].append((region, (action_begin, action_end)))
+        nodes_by_y.setdefault(y_begin, []).append((region, (action_begin, action_end)))
 
     min_y = min(nodes_by_y.keys())
     max_y = max(nodes_by_y.keys())
@@ -345,15 +339,30 @@ def _spread_vertically(
         grouped_regions = _group_overlapping_regions(regions)
 
         for regions in grouped_regions:
-            nr_regions = len(regions)
 
-            if nr_regions > 1:
-                y_coordinates = distribute(
-                    nr_regions * [y_coordinate], overlapping_lines_spread * range_y
+            # We now have per non-overlapping region (x-coordinates), one or more pathway sections. Sections
+            # that belong to shared routes must not be spread. Whether or not this is the case depends on the
+            # ID of the action instances pointed to by the action begin/end nodes. Action instances with the
+            # same ID can only be reached using the same, shared, route.
+
+            sections_by_action_id: dict[int, list[tuple[ActionBegin, ActionEnd]]] = {}
+
+            for region_section in regions:
+                action_begin, action_end = region_section[1]
+                assert action_begin.action is action_end.action
+                sections_by_action_id.setdefault(id(action_begin.action), []).append(
+                    region_section[1]
                 )
 
-                for idx in range(nr_regions):
-                    action_begin, action_end = regions[idx][1]
+            nr_regions = len(sections_by_action_id)
+
+            y_coordinates = distribute(
+                nr_regions * [y_coordinate], overlapping_lines_spread * range_y
+            )
+
+            for idx, sections in enumerate(sections_by_action_id.values()):
+                for section in sections:
+                    action_begin, action_end = section
                     position_by_node[action_begin][1] = y_coordinates[idx]
                     position_by_node[action_end][1] = y_coordinates[idx]
 
@@ -384,12 +393,12 @@ def _spread_horizontally(
     pathway_map: PathwayMap,
     position_by_node: dict[ActionBegin | ActionEnd, np.ndarray],
     overlapping_lines_spread: float,
-    spread_root_action: bool,
 ) -> None:
 
     # - Assign all action_end / action_begin combinations to bins, by x-coordinate
     # - For those bins that contain more than one element, tweak the x-coordinates
     # - When tweaking x-coordinates take non-overlapping regions into account
+    # - Additionally, only tweak x-coordinates of sections that don't share a route from the root node
 
     # Per x-coordinate a list of regions (y-coordinates), action end/begin tuples
     nodes_by_x: dict[
@@ -418,22 +427,34 @@ def _spread_horizontally(
     )
     range_x = max_x - min_x
 
-    if not spread_root_action:
-        del nodes_by_x[min_x]
-
     for x_coordinate, regions in nodes_by_x.items():
         grouped_regions = _group_overlapping_regions(regions)
 
         for regions in grouped_regions:
-            nr_regions = len(regions)
 
-            if nr_regions > 1:
-                x_coordinates = distribute(
-                    nr_regions * [x_coordinate], overlapping_lines_spread * range_x
+            # We now have per non-overlapping region (y-coordinates), one or more pathway sections. Sections
+            # that belong to shared routes must not be spread. Whether or not this is the case depends on the
+            # ID of the action instances pointed to by the action begin/end nodes. Action instances with the
+            # same ID can only be reached using the same, shared, route.
+
+            section_by_action_id: dict[int, list[tuple[ActionEnd, ActionBegin]]] = {}
+
+            for region_section in regions:
+                action_end, action_begin = region_section[1]
+                assert action_end.action is not action_begin.action
+                section_by_action_id.setdefault(id(action_end.action), []).append(
+                    region_section[1]
                 )
 
-                for idx in range(nr_regions):
-                    action_end, action_begin = regions[idx][1]
+            nr_regions = len(section_by_action_id)
+
+            x_coordinates = distribute(
+                nr_regions * [x_coordinate], overlapping_lines_spread * range_x
+            )
+
+            for idx, sections in enumerate(section_by_action_id.values()):
+                for section in sections:
+                    action_end, action_begin = section
                     position_by_node[action_end][0] = x_coordinates[idx]
                     position_by_node[action_begin][0] = x_coordinates[idx]
 
@@ -577,7 +598,6 @@ def _layout(
     pathway_map: PathwayMap,
     *,
     overlapping_lines_spread: float | tuple[float, float],
-    spread_root_action: bool = False,
 ) -> tuple[dict[ActionBegin | ActionEnd, np.ndarray], dict[str, float]]:
     """
     Layout that replicates the pathway map layout of the original (pre-2024) pathway generator
@@ -641,13 +661,9 @@ def _layout(
         horizontal_spread, vertical_spread = overlapping_lines_spread
 
         if horizontal_spread > 0:
-            _spread_horizontally(
-                pathway_map, position_by_node, horizontal_spread, spread_root_action
-            )
+            _spread_horizontally(pathway_map, position_by_node, horizontal_spread)
         if vertical_spread > 0:
-            _spread_vertically(
-                pathway_map, position_by_node, vertical_spread, spread_root_action
-            )
+            _spread_vertically(pathway_map, position_by_node, vertical_spread)
 
     return position_by_node, y_coordinate_by_action_name
 
@@ -670,12 +686,9 @@ def plot(
         "overlapping_lines_spread", (0, 0)
     )
 
-    spread_root_action: bool = arguments.get("spread_root_action", False)
-
     layout, y_coordinate_by_action_name = _layout(
         pathway_map,
         overlapping_lines_spread=overlapping_lines_spread,
-        spread_root_action=spread_root_action,
     )
 
     classic_pathway_map_plotter(

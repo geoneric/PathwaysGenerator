@@ -75,7 +75,7 @@ Plot pathway map
 
 Usage:
     {command} [--title=<title>] [--x_label=<label>] [--show_legend]
-        [--overshoot] [--spread=<spread>] [--spread_root] <basename> <plot>
+        [--overshoot] [--spread=<spread>] <basename> <plot>
 
 Arguments:
     basename           Either, the name without postfix and extension of text
@@ -99,7 +99,6 @@ Options:
                        about the separation of vertical lines (transitions).
                        Vertical spread is about horizontal lines (actions).
                        [default: 0]
-    --spread_root      Spread the root (current) action as well
     --title=<title>    Title
     --x_label=<label>  Label of x-axis
 
@@ -120,14 +119,12 @@ Examples:
     show_legend = arguments["--show_legend"]
     overshoot = arguments["--overshoot"]
     overlapping_lines_spread: tuple[float, float] = parse_spread(arguments["--spread"])
-    spread_root_action = arguments["--spread_root"]
 
     plot_arguments: dict[str, typing.Any] = {
         "title": title,
         "x_label": x_label,
         "show_legend": show_legend,
         "overlapping_lines_spread": overlapping_lines_spread,
-        "spread_root_action": spread_root_action,
     }
 
     if overshoot:

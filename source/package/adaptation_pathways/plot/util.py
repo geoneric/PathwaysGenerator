@@ -263,7 +263,7 @@ def group_overlapping_regions_with_payloads(
     """
     Given regions, defined by start and end coordinates, group the ones that overlap
 
-    Regions are considered to overlap when they share at least one (indefinitely small) point. Optionally, a
+    Regions are considered to overlap when they share at least one (infinitely small) point. Optionally, a
     payload associated with each region can be passed in as well, which will be grouped similar to the
     regions. This allows the payload and the region to be re-associated again.
     """
