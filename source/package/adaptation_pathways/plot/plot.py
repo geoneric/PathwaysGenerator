@@ -1,10 +1,8 @@
 import typing
 
-import matplotlib as mpl
-
 
 def configure_title(
-    axes: mpl.axes.Axes,
+    axes,
     *,
     arguments: dict[str, typing.Any],
 ) -> None:

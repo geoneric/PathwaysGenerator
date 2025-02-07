@@ -1,6 +1,5 @@
 import typing
 
-import matplotlib as mpl
 import matplotlib.lines as mlines
 
 from ...action import Action
@@ -11,7 +10,7 @@ from ..plot import configure_title
 
 
 def _configure_x_axes(
-    axes: mpl.axes.Axes,
+    axes,
     *,
     arguments: dict[str, typing.Any],
 ):
@@ -34,7 +33,7 @@ def _configure_x_axes(
 
 
 def _configure_y_axes(
-    axes: mpl.axes.Axes,
+    axes,
     paths: list[list[typing.Any]],
     *,
     arguments: dict[str, typing.Any],
@@ -94,7 +93,7 @@ def _plot_annotations(
 
 
 def plot_bars(
-    axes: mpl.axes.Axes,
+    axes,
     pathway_map: PathwayMap,
     *,
     arguments: dict[str, typing.Any] | None = None,
@@ -150,7 +149,8 @@ def plot_bars(
         colours = [
             colour_by_action_name[action_end.action.name] for action_end in action_ends
         ]
-        edge_colours = colours if stack_bars else "black"
+        # edge_colours = colours if stack_bars else "black"
+        edge_colours = None
 
         axes.barh(
             y,
