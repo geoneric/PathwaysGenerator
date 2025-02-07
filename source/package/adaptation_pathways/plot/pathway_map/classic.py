@@ -11,6 +11,7 @@ from ...action_combination import ActionCombination
 from ...graph import PathwayMap
 from ...graph.node import ActionBegin, ActionEnd
 from .. import alias
+from ..plot import configure_title
 from ..util import add_position, distribute, group_overlapping_regions_with_payloads
 
 
@@ -127,18 +128,6 @@ def _plot_action_tipping_points(
     return path_collection
 
 
-def _configure_title(
-    axes,
-    *,
-    arguments: dict[str, typing.Any],
-) -> None:
-
-    title: str = arguments.get("title", "")
-
-    if len(title) > 0:
-        axes.set_title(title)
-
-
 def _configure_y_axes(
     axes,
     y_coordinate_by_action_name: dict[str, float],
@@ -225,7 +214,7 @@ def _plot_annotations(
     legend_arguments: dict[str, typing.Any],
 ) -> None:
 
-    _configure_title(axes, arguments=arguments)
+    configure_title(axes, arguments=arguments)
     y_labels, label_colours = _configure_y_axes(
         axes, y_coordinate_by_action_name, arguments=arguments
     )

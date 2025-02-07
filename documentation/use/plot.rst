@@ -7,10 +7,12 @@ Plotting pathways
    Examples <example/index>
 
 
-The package contains two command-line applications. One is called ``ap_plot_graphs`` and can
-be used to gain insight into various kinds of graphs used to store information about pathways,
-and one is called ``ap_plot_pathway_map`` and can be used to visualize pathway maps in the
-so-called :const:`CLASSIC <adaptation_pathways.plot.pathway_map.plot.PathwayMapLayout.CLASSIC>` layout.
+The package contains multiple command-line applications.
+``ap_plot_graphs`` and can be used to gain insight into various kinds of graphs used to store information
+about pathways.
+``ap_plot_pathway_map`` can be used to visualize pathway maps in the so-called
+:const:`CLASSIC <adaptation_pathways.plot.pathway_map.plot.PathwayMapLayout.CLASSIC>` layout.
+``ap_plot_bars`` can be used to visualize pathways using bar plots.
 
 
 ``ap_plot_graphs``
@@ -54,3 +56,22 @@ Example for creating a plot from ``my_pathways-action.txt`` and ``my_pathways-se
    ap_plot_pathway_map my_pathways my_pathways.pdf
 
 For help about the usage of the command type ``ap_plot_pathway_map --help``.
+
+
+``ap_plot_bars``
+----------------
+See also:
+:mod:`adaptation_pathways.cli.plot_bars`,
+:class:`PathwayMap <adaptation_pathways.graph.pathway_map.PathwayMap>`
+
+This command takes information about pathways as input, and outputs a single plot containing
+the pathways visualized by horizontal bars.
+
+Example for creating a plot from ``my_pathways-action.txt`` and ``my_pathways-sequence.txt``
+(or ``my_pathways.apw``) to ``./my_pathways.pdf``:
+
+.. code-block:: bash
+
+   ap_plot_bars my_pathways my_pathways.pdf
+
+For help about the usage of the command type ``ap_plot_bars --help``.

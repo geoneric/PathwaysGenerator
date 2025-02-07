@@ -45,6 +45,7 @@ dependencies = [
 [project.scripts]
 ap_export = "adaptation_pathways.cli.export:main"
 ap_import = "adaptation_pathways.cli.import_:main"
+ap_plot_bars = "adaptation_pathways.cli.plot_bars:main"
 ap_plot_graphs = "adaptation_pathways.cli.plot_graphs:main"
 ap_plot_pathway_map = "adaptation_pathways.cli.plot_pathway_map:main"
 
