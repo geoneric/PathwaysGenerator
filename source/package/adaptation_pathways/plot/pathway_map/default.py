@@ -2,7 +2,6 @@ import matplotlib as mpl
 import numpy as np
 
 from ...graph import PathwayMap
-from ...graph.node import Node
 from .. import alias
 from ..colour import default_nominal_palette
 from ..util import add_position, distribute, plot_graph
@@ -11,7 +10,7 @@ from .colour import colour_by_action_name_pathway_map, default_colours
 
 def _distribute_horizontally(
     pathway_map: PathwayMap,
-    position_by_node: dict[Node, np.ndarray],
+    position_by_node: alias.PositionByNode,
 ) -> None:
     """
     Assign x-coordinates to all action_{begin,end} nodes in the pathway map
@@ -39,7 +38,7 @@ def _distribute_horizontally(
 
 def _distribute_vertically(
     pathway_map: PathwayMap,
-    position_by_node: dict[Node, np.ndarray],
+    position_by_node: alias.PositionByNode,
 ) -> None:
     paths = pathway_map.all_paths()
     min_distance = 1.0
@@ -54,7 +53,7 @@ def _distribute_vertically(
 
 def _layout(
     pathway_map: PathwayMap,
-) -> dict[Node, np.ndarray]:
+) -> alias.PositionByNode:
     """
     Layout for visualizing pathway maps
 
@@ -63,7 +62,7 @@ def _layout(
 
     The goal of this layout is to be able to visualize the contents of the graph.
     """
-    position_by_node: dict[Node, np.ndarray] = {}
+    position_by_node: alias.PositionByNode = {}
 
     if pathway_map.nr_edges() > 0:
         _distribute_horizontally(pathway_map, position_by_node)

@@ -1,11 +1,5 @@
-from typing import TypeAlias
-
 from ...action import Action
 from .node import Node
-
-
-# TODO Move elsewhere
-TippingPoint: TypeAlias = float
 
 
 class ActionEnd(Node):

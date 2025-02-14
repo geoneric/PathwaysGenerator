@@ -10,7 +10,7 @@ from ... import alias
 from ...action import Action
 from ...action_combination import ActionCombination
 from ...graph import PathwayMap, tipping_point_range
-from ...graph.node import ActionBegin, ActionEnd, TippingPoint
+from ...graph.node import ActionBegin, ActionEnd
 from ..colour import default_nominal_palette
 from ..plot import configure_title
 from ..util import add_position, distribute, group_overlapping_regions_with_payloads
@@ -20,7 +20,7 @@ from .colour import colour_by_action_name_pathway_map
 def _plot_action_lines(
     axes,
     pathway_map,
-    layout: dict[ActionBegin | ActionEnd, np.ndarray],
+    layout: alias.PositionByNode,
     *,
     colour_by_action_name,
     tipping_point_overshoot,
@@ -54,7 +54,7 @@ def _plot_action_lines(
 def _plot_action_starts(
     axes,
     pathway_map,
-    layout: dict[ActionBegin | ActionEnd, np.ndarray],
+    layout: alias.PositionByNode,
     *,
     colour_by_action_name,
     start_action_marker,
@@ -77,7 +77,7 @@ def _plot_action_starts(
 def _plot_action_tipping_points(
     axes,
     pathway_map,
-    layout: dict[ActionBegin | ActionEnd, np.ndarray],
+    layout: alias.PositionByNode,
     *,
     colour_by_action_name,
     tipping_point_face_colour,
@@ -140,7 +140,7 @@ def _configure_y_axes(
 
 def _configure_x_axes(
     axes,
-    layout: dict[ActionBegin | ActionEnd, np.ndarray],
+    layout: alias.PositionByNode,
     *,
     x_label,
 ):
@@ -189,7 +189,7 @@ def _configure_legend(axes, *, labels, colours, arguments):
 
 def _plot_annotations(
     axes,
-    layout: dict[ActionBegin | ActionEnd, np.ndarray],
+    layout: alias.PositionByNode,
     y_coordinate_by_action_name: dict[str, float],
     *,
     colour_by_action_name,
@@ -221,7 +221,7 @@ def _plot_annotations(
 def classic_pathway_map_plotter(
     axes,
     pathway_map,
-    layout: dict[ActionBegin | ActionEnd, np.ndarray],
+    layout: alias.PositionByNode,
     y_coordinate_by_action_name: dict[str, float],
     *,
     colour_by_action_name,
@@ -310,7 +310,7 @@ def _group_overlapping_regions(
 # pylint: disable-next=too-many-locals
 def _spread_vertically(
     pathway_map: PathwayMap,
-    position_by_node: dict[ActionBegin | ActionEnd, np.ndarray],
+    position_by_node: alias.PositionByNode,
     overlapping_lines_spread: float,
 ) -> None:
 
@@ -374,8 +374,8 @@ def _spread_vertically(
 def _distribute_horizontally(
     pathway_map: PathwayMap,
     action_begin: ActionBegin,
-    tipping_point_by_action: dict[Action, TippingPoint],
-    position_by_node: dict[ActionBegin | ActionEnd, np.ndarray],
+    tipping_point_by_action: alias.TippingPointByAction,
+    position_by_node: alias.PositionByNode,
 ) -> None:
     assert isinstance(action_begin, ActionBegin)
 
@@ -398,7 +398,7 @@ def _distribute_horizontally(
 # pylint: disable-next=too-many-locals
 def _spread_horizontally(
     pathway_map: PathwayMap,
-    position_by_node: dict[ActionBegin | ActionEnd, np.ndarray],
+    position_by_node: alias.PositionByNode,
     overlapping_lines_spread: float,
 ) -> None:
 
@@ -470,8 +470,8 @@ def _spread_horizontally(
 def _distribute_vertically(
     pathway_map: PathwayMap,
     root_actions_begins: list[ActionBegin],
-    level_by_action: dict[Action, float],
-    position_by_node: dict[ActionBegin | ActionEnd, np.ndarray],
+    level_by_action: alias.LevelByAction,
+    position_by_node: alias.PositionByNode,
 ) -> dict[str, float]:
 
     for root_action_begin in root_actions_begins:
@@ -603,7 +603,7 @@ def _layout(
     overlapping_lines_spread=(0.0, 0.0),
     level_by_action: alias.LevelByAction | None = None,
     tipping_point_by_action,
-) -> tuple[dict[ActionBegin | ActionEnd, np.ndarray], dict[str, float]]:
+) -> tuple[alias.PositionByNode, dict[str, float]]:
     """
     Layout that replicates the pathway map layout of the original (pre-2024) pathway generator
 
@@ -625,7 +625,7 @@ def _layout(
     # Low numbers correspond with a high position in the stack (large y-coordinate). Such
     # actions will be positioned at the top of the pathway map.
 
-    position_by_node: dict[ActionBegin | ActionEnd, np.ndarray] = {}
+    position_by_node: alias.PositionByNode = {}
     y_coordinate_by_action_name: dict[str, float] = {}
 
     if pathway_map.nr_edges() > 0:

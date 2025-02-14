@@ -2,7 +2,12 @@
 This module contains aliases to be used as type hints.
 """
 
+from typing import TypeAlias
+
+import numpy as np
+
 from ..action import Action
+from ..graph.node import Node
 
 
 # from .colour import Colour, Colours  # pylint: disable=unused-import
@@ -23,3 +28,6 @@ ColourByActionName = dict[str, Colour]
 LevelByAction = dict[Action, float]
 
 Region = tuple[float, float]
+
+Position: TypeAlias = np.ndarray
+PositionByNode = dict[Node, Position]

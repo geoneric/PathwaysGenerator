@@ -14,7 +14,7 @@ from .colour import colour_by_action_name_sequence_graph, default_colours
 def _distribute_horizontally(
     sequence_graph: SequenceGraph,
     from_action: Action,
-    nodes: dict[Action, np.ndarray],
+    nodes: alias.PositionByNode,
 ) -> None:
     min_distance = 1.0
     from_x = nodes[from_action][0]
@@ -35,7 +35,7 @@ def _distribute_horizontally(
 def _distribute_vertically(
     sequence_graph: SequenceGraph,
     from_action: Action,
-    nodes: dict[Action, np.ndarray],
+    nodes: alias.PositionByNode,
 ) -> None:
     # Visit *all* actions in one go, in order of increasing x-coordinate
     # - Group actions by x-coordinate. Within each group:
@@ -85,7 +85,7 @@ def _distribute_vertically(
             nodes[action][1] = y_coordinates[idx]
 
 
-def _layout(sequence_graph: SequenceGraph) -> dict[Action, np.ndarray]:
+def _layout(sequence_graph: SequenceGraph) -> alias.PositionByNode:
     """
     Layout for visualizing sequence graphs
 
@@ -94,7 +94,7 @@ def _layout(sequence_graph: SequenceGraph) -> dict[Action, np.ndarray]:
 
     The goal of this layout is to be able to visualize the contents of the graph.
     """
-    nodes: dict[Action, np.ndarray] = {}
+    nodes: alias.PositionByNode = {}
 
     if sequence_graph.nr_actions() > 0:
         from_action = sequence_graph.root_node

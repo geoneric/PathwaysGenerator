@@ -1,7 +1,8 @@
+from .. import alias
 from ..action import Action
 from ..action_combination import ActionCombination
 from .multi_rooted_graph import MultiRootedGraph
-from .node import ActionBegin, ActionEnd, TippingPoint
+from .node import ActionBegin, ActionEnd
 
 
 class PathwayMap(MultiRootedGraph):
@@ -113,7 +114,7 @@ class PathwayMap(MultiRootedGraph):
 
 
 def verify_tipping_points(
-    pathway_map: PathwayMap, tipping_point_by_action: dict[Action, TippingPoint]
+    pathway_map: PathwayMap, tipping_point_by_action: alias.TippingPointByAction
 ) -> None:
     """
     Verify all tipping points in the pathway map passed in are correctly set
@@ -141,8 +142,8 @@ def verify_tipping_points(
 
 
 def tipping_point_range(
-    pathway_map: PathwayMap, tipping_point_by_action: dict[Action, TippingPoint]
-) -> tuple[TippingPoint, TippingPoint]:
+    pathway_map: PathwayMap, tipping_point_by_action: alias.TippingPointByAction
+) -> tuple[alias.TippingPoint, alias.TippingPoint]:
     """
     Return minimum and maximum tipping points
     """
