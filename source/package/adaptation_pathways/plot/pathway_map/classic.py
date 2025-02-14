@@ -285,7 +285,7 @@ def classic_pathway_map_plotter(
 
 
 def _group_overlapping_regions(
-    regions: list[tuple[alias.Region, typing.Any]]
+    regions: list[tuple[alias.Region, typing.Any]],
 ) -> list[list[tuple[alias.Region, typing.Any]]]:
 
     # Given a list of tuples of regions and their payload (additional information not relevant here):
