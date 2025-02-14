@@ -8,8 +8,8 @@ import numpy as np
 
 from ...action import Action
 from ...action_combination import ActionCombination
-from ...graph import PathwayMap
-from ...graph.node import ActionBegin, ActionEnd
+from ...graph import PathwayMap, tipping_point_range
+from ...graph.node import ActionBegin, ActionEnd, TippingPoint
 from .. import alias
 from ..plot import configure_title
 from ..util import add_position, distribute, group_overlapping_regions_with_payloads
@@ -359,12 +359,13 @@ def _spread_vertically(
 def _distribute_horizontally(
     pathway_map: PathwayMap,
     action_begin: ActionBegin,
+    tipping_point_by_action: dict[Action, TippingPoint],
     position_by_node: dict[ActionBegin | ActionEnd, np.ndarray],
 ) -> None:
     assert isinstance(action_begin, ActionBegin)
 
     action_end = pathway_map.action_end(action_begin)
-    end_x = action_end.tipping_point
+    end_x = tipping_point_by_action[action_end.action]
 
     add_position(position_by_node, action_end, (end_x, np.nan))
 
@@ -374,7 +375,9 @@ def _distribute_horizontally(
         begin_x = end_x
 
         add_position(position_by_node, action_begin_new, (begin_x, np.nan))
-        _distribute_horizontally(pathway_map, action_begin_new, position_by_node)
+        _distribute_horizontally(
+            pathway_map, action_begin_new, tipping_point_by_action, position_by_node
+        )
 
 
 # pylint: disable-next=too-many-locals
@@ -452,6 +455,7 @@ def _spread_horizontally(
 def _distribute_vertically(
     pathway_map: PathwayMap,
     root_actions_begins: list[ActionBegin],
+    level_by_action: dict[Action, float],
     position_by_node: dict[ActionBegin | ActionEnd, np.ndarray],
 ) -> dict[str, float]:
 
@@ -513,11 +517,6 @@ def _distribute_vertically(
     assert len(y_coordinates) == len(names_of_actions_to_distribute)
 
     # Now it is time to re-order the actions to distribute, based on their level, if any was set
-    level_by_action = (
-        pathway_map.graph.graph["level_by_action"]
-        if "level_by_action" in pathway_map.graph.graph
-        else {}
-    )
 
     # Update the levels of action combinations that continue multiple existing actions. These
     # must end up somewhere in between the continued actions.
@@ -586,7 +585,7 @@ def _distribute_vertically(
 def _layout(
     pathway_map: PathwayMap,
     *,
-    overlapping_lines_spread: float | tuple[float, float],
+    arguments: dict[str, typing.Any] | None = None,
 ) -> tuple[dict[ActionBegin | ActionEnd, np.ndarray], dict[str, float]]:
     """
     Layout that replicates the pathway map layout of the original (pre-2024) pathway generator
@@ -600,23 +599,37 @@ def _layout(
     - Each action ends up at its own level in the stack
     - Pathways jump from horizontal line to horizontal line, depending on the sequences of
       actions that make up each pathway
-
-    The pathway map passed in must contain sane tipping points. When in doubt, call
-    ``verify_tipping_points()`` before calling this function.
-
-    The graph in the pathway map passed in must contain an attribute called "level_by_action",
-    with a numeric value per action, which corresponds with the position in the above mentioned
-    stack. Low numbers correspond with a high position in the stack (large y-coordinate). Such
-    actions will be positioned at the top of the pathway map.
     """
+    # TODO Update and move docs elsewhere
+    # The pathway map passed in must contain sane tipping points. When in doubt, call
+    # ``verify_tipping_points()`` before calling this function.
+
+    # The graph in the pathway map passed in must contain an attribute called "level_by_action",
+    # with a numeric value per action, which corresponds with the position in the above mentioned
+    # stack. Low numbers correspond with a high position in the stack (large y-coordinate). Such
+    # actions will be positioned at the top of the pathway map.
+    if arguments is None:
+        arguments = {}
+
+    # Initialize optional arguments that don't have a value yet
+    arguments.setdefault("overlapping_lines_spread", 0.0)
+    arguments.setdefault("level_by_action", {})
+    arguments.setdefault("tipping_point_by_action", {})
+
+    level_by_action = arguments["level_by_action"]
+    tipping_point_by_action = arguments["tipping_point_by_action"]
+    overlapping_lines_spread = arguments["overlapping_lines_spread"]
+
     position_by_node: dict[ActionBegin | ActionEnd, np.ndarray] = {}
     y_coordinate_by_action_name: dict[str, float] = {}
 
     if pathway_map.nr_edges() > 0:
 
-        min_tipping_point, max_tipping_point = pathway_map.tipping_point_range()
-        tipping_point_range = max_tipping_point - min_tipping_point
-        assert tipping_point_range >= 0
+        min_tipping_point, max_tipping_point = tipping_point_range(
+            pathway_map, tipping_point_by_action
+        )
+        tipping_point_range_ = max_tipping_point - min_tipping_point
+        assert tipping_point_range_ >= 0
 
         root_actions_begins = pathway_map.root_nodes
         root_actions_ends = [
@@ -624,10 +637,11 @@ def _layout(
             for root_action_begin in root_actions_begins
         ]
         root_actions_tipping_points = [
-            root_action_end.tipping_point for root_action_end in root_actions_ends
+            tipping_point_by_action[root_action_end.action]
+            for root_action_end in root_actions_ends
         ]
         x_coordinates = [
-            tipping_point - 0.1 * tipping_point_range
+            tipping_point - 0.1 * tipping_point_range_
             for tipping_point in root_actions_tipping_points
         ]
 
@@ -635,10 +649,15 @@ def _layout(
             add_position(position_by_node, root_action_begin, (x_coordinate, 0))
 
         for root_action_begin, x_coordinate in zip(root_actions_begins, x_coordinates):
-            _distribute_horizontally(pathway_map, root_action_begin, position_by_node)
+            _distribute_horizontally(
+                pathway_map,
+                root_action_begin,
+                tipping_point_by_action,
+                position_by_node,
+            )
 
         y_coordinate_by_action_name = _distribute_vertically(
-            pathway_map, root_actions_begins, position_by_node
+            pathway_map, root_actions_begins, level_by_action, position_by_node
         )
 
         if not isinstance(overlapping_lines_spread, tuple):
@@ -671,13 +690,12 @@ def plot(
     if legend_arguments is None:
         legend_arguments = {}
 
-    overlapping_lines_spread: tuple[float, float] = arguments.get(
-        "overlapping_lines_spread", (0, 0)
-    )
+    # Initialize optional arguments that don't have a value yet
+    arguments.setdefault("overlapping_lines_spread", (0, 0))
 
     layout, y_coordinate_by_action_name = _layout(
         pathway_map,
-        overlapping_lines_spread=overlapping_lines_spread,
+        arguments=arguments,
     )
 
     classic_pathway_map_plotter(

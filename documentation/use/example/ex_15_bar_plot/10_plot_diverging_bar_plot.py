@@ -1,6 +1,6 @@
 """
-Pathway map for diverging pathways
-==================================
+Bar plot for diverging pathways
+===============================
 """
 
 from io import StringIO
@@ -45,11 +45,10 @@ colour_by_action_name = {
     action.name: colour for action, colour in colour_by_action.items()
 }
 
-pathway_map.assign_tipping_points(tipping_point_by_action)
-pathway_map.set_attribute("level_by_action", level_by_action)
-
 arguments = {
     "colour_by_action_name": colour_by_action_name,
+    "level_by_action": level_by_action,
+    "tipping_point_by_action": tipping_point_by_action,
 }
 
 _, axes = plt.subplots(layout="constrained")

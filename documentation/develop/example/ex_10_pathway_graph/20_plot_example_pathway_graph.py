@@ -51,9 +51,11 @@ colour_by_action_name = {
     action.name: colour for action, colour in colour_by_action.items()
 }
 
-pathway_graph.set_attribute("colour_by_action_name", colour_by_action_name)
+arguments = {
+    "colour_by_action_name": colour_by_action_name,
+}
 
 _, axes = plt.subplots(layout="constrained")
 init_axes(axes)
-plot_default_pathway_graph(axes, pathway_graph)
+plot_default_pathway_graph(axes, pathway_graph, arguments=arguments)
 plt.show()

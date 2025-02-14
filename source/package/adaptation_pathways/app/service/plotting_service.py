@@ -14,9 +14,12 @@ from adaptation_pathways.alias import Sequence, TippingPointByAction
 from adaptation_pathways.app.model.pathway import Pathway
 from adaptation_pathways.app.model.pathways_project import PathwaysProject
 from adaptation_pathways.app.model.scenario import Scenario
-from adaptation_pathways.graph.convert import sequence_graph_to_pathway_map
+from adaptation_pathways.graph import (
+    SequenceGraph,
+    sequence_graph_to_pathway_map,
+    verify_tipping_points,
+)
 from adaptation_pathways.graph.node.action import Action as ActionNode
-from adaptation_pathways.graph.sequence_graph import SequenceGraph
 from adaptation_pathways.plot import init_axes, plot_classic_pathway_map
 from adaptation_pathways.plot.util import action_level_by_first_occurrence
 
@@ -76,22 +79,20 @@ class PlottingService:
 
         # Mostly copied from plot_pathway_map.py
         level_by_action = action_level_by_first_occurrence(sequences)
-
         pathway_map = sequence_graph_to_pathway_map(sequence_graph)
 
-        if pathway_map.nr_nodes() > 0:
-            pathway_map.assign_tipping_points(tipping_points, verify=True)
-
-        pathway_map.set_attribute("level_by_action", level_by_action)
-        pathway_map.set_attribute("colour_by_action_name", action_colors)
+        verify_tipping_points(pathway_map, tipping_points)
 
         figure, axes = plt.subplots(layout="constrained")
         init_axes(axes)
 
-        arguments: dict[str, Any] = {}
-        arguments["colour_by_action_name"] = action_colors
-        arguments["overlapping_lines_spread"] = 0.02
-        arguments["tipping_point_overshoot"] = 0.2
+        arguments: dict[str, Any] = {
+            "colour_by_action_name": action_colors,
+            "level_by_action": level_by_action,
+            "overlapping_lines_spread": 0.02,
+            "tipping_points": tipping_points,
+            "tipping_point_overshoot": 0.2,
+        }
 
         if for_export:
             arguments["x_label"] = f"{metric.name} ({metric.unit.symbol})"

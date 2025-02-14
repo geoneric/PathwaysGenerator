@@ -3,8 +3,8 @@ import typing
 import matplotlib.lines as mlines
 
 from ...action import Action
-from ...graph import PathwayMap
-from ...graph.node import ActionEnd
+from ...graph import PathwayMap, tipping_point_range
+from ...graph.node import ActionEnd, TippingPoint
 from .. import alias
 from ..plot import configure_title
 
@@ -108,12 +108,7 @@ def plot_bars(
     if legend_arguments is None:
         legend_arguments = {}
 
-    colour_by_action_name: dict[Action, alias.Colour] = arguments[
-        "colour_by_action_name"
-    ]
-
-    paths = pathway_map.all_paths()
-
+    # Initialize optional arguments that don't have a value yet
     if "label_by_pathway" not in arguments:
         # Each pathway is uniquely identified by the action instance of its leaf node
         arguments["label_by_pathway"] = {
@@ -124,7 +119,15 @@ def plot_bars(
     if "stack_bars" not in arguments:
         arguments["stack_bars"] = False
 
+    colour_by_action_name: dict[Action, alias.Colour] = arguments[
+        "colour_by_action_name"
+    ]
     stack_bars: bool = arguments["stack_bars"]
+    tipping_point_by_action: dict[Action, TippingPoint] = arguments[
+        "tipping_point_by_action"
+    ]
+
+    paths = pathway_map.all_paths()
 
     bar_height = 0.8 if not stack_bars else 1.0
 
@@ -132,16 +135,18 @@ def plot_bars(
     # max_nr_bars = 3
     # axes.set_ylim(-0.5 * bar_height, max_nr_bars - 0.5 * bar_height)
 
-    min_tipping_point, max_tipping_point = pathway_map.tipping_point_range()
-    tipping_point_range = max_tipping_point - min_tipping_point
-    assert tipping_point_range >= 0
+    min_tipping_point, max_tipping_point = tipping_point_range(
+        pathway_map, tipping_point_by_action
+    )
+    tipping_point_range_ = max_tipping_point - min_tipping_point
+    assert tipping_point_range_ >= 0
 
     for idx, path in enumerate(paths):
         y = idx
         action_ends = list(path[1::2])
 
-        x = [action_end.tipping_point for action_end in action_ends]
-        x = [x[0] - 0.1 * tipping_point_range] + x
+        x = [tipping_point_by_action[action_end.action] for action_end in action_ends]
+        x = [x[0] - 0.1 * tipping_point_range_] + x
 
         starts = x[:-1]
         widths = [end - start for start, end in zip(x, x[1:])]

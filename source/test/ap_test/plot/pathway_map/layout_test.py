@@ -1,3 +1,4 @@
+import typing
 import unittest
 from io import StringIO
 
@@ -23,19 +24,25 @@ from adaptation_pathways.plot.util import action_level_by_first_occurrence
 # pylint: disable=too-many-locals
 
 
-def configure_pathway_map(actions_str: str, sequences_str: str) -> PathwayMap:
+def configure_pathway_map(
+    actions_str: str, sequences_str: str
+) -> tuple[PathwayMap, dict[str, typing.Any]]:
     actions, _ = read_actions(StringIO(actions_str))
-    sequences, tipping_points = read_sequences(StringIO(sequences_str), actions)
+    sequences, tipping_point_by_action = read_sequences(
+        StringIO(sequences_str), actions
+    )
     # sequences = specialize_action_instances(sequences, actions)
     level_by_action = action_level_by_first_occurrence(sequences)
 
     sequence_graph = SequenceGraph(sequences)
     pathway_map = sequence_graph_to_pathway_map(sequence_graph)
 
-    pathway_map.assign_tipping_points(tipping_points)
-    pathway_map.set_attribute("level_by_action", level_by_action)
+    arguments = {
+        "level_by_action": level_by_action,
+        "tipping_point_by_action": tipping_point_by_action,
+    }
 
-    return pathway_map
+    return pathway_map, arguments
 
 
 class PathwayLayoutTestBase(unittest.TestCase):
@@ -669,8 +676,7 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
     def test_empty(self):
         sequence_graph = SequenceGraph()
         pathway_map = sequence_graph_to_pathway_map(sequence_graph)
-        pathway_map.assign_tipping_points({})
-        positions, _ = classic_layout(pathway_map, overlapping_lines_spread=0)
+        positions, _ = classic_layout(pathway_map)
 
         self.assertEqual(len(positions), 0)
 
@@ -688,14 +694,13 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
         paths = list(pathway_map.all_paths())
         self.assertEqual(len(paths), 1)
 
-        pathway_map.assign_tipping_points(
-            {
-                # current: 0, → Skipping this one is fine, default is 0
+        arguments = {
+            "tipping_point_by_action": {
+                current: 0,
                 a: 10,
             }
-        )
-
-        positions, _ = classic_layout(pathway_map, overlapping_lines_spread=0)
+        }
+        positions, _ = classic_layout(pathway_map, arguments=arguments)
         self.assertEqual(len(positions), 4)
 
         self.assert_equal_positions(
@@ -729,16 +734,15 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
         paths = list(pathway_map.all_paths())
         self.assertEqual(len(paths), 1)
 
-        pathway_map.assign_tipping_points(
-            {
+        arguments = {
+            "tipping_point_by_action": {
                 current: 2030,
                 a: 2040,
                 b: 2050,
                 c: 2060,
             }
-        )
-
-        positions, _ = classic_layout(pathway_map, overlapping_lines_spread=0)
+        }
+        positions, _ = classic_layout(pathway_map, arguments=arguments)
         self.assertEqual(len(positions), 8)
 
         self.assert_equal_positions(
@@ -776,16 +780,15 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
         paths = list(pathway_map.all_paths())
         self.assertEqual(len(paths), 3)
 
-        pathway_map.assign_tipping_points(
-            {
+        arguments = {
+            "tipping_point_by_action": {
                 current: 2030,
                 a: 2040,
                 b: 2050,
                 c: 2060,
             }
-        )
-
-        positions, _ = classic_layout(pathway_map, overlapping_lines_spread=0)
+        }
+        positions, _ = classic_layout(pathway_map, arguments=arguments)
         self.assertEqual(len(positions), 12)
 
         self.assert_equal_positions(
@@ -844,17 +847,16 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
         paths = list(pathway_map.all_paths())
         self.assertEqual(len(paths), 3)
 
-        pathway_map.assign_tipping_points(
-            {
+        arguments = {
+            "tipping_point_by_action": {
                 current: 2030,
                 a: 2040,
                 b: 2050,
                 c: 2060,
                 d: 2070,
             }
-        )
-
-        positions, _ = classic_layout(pathway_map, overlapping_lines_spread=0)
+        }
+        positions, _ = classic_layout(pathway_map, arguments=arguments)
         self.assertEqual(len(positions), 18)
 
         self.assert_equal_positions(
@@ -918,11 +920,11 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
             f[2]        e[3]    2090
             f[3]        e[4]    2090
             """
-        pathway_map = configure_pathway_map(actions, sequences)
+        pathway_map, arguments = configure_pathway_map(actions, sequences)
         paths = list(pathway_map.all_paths())
         self.assertEqual(len(paths), 4)
 
-        positions, _ = classic_layout(pathway_map, overlapping_lines_spread=0)
+        positions, _ = classic_layout(pathway_map, arguments=arguments)
         self.assertEqual(len(positions), 30)
 
         self.assert_equal_positions(
@@ -1010,11 +1012,11 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
 
             current     d[1]        2100
             """
-        pathway_map = configure_pathway_map(actions, sequences)
+        pathway_map, arguments = configure_pathway_map(actions, sequences)
         paths = list(pathway_map.all_paths())
         self.assertEqual(len(paths), 10)
 
-        positions, _ = classic_layout(pathway_map, overlapping_lines_spread=0)
+        positions, _ = classic_layout(pathway_map, arguments=arguments)
         self.assertEqual(len(positions), 66)
 
         self.assert_equal_positions(
@@ -1171,16 +1173,17 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
         paths = list(pathway_map.all_paths())
         self.assertEqual(len(paths), 3)
 
-        pathway_map.assign_tipping_points(
-            {
+        arguments = {
+            "tipping_point_by_action": {
                 current: 2020,
                 a: 2030,
                 b: 2040,
                 c: 2050,
                 d: 2100,
             }
-        )
-        positions, _ = classic_layout(pathway_map, overlapping_lines_spread=0)
+        }
+
+        positions, _ = classic_layout(pathway_map, arguments=arguments)
         self.assertEqual(len(positions), 14)
 
         self.assert_equal_positions(
@@ -1232,11 +1235,11 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
             current b 2040
             current c 2050
             """
-        pathway_map = configure_pathway_map(actions, sequences)
+        pathway_map, arguments = configure_pathway_map(actions, sequences)
         paths = list(pathway_map.all_paths())
         self.assertEqual(len(paths), 3)
 
-        positions, _ = classic_layout(pathway_map, overlapping_lines_spread=0)
+        positions, _ = classic_layout(pathway_map, arguments=arguments)
         self.assertEqual(len(positions), 16)
 
         self.assert_equal_positions(
@@ -1302,16 +1305,16 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
         paths = list(pathway_map.all_paths())
         self.assertEqual(len(paths), 3)
 
-        pathway_map.assign_tipping_points(
-            {
+        arguments = {
+            "tipping_point_by_action": {
                 current: 2020,
                 a: 2030,
                 b: 2040,
                 c: 2050,
                 d: 2100,
             }
-        )
-        positions, _ = classic_layout(pathway_map, overlapping_lines_spread=0)
+        }
+        positions, _ = classic_layout(pathway_map, arguments=arguments)
         self.assertEqual(len(positions), 16)
 
         self.assert_equal_positions(
@@ -1377,16 +1380,16 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
         paths = list(pathway_map.all_paths())
         self.assertEqual(len(paths), 3)
 
-        pathway_map.assign_tipping_points(
-            {
+        arguments = {
+            "tipping_point_by_action": {
                 current: 2020,
                 a: 2030,
                 b: 2040,
                 c: 2050,
                 d: 2100,
             }
-        )
-        positions, _ = classic_layout(pathway_map, overlapping_lines_spread=0)
+        }
+        positions, _ = classic_layout(pathway_map, arguments=arguments)
         self.assertEqual(len(positions), 14)
 
         self.assert_equal_positions(
@@ -1438,11 +1441,11 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
             a d[1] 2100
             c d[2] 2100
             """
-        pathway_map = configure_pathway_map(actions, sequences)
+        pathway_map, arguments = configure_pathway_map(actions, sequences)
         paths = list(pathway_map.all_paths())
         self.assertEqual(len(paths), 3)
 
-        positions, _ = classic_layout(pathway_map, overlapping_lines_spread=0)
+        positions, _ = classic_layout(pathway_map, arguments=arguments)
         self.assertEqual(len(positions), 16)
 
         self.assert_equal_positions(
@@ -1495,11 +1498,11 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
             b d 2100
             current c 2050
             """
-        pathway_map = configure_pathway_map(actions, sequences)
+        pathway_map, arguments = configure_pathway_map(actions, sequences)
         paths = list(pathway_map.all_paths())
         self.assertEqual(len(paths), 3)
 
-        positions, _ = classic_layout(pathway_map, overlapping_lines_spread=0)
+        positions, _ = classic_layout(pathway_map, arguments=arguments)
         self.assertEqual(len(positions), 14)
 
         self.assert_equal_positions(
@@ -1559,15 +1562,15 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
         paths = list(pathway_map.all_paths())
         self.assertEqual(len(paths), 2)
 
-        pathway_map.assign_tipping_points(
-            {
+        arguments = {
+            "tipping_point_by_action": {
                 current: 2030,
                 a1: 2040,
                 b: 2050,
                 a2: 2060,
             }
-        )
-        positions, _ = classic_layout(pathway_map, overlapping_lines_spread=0)
+        }
+        positions, _ = classic_layout(pathway_map, arguments=arguments)
         self.assertEqual(len(positions), 10)
 
         self.assert_equal_positions(
@@ -1615,8 +1618,8 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
             current b 2030
             b c 2040
             """
-        pathway_map = configure_pathway_map(actions, sequences)
-        positions, _ = classic_layout(pathway_map, overlapping_lines_spread=0)
+        pathway_map, arguments = configure_pathway_map(actions, sequences)
+        positions, _ = classic_layout(pathway_map, arguments=arguments)
 
         y_coordinates_we_want = {
             "current": 0,
@@ -1644,8 +1647,8 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
             b c 2040
             current b 2030
             """
-        pathway_map = configure_pathway_map(actions, sequences)
-        positions, _ = classic_layout(pathway_map, overlapping_lines_spread=0)
+        pathway_map, arguments = configure_pathway_map(actions, sequences)
+        positions, _ = classic_layout(pathway_map, arguments=arguments)
 
         y_coordinates_we_want = {
             "current": 0,
@@ -1675,8 +1678,8 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
             current a 2030
             current b 2030
             """
-        pathway_map = configure_pathway_map(actions, sequences)
-        positions, _ = classic_layout(pathway_map, overlapping_lines_spread=0)
+        pathway_map, arguments = configure_pathway_map(actions, sequences)
+        positions, _ = classic_layout(pathway_map, arguments=arguments)
 
         y_coordinates_we_want = {
             "current": 0,

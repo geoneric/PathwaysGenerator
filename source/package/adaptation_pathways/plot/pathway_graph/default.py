@@ -1,13 +1,14 @@
 import itertools
+import typing
 
 import matplotlib as mpl
 import numpy as np
 
 from ...graph import PathwayGraph
 from ...graph.node import Node
-from ..colour import PlotColours
+from ..colour import default_nominal_palette
 from ..util import add_position, distribute, plot_graph, sort_horizontally
-from .colour import default_colours
+from .colour import colour_by_action_name_pathway_graph, default_colours
 
 
 def _distribute_horizontally(
@@ -114,16 +115,26 @@ def _layout(pathway_graph: PathwayGraph) -> dict[Node, np.ndarray]:
 def plot(
     axes: mpl.axes.Axes,
     pathway_graph: PathwayGraph,
-    title: str = "",
-    plot_colours: PlotColours | None = None,
+    *,
+    arguments: dict[str, typing.Any] | None = None,
 ) -> None:
-    if plot_colours is None:
-        plot_colours = default_colours(pathway_graph)
+
+    if arguments is None:
+        arguments = {}
+
+    # Initialize optional arguments that don't have a value yet
+    arguments.setdefault("title", "")
+    arguments.setdefault(
+        "colour_by_action_name",
+        colour_by_action_name_pathway_graph(pathway_graph, default_nominal_palette()),
+    )
+
+    plot_colours = default_colours(pathway_graph, arguments["colour_by_action_name"])
 
     plot_graph(
         axes,
         pathway_graph.graph,
-        title,
+        arguments["title"],
         _layout(pathway_graph),
         plot_colours,
     )

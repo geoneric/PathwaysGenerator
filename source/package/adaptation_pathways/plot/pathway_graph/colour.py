@@ -8,7 +8,6 @@ from ..colour import (
     default_label_colour,
     default_node_edge_colours,
     default_node_style,
-    default_nominal_palette,
     nord_palette_light,
 )
 
@@ -32,7 +31,7 @@ def colour_by_node(
     return colours
 
 
-def colour_by_action_name(
+def colour_by_action_name_pathway_graph(
     graph: PathwayGraph, palette: alias.Colours
 ) -> dict[str, alias.Colour]:
     palette_size = len(palette)
@@ -49,19 +48,11 @@ def colour_by_action_name(
     return result
 
 
-def default_node_colours(graph: PathwayGraph) -> list[alias.Colour | alias.Colours]:
-    colour_by_action_name_ = (
-        graph.graph.graph["colour_by_action_name"]
-        if "colour_by_action_name" in graph.graph.graph
-        else colour_by_action_name(graph, default_nominal_palette())
-    )
-
-    return colour_by_node(graph, colour_by_action_name_)
-
-
-def default_colours(pathway_graph: PathwayGraph) -> PlotColours:
+def default_colours(
+    pathway_graph: PathwayGraph, colour_by_action_name: dict[str, alias.Colour]
+) -> PlotColours:
     return PlotColours(
-        default_node_colours(pathway_graph),
+        colour_by_node(pathway_graph, colour_by_action_name),
         default_node_style(),
         default_edge_colours(pathway_graph),
         default_edge_style(),
