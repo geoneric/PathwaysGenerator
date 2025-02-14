@@ -6,11 +6,12 @@ import matplotlib.lines as mlines
 import matplotlib.markers as mmarkers
 import numpy as np
 
-from ... import alias
 from ...action import Action
 from ...action_combination import ActionCombination
+from ...alias import TippingPointByAction
 from ...graph import PathwayMap, tipping_point_range
 from ...graph.node import ActionBegin, ActionEnd
+from ..alias import ColourByActionName, LevelByAction, PositionByNode, Region
 from ..colour import default_nominal_palette
 from ..plot import configure_title
 from ..util import add_position, distribute, group_overlapping_regions_with_payloads
@@ -20,7 +21,7 @@ from .colour import colour_by_action_name_pathway_map
 def _plot_action_lines(
     axes,
     pathway_map,
-    layout: alias.PositionByNode,
+    layout: PositionByNode,
     *,
     colour_by_action_name,
     tipping_point_overshoot,
@@ -54,7 +55,7 @@ def _plot_action_lines(
 def _plot_action_starts(
     axes,
     pathway_map,
-    layout: alias.PositionByNode,
+    layout: PositionByNode,
     *,
     colour_by_action_name,
     start_action_marker,
@@ -77,7 +78,7 @@ def _plot_action_starts(
 def _plot_action_tipping_points(
     axes,
     pathway_map,
-    layout: alias.PositionByNode,
+    layout: PositionByNode,
     *,
     colour_by_action_name,
     tipping_point_face_colour,
@@ -140,7 +141,7 @@ def _configure_y_axes(
 
 def _configure_x_axes(
     axes,
-    layout: alias.PositionByNode,
+    layout: PositionByNode,
     *,
     x_label,
 ):
@@ -189,7 +190,7 @@ def _configure_legend(axes, *, labels, colours, arguments):
 
 def _plot_annotations(
     axes,
-    layout: alias.PositionByNode,
+    layout: PositionByNode,
     y_coordinate_by_action_name: dict[str, float],
     *,
     colour_by_action_name,
@@ -221,7 +222,7 @@ def _plot_annotations(
 def classic_pathway_map_plotter(
     axes,
     pathway_map,
-    layout: alias.PositionByNode,
+    layout: PositionByNode,
     y_coordinate_by_action_name: dict[str, float],
     *,
     colour_by_action_name,
@@ -285,8 +286,8 @@ def classic_pathway_map_plotter(
 
 
 def _group_overlapping_regions(
-    regions: list[tuple[alias.Region, typing.Any]],
-) -> list[list[tuple[alias.Region, typing.Any]]]:
+    regions: list[tuple[Region, typing.Any]],
+) -> list[list[tuple[Region, typing.Any]]]:
 
     # Given a list of tuples of regions and their payload (additional information not relevant here):
     # - Group the regions into overlapping regions
@@ -299,7 +300,7 @@ def _group_overlapping_regions(
     grouped_regions, grouped_payloads = group_overlapping_regions_with_payloads(
         *(list(tuples) for tuples in zip(*regions))
     )
-    result: list[list[tuple[alias.Region, typing.Any]]] = []
+    result: list[list[tuple[Region, typing.Any]]] = []
 
     for region_group, payload_group in zip(grouped_regions, grouped_payloads):
         result.append(list(zip(region_group, payload_group)))
@@ -310,7 +311,7 @@ def _group_overlapping_regions(
 # pylint: disable-next=too-many-locals
 def _spread_vertically(
     pathway_map: PathwayMap,
-    position_by_node: alias.PositionByNode,
+    position_by_node: PositionByNode,
     overlapping_lines_spread: float,
 ) -> None:
 
@@ -320,9 +321,7 @@ def _spread_vertically(
     # - Additionally, only tweak y-coordinates of sections that don't share a route from the root node
 
     # Per y-coordinate a list of regions (x-coordinates), action begin/end tuples
-    nodes_by_y: dict[
-        float, list[tuple[alias.Region, tuple[ActionBegin, ActionEnd]]]
-    ] = {}
+    nodes_by_y: dict[float, list[tuple[Region, tuple[ActionBegin, ActionEnd]]]] = {}
 
     for action_begin in pathway_map.all_action_begins():
         action_end = pathway_map.action_end(action_begin)
@@ -374,8 +373,8 @@ def _spread_vertically(
 def _distribute_horizontally(
     pathway_map: PathwayMap,
     action_begin: ActionBegin,
-    tipping_point_by_action: alias.TippingPointByAction,
-    position_by_node: alias.PositionByNode,
+    tipping_point_by_action: TippingPointByAction,
+    position_by_node: PositionByNode,
 ) -> None:
     assert isinstance(action_begin, ActionBegin)
 
@@ -398,7 +397,7 @@ def _distribute_horizontally(
 # pylint: disable-next=too-many-locals
 def _spread_horizontally(
     pathway_map: PathwayMap,
-    position_by_node: alias.PositionByNode,
+    position_by_node: PositionByNode,
     overlapping_lines_spread: float,
 ) -> None:
 
@@ -408,9 +407,7 @@ def _spread_horizontally(
     # - Additionally, only tweak x-coordinates of sections that don't share a route from the root node
 
     # Per x-coordinate a list of regions (y-coordinates), action end/begin tuples
-    nodes_by_x: dict[
-        float, list[tuple[alias.Region, tuple[ActionEnd, ActionBegin]]]
-    ] = {}
+    nodes_by_x: dict[float, list[tuple[Region, tuple[ActionEnd, ActionBegin]]]] = {}
 
     for action_end in pathway_map.all_action_ends():
         action_begins = pathway_map.action_begins(action_end)
@@ -470,8 +467,8 @@ def _spread_horizontally(
 def _distribute_vertically(
     pathway_map: PathwayMap,
     root_actions_begins: list[ActionBegin],
-    level_by_action: alias.LevelByAction,
-    position_by_node: alias.PositionByNode,
+    level_by_action: LevelByAction,
+    position_by_node: PositionByNode,
 ) -> dict[str, float]:
 
     for root_action_begin in root_actions_begins:
@@ -601,9 +598,9 @@ def _layout(
     pathway_map: PathwayMap,
     *,
     overlapping_lines_spread=(0.0, 0.0),
-    level_by_action: alias.LevelByAction | None = None,
+    level_by_action: LevelByAction | None = None,
     tipping_point_by_action,
-) -> tuple[alias.PositionByNode, dict[str, float]]:
+) -> tuple[PositionByNode, dict[str, float]]:
     """
     Layout that replicates the pathway map layout of the original (pre-2024) pathway generator
 
@@ -625,7 +622,7 @@ def _layout(
     # Low numbers correspond with a high position in the stack (large y-coordinate). Such
     # actions will be positioned at the top of the pathway map.
 
-    position_by_node: alias.PositionByNode = {}
+    position_by_node: PositionByNode = {}
     y_coordinate_by_action_name: dict[str, float] = {}
 
     if pathway_map.nr_edges() > 0:
@@ -688,13 +685,13 @@ def plot(
     axes: mpl.axes.Axes,
     pathway_map: PathwayMap,
     *,
-    colour_by_action_name: alias.ColourByActionName | None = None,
+    colour_by_action_name: ColourByActionName | None = None,
     legend_arguments: dict[str, typing.Any] | None = None,
-    level_by_action: alias.LevelByAction | None = None,
+    level_by_action: LevelByAction | None = None,
     overlapping_lines_spread=(0.0, 0.0),
     show_legend: bool = False,
     start_action_marker: mmarkers.MarkerStyle = "o",
-    tipping_point_by_action: alias.TippingPointByAction,
+    tipping_point_by_action: TippingPointByAction,
     tipping_point_face_colour="white",
     tipping_point_marker: mmarkers.MarkerStyle | str | None = None,
     tipping_point_overshoot: float = 0.0,

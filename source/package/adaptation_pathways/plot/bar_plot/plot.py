@@ -2,9 +2,10 @@ import typing
 
 import matplotlib.lines as mlines
 
-from ... import alias
+from ...alias import TippingPointByAction
 from ...graph import PathwayMap, tipping_point_range
 from ...graph.node import ActionEnd
+from ..alias import ColourByActionName, LevelByAction
 from ..colour import default_nominal_palette
 from ..pathway_map.colour import colour_by_action_name_pathway_map
 from ..plot import configure_title
@@ -92,15 +93,13 @@ def plot_bars(
     axes,
     pathway_map: PathwayMap,
     *,
-    colour_by_action_name: alias.ColourByActionName | None = None,
+    colour_by_action_name: ColourByActionName | None = None,
     label_by_pathway: dict[ActionEnd, str] | None = None,
     legend_arguments: dict[str, typing.Any] | None = None,
-    level_by_action: (  # pylint: disable=unused-argument
-        alias.LevelByAction | None
-    ) = None,
+    level_by_action: LevelByAction | None = None,  # pylint: disable=unused-argument
     show_legend: bool = False,
     stack_bars: bool = False,
-    tipping_point_by_action: alias.TippingPointByAction,
+    tipping_point_by_action: TippingPointByAction,
     title: str = "",
     x_label: str = "",
 ) -> None:

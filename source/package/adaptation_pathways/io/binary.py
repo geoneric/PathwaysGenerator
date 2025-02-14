@@ -2,9 +2,10 @@ import copy
 import sqlite3
 from pathlib import Path
 
-from .. import alias
 from ..action import Action
 from ..action_combination import ActionCombination
+from ..alias import Actions, Sequences, TippingPointByAction
+from ..plot.alias import ColourByActionName
 from ..plot.colour import default_node_colour, hex_to_rgba, rgba_to_hex
 
 
@@ -114,10 +115,10 @@ def _create_tables(connection):
 
 def _insert_records(
     connection,
-    actions: alias.Actions,
-    sequences: alias.Sequences,
-    tipping_point_by_action: alias.TippingPointByAction,
-    colour_by_action_name: alias.ColourByActionName,
+    actions: Actions,
+    sequences: Sequences,
+    tipping_point_by_action: TippingPointByAction,
+    colour_by_action_name: ColourByActionName,
 ) -> None:
     # pylint: disable=too-many-locals
 
@@ -157,7 +158,7 @@ def _insert_records(
     action_instances_by_name: dict[str, list[Action]] = {}
 
     # All unique Action instances, is some order
-    action_instances: alias.Actions = []
+    action_instances: Actions = []
 
     def add_action_instance(action):
         if action.name not in action_instances_by_name:
@@ -315,10 +316,10 @@ def _insert_records(
 
 
 def write_dataset(  # pylint: disable=too-many-arguments
-    actions: alias.Actions,
-    sequences: alias.Sequences,
-    tipping_point_by_action: alias.TippingPointByAction,
-    colour_by_action_name: alias.ColourByActionName,
+    actions: Actions,
+    sequences: Sequences,
+    tipping_point_by_action: TippingPointByAction,
+    colour_by_action_name: ColourByActionName,
     database_path: Path | str,
     *,
     overwrite: bool = True,
@@ -350,9 +351,7 @@ def write_dataset(  # pylint: disable=too-many-arguments
 
 def read_dataset(  # pylint: disable=too-many-locals
     database_path: Path | str,
-) -> tuple[
-    alias.Actions, alias.Sequences, alias.TippingPointByAction, alias.ColourByActionName
-]:
+) -> tuple[Actions, Sequences, TippingPointByAction, ColourByActionName]:
     """
     Open the database and return the contents
 
@@ -395,7 +394,7 @@ def read_dataset(  # pylint: disable=too-many-locals
             combined_action_id
         )
 
-    action_by_id: dict[int, alias.Action] = {}
+    action_by_id: dict[int, Action] = {}
 
     # First add a regular action instance for all actions. This will keep the order as is.
     for action_id, action_name in action_name_by_id.items():
@@ -424,7 +423,7 @@ def read_dataset(  # pylint: disable=too-many-locals
         for action_id, edition_id in edition_data
     }
 
-    actions: alias.Actions = list(action_by_id.values())
+    actions: Actions = list(action_by_id.values())
 
     sequence_data = list(
         connection.execute(

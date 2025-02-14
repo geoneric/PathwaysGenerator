@@ -1,12 +1,11 @@
-from .. import alias
+from ..alias import Actions, Sequences, TippingPointByAction
+from ..plot.alias import ColourByActionName
 from . import binary, text
 
 
 def read_dataset(
     basename_pathname: str,
-) -> tuple[
-    alias.Actions, alias.Sequences, alias.TippingPointByAction, alias.ColourByActionName
-]:
+) -> tuple[Actions, Sequences, TippingPointByAction, ColourByActionName]:
     """
     Read a dataset and return the contents
 
