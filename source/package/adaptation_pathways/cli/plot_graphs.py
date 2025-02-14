@@ -40,13 +40,9 @@ def plot_graphs(
 ) -> int:
 
     # pylint: disable-next=unused-variable
-    actions, sequences, tipping_point_by_action, colour_by_action = read_dataset(
+    actions, sequences, tipping_point_by_action, colour_by_action_name = read_dataset(
         basename_pathname
     )
-
-    colour_by_action_name = {
-        action.name: colour for action, colour in colour_by_action.items()
-    }
 
     _, axes = plt.subplots(layout="constrained")
     init_axes(axes)

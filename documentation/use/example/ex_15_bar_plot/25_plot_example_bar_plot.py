@@ -14,7 +14,7 @@ from adaptation_pathways.plot.bar_plot import plot_bars
 from adaptation_pathways.plot.util import action_level_by_first_occurrence, init_axes
 
 
-actions, colour_by_action = text.read_actions(
+actions, colour_by_action_name = text.read_actions(
     StringIO(
         """
 current #ff4c566a
@@ -54,11 +54,7 @@ current     d[1]        2100
 )
 sequence_graph = SequenceGraph(sequences)
 pathway_map = sequence_graph_to_pathway_map(sequence_graph)
-
 level_by_action = action_level_by_first_occurrence(sequences)
-colour_by_action_name = {
-    action.name: colour for action, colour in colour_by_action.items()
-}
 
 arguments: dict[str, typing.Any] = {
     "colour_by_action_name": colour_by_action_name,

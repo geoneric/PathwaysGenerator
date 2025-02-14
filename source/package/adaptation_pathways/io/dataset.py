@@ -5,7 +5,7 @@ from . import binary, text
 def read_dataset(
     basename_pathname: str,
 ) -> tuple[
-    alias.Actions, alias.Sequences, alias.TippingPointByAction, alias.ColourByAction
+    alias.Actions, alias.Sequences, alias.TippingPointByAction, alias.ColourByActionName
 ]:
     """
     Read a dataset and return the contents
@@ -23,12 +23,12 @@ def read_dataset(
     try:
         if binary.dataset_exists(basename_pathname):
             # pylint: disable-next=unused-variable
-            actions, sequences, tipping_point_by_action, colour_by_action = (
+            actions, sequences, tipping_point_by_action, colour_by_action_name = (
                 binary.read_dataset(basename_pathname)
             )
         else:
             # pylint: disable-next=unused-variable
-            actions, sequences, tipping_point_by_action, colour_by_action = (
+            actions, sequences, tipping_point_by_action, colour_by_action_name = (
                 text.read_dataset(basename_pathname)
             )
     except Exception as exception:
@@ -42,4 +42,4 @@ def read_dataset(
             )
         raise RuntimeError(message) from exception
 
-    return actions, sequences, tipping_point_by_action, colour_by_action
+    return actions, sequences, tipping_point_by_action, colour_by_action_name

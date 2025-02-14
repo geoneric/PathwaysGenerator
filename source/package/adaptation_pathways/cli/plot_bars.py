@@ -23,13 +23,9 @@ def plot_bars_(
 ) -> int:
 
     # pylint: disable-next=unused-variable
-    _, sequences, tipping_point_by_action, colour_by_action = read_dataset(
+    _, sequences, tipping_point_by_action, colour_by_action_name = read_dataset(
         basename_pathname
     )
-
-    colour_by_action_name = {
-        action.name: colour for action, colour in colour_by_action.items()
-    }
 
     level_by_action = action_level_by_first_occurrence(sequences)
     sequence_graph = SequenceGraph(sequences)

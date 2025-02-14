@@ -14,7 +14,7 @@ from adaptation_pathways.plot.sequence_graph import plot_default_sequence_graph
 from adaptation_pathways.plot.util import init_axes
 
 
-actions, colour_by_action = text.read_actions(
+actions, colour_by_action_name = text.read_actions(
     StringIO(
         """
 current #ff4c566a
@@ -36,10 +36,6 @@ current c
     actions,
 )
 sequence_graph = SequenceGraph(sequences)
-
-colour_by_action_name = {
-    action.name: colour for action, colour in colour_by_action.items()
-}
 
 arguments: dict[str, typing.Any] = {
     "colour_by_action_name": colour_by_action_name,
