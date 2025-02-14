@@ -21,7 +21,7 @@ class TextTest(unittest.TestCase):
         ]
 
         for string in strings:
-            actions, colour_by_action = text.read_actions(
+            actions, colour_by_action_name = text.read_actions(
                 StringIO(
                     f"""
                     {string}
@@ -29,10 +29,10 @@ class TextTest(unittest.TestCase):
                 )
             )
             self.assertEqual(len(actions), 0)
-            self.assertEqual(len(colour_by_action), 0)
+            self.assertEqual(len(colour_by_action_name), 0)
 
     def test_single_action(self):
-        actions, colour_by_action = text.read_actions(
+        actions, colour_by_action_name = text.read_actions(
             StringIO(
                 """
                 current
@@ -41,9 +41,9 @@ class TextTest(unittest.TestCase):
         )
         self.assertEqual(len(actions), 1)
         self.assertEqual(actions[0].name, "current")
-        self.assertEqual(len(colour_by_action), 0)
+        self.assertEqual(len(colour_by_action_name), 0)
 
-        actions, colour_by_action = text.read_actions(
+        actions, colour_by_action_name = text.read_actions(
             StringIO(
                 """
                 current #12345678
@@ -52,9 +52,11 @@ class TextTest(unittest.TestCase):
         )
         self.assertEqual(len(actions), 1)
         self.assertEqual(actions[0].name, "current")
-        self.assertEqual(len(colour_by_action), 1)
-        self.assertTrue(actions[0] in colour_by_action)
-        self.assertEqual(colour_by_action[actions[0]], hex_to_rgba("#12345678"))
+        self.assertEqual(len(colour_by_action_name), 1)
+        self.assertTrue(actions[0].name in colour_by_action_name)
+        self.assertEqual(
+            colour_by_action_name[actions[0].name], hex_to_rgba("#12345678")
+        )
 
         self.assertRaises(
             ValueError,
@@ -68,7 +70,7 @@ class TextTest(unittest.TestCase):
         )
 
     def test_comment(self):
-        actions, colour_by_action = text.read_actions(
+        actions, colour_by_action_name = text.read_actions(
             StringIO(
                 """
                 # A comment
@@ -79,10 +81,10 @@ class TextTest(unittest.TestCase):
         )
         self.assertEqual(len(actions), 1)
         self.assertEqual(actions[0].name, "current")
-        self.assertEqual(len(colour_by_action), 0)
+        self.assertEqual(len(colour_by_action_name), 0)
 
     def test_action_combination(self):
-        actions, colour_by_action = text.read_actions(
+        actions, colour_by_action_name = text.read_actions(
             StringIO(
                 """
                 a #12345678
@@ -95,10 +97,16 @@ class TextTest(unittest.TestCase):
         self.assertEqual(actions[0].name, "a")
         self.assertEqual(actions[1].name, "b")
         self.assertEqual(actions[2].name, "c")
-        self.assertEqual(len(colour_by_action), 3)
-        self.assertEqual(colour_by_action[actions[0]], hex_to_rgba("#12345678"))
-        self.assertEqual(colour_by_action[actions[1]], hex_to_rgba("#87654321"))
-        self.assertEqual(colour_by_action[actions[2]], hex_to_rgba("#24688642"))
+        self.assertEqual(len(colour_by_action_name), 3)
+        self.assertEqual(
+            colour_by_action_name[actions[0].name], hex_to_rgba("#12345678")
+        )
+        self.assertEqual(
+            colour_by_action_name[actions[1].name], hex_to_rgba("#87654321")
+        )
+        self.assertEqual(
+            colour_by_action_name[actions[2].name], hex_to_rgba("#24688642")
+        )
         self.assertTrue(isinstance(actions[0], Action))
         self.assertTrue(isinstance(actions[1], Action))
         self.assertTrue(isinstance(actions[2], ActionCombination))

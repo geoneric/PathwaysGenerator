@@ -21,9 +21,10 @@ import io
 import re
 from pathlib import Path
 
-from .. import alias
 from ..action import Action
 from ..action_combination import ActionCombination
+from ..alias import Actions, Sequence, Sequences, TippingPoint, TippingPointByAction
+from ..plot.alias import ColourByActionName
 from ..plot.colour import hex_to_rgba, rgba_to_hex
 
 
@@ -127,7 +128,7 @@ def _parse_action(line: str, action_by_name: dict[str, Action]) -> tuple[Action,
 
 def read_actions(
     actions_path: Path | io.IOBase,
-) -> tuple[alias.Actions, alias.ColourByAction]:
+) -> tuple[Actions, ColourByActionName]:
     """
     Read file containing information about actions and return the contents
 
@@ -135,9 +136,9 @@ def read_actions(
     """
 
     stream = _open_stream(actions_path)
-    actions: alias.Actions = []
+    actions: Actions = []
     action_by_name: dict[str, Action] = {}
-    colour_by_action: alias.ColourByAction = {}
+    colour_by_action_name: ColourByActionName = {}
 
     with stream:
         for line in stream:
@@ -149,19 +150,19 @@ def read_actions(
                 actions.append(action)
 
                 if len(colour) > 0:
-                    colour_by_action[action] = hex_to_rgba(colour)
+                    colour_by_action_name[action.name] = hex_to_rgba(colour)
 
-    return actions, colour_by_action
+    return actions, colour_by_action_name
 
 
 # pylint: disable-next=too-many-locals
 def _parse_sequence(
     line: str,
-    actions: alias.Actions,
+    actions: Actions,
     action_by_name_and_edition: dict[tuple[str, int], Action],
-) -> tuple[alias.Sequence, alias.TippingPoint]:
+) -> tuple[Sequence, TippingPoint]:
 
-    def action_by_name(name: str) -> alias.Action:
+    def action_by_name(name: str) -> Action:
         # Find action instance corresponding with the name. Should be only one of these.
         actions_by_name = [action for action in actions if action.name == name]
 
@@ -230,8 +231,8 @@ def _parse_sequence(
 
 def read_sequences(
     sequences_path: Path | io.IOBase,
-    actions: alias.Actions,
-) -> tuple[alias.Sequences, alias.TippingPointByAction]:
+    actions: Actions,
+) -> tuple[Sequences, TippingPointByAction]:
     """
     Read sequences of actions and an optional tipping point from a stream and return the
     information read
@@ -239,8 +240,8 @@ def read_sequences(
     :raises ValueError: In case the contents are inconsistent
     """
     stream = _open_stream(sequences_path)
-    sequences: alias.Sequences = []
-    tipping_point_by_action: alias.TippingPointByAction = {}
+    sequences: Sequences = []
+    tipping_point_by_action: TippingPointByAction = {}
     action_by_name_and_edition: dict[tuple[str, int], Action] = {}
 
     with stream:
@@ -286,9 +287,7 @@ def read_sequences(
 
 def read_dataset(
     basename_pathname: str,
-) -> tuple[
-    alias.Actions, alias.Sequences, alias.TippingPointByAction, alias.ColourByAction
-]:
+) -> tuple[Actions, Sequences, TippingPointByAction, ColourByActionName]:
     """
     Read information about adaptation pathways from a set of text files
 
@@ -300,10 +299,10 @@ def read_dataset(
     actions_path = format_actions_path(basename_pathname)
     sequences_path = format_sequences_path(basename_pathname)
 
-    actions, colour_by_action = read_actions(actions_path)
+    actions, colour_by_action_name = read_actions(actions_path)
     sequences, tipping_point_by_action = read_sequences(sequences_path, actions)
 
-    return actions, sequences, tipping_point_by_action, colour_by_action
+    return actions, sequences, tipping_point_by_action, colour_by_action_name
 
 
 def _format_action(action: Action | ActionCombination) -> str:
@@ -319,7 +318,7 @@ def _format_action(action: Action | ActionCombination) -> str:
 
 
 def write_actions(
-    actions: alias.Actions, colour_by_action: alias.ColourByAction, path: Path
+    actions: Actions, colour_by_action_name: ColourByActionName, path: Path
 ) -> None:
     """
     Write information about actions to a file
@@ -327,13 +326,13 @@ def write_actions(
     with open(path, "w", encoding="utf8") as file:
         for action in actions:
             file.write(
-                f"{_format_action(action)} {rgba_to_hex(colour_by_action[action])}\n"
+                f"{_format_action(action)} {rgba_to_hex(colour_by_action_name[action.name])}\n"
             )
 
 
 def write_sequences(
-    sequences: alias.Sequences,
-    tipping_point_by_action: alias.TippingPointByAction,
+    sequences: Sequences,
+    tipping_point_by_action: TippingPointByAction,
     path: Path,
 ) -> None:
     """
@@ -362,10 +361,10 @@ def write_sequences(
 
 
 def write_dataset(
-    actions: alias.Actions,
-    sequences: alias.Sequences,
-    tipping_point_by_action: alias.TippingPointByAction,
-    colour_by_action: alias.ColourByAction,
+    actions: Actions,
+    sequences: Sequences,
+    tipping_point_by_action: TippingPointByAction,
+    colour_by_action_name: ColourByActionName,
     basename_pathname: str,
 ) -> None:
     """
@@ -377,5 +376,5 @@ def write_dataset(
     actions_path = format_actions_path(basename_pathname)
     sequences_path = format_sequences_path(basename_pathname)
 
-    write_actions(actions, colour_by_action, actions_path)
+    write_actions(actions, colour_by_action_name, actions_path)
     write_sequences(sequences, tipping_point_by_action, sequences_path)

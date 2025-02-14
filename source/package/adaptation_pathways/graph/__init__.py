@@ -9,5 +9,5 @@ from .convert import (
     sequence_graph_to_pathway_map,
 )
 from .pathway_graph import PathwayGraph
-from .pathway_map import PathwayMap, verify_tipping_points
+from .pathway_map import PathwayMap, tipping_point_range, verify_tipping_points
 from .sequence_graph import SequenceGraph

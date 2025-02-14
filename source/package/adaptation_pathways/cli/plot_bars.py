@@ -5,10 +5,10 @@ import typing
 import docopt
 import matplotlib.pyplot as plt
 
-from ..graph import SequenceGraph, sequence_graph_to_pathway_map
+from ..graph import SequenceGraph, sequence_graph_to_pathway_map, verify_tipping_points
 from ..io import read_dataset
-from ..plot import init_axes, plot_bars, save_plot
-from ..plot.util import action_level_by_first_occurrence
+from ..plot.bar_plot import plot_bars
+from ..plot.util import action_level_by_first_occurrence, init_axes, save_plot
 from ..version import __version__ as version
 from .main import main_function
 
@@ -23,29 +23,24 @@ def plot_bars_(
 ) -> int:
 
     # pylint: disable-next=unused-variable
-    _, sequences, tipping_point_by_action, colour_by_action = read_dataset(
+    _, sequences, tipping_point_by_action, colour_by_action_name = read_dataset(
         basename_pathname
     )
-
-    colour_by_action_name = {
-        action.name: colour for action, colour in colour_by_action.items()
-    }
 
     level_by_action = action_level_by_first_occurrence(sequences)
     sequence_graph = SequenceGraph(sequences)
     pathway_map = sequence_graph_to_pathway_map(sequence_graph)
 
-    if pathway_map.nr_nodes() > 0:
-        pathway_map.assign_tipping_points(tipping_point_by_action, verify=True)
-    pathway_map.set_attribute("level_by_action", level_by_action)
-    # pathway_map.set_attribute("colour_by_action_name", colour_by_action_name)
+    verify_tipping_points(pathway_map, tipping_point_by_action)
 
     _, axes = plt.subplots(layout="constrained")
     init_axes(axes)
 
     arguments["colour_by_action_name"] = colour_by_action_name
+    arguments["level_by_action"] = level_by_action
+    arguments["tipping_point_by_action"] = tipping_point_by_action
 
-    plot_bars(axes, pathway_map, arguments=arguments, legend_arguments=legend_arguments)
+    plot_bars(axes, pathway_map, **arguments, legend_arguments=legend_arguments)
     save_plot(plot_pathname)
 
     return 0

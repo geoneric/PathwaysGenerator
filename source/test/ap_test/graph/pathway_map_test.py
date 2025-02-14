@@ -23,17 +23,17 @@ class PathwayMapTest(unittest.TestCase):
 
     def test_assign_tipping_points_empty_graph(self):
         graph = PathwayMap()
-        tipping_points = {}
+        tipping_point_by_action = {}
 
         # Empty collection of tipping points
-        graph.assign_tipping_points(tipping_points)
+        verify_tipping_points(graph, tipping_point_by_action)
 
         # Non-empty collection of tipping points
         action = Action("Meh")
-        tipping_points[action] = 5
+        tipping_point_by_action[action] = 5.0
 
-        with self.assertRaises(LookupError):
-            graph.assign_tipping_points(tipping_points)
+        # OK, tipping point is skipped
+        verify_tipping_points(graph, tipping_point_by_action)
 
     def test_assign_tipping_points_non_empty_graph(self):
         graph = PathwayMap()
@@ -43,30 +43,19 @@ class PathwayMapTest(unittest.TestCase):
 
         graph.add_period(action_begin, action_end)
 
-        tipping_points = {}
-
-        # Empty collection of tipping points
-        for action_end in graph.action_ends_by_action(action):
-            self.assertEqual(action_end.tipping_point, 0)
-        graph.assign_tipping_points(tipping_points)
-        for action_end in graph.action_ends_by_action(action):
-            self.assertEqual(action_end.tipping_point, 0)
+        tipping_point_by_action = {}
 
         # Non-empty collection of tipping points
-        tipping_points[action] = 5
+        tipping_point_by_action[action] = 5.0
 
-        for action_end in graph.action_ends_by_action(action):
-            self.assertEqual(action_end.tipping_point, 0)
-        graph.assign_tipping_points(tipping_points)
-        for action_end in graph.action_ends_by_action(action):
-            self.assertEqual(action_end.tipping_point, 5)
+        verify_tipping_points(graph, tipping_point_by_action)
 
 
 class VerifyTippingPointsTest(unittest.TestCase):
     def test_empty_graph(self):
         graph = PathwayMap()
 
-        verify_tipping_points(graph)
+        verify_tipping_points(graph, {})
 
     def test_single_period(self):
         sequence_graph = SequenceGraph()
@@ -80,11 +69,11 @@ class VerifyTippingPointsTest(unittest.TestCase):
 
         pathway_map = sequence_graph_to_pathway_map(sequence_graph)
 
-        verify_tipping_points(pathway_map)
-
-        tipping_points = {a: 5}
-        pathway_map.assign_tipping_points(tipping_points)
-        verify_tipping_points(pathway_map)
+        tipping_point_by_action = {
+            current: 4.0,
+            a: 5.0,
+        }
+        verify_tipping_points(pathway_map, tipping_point_by_action)
 
     def test_use_case_01(self):
         sequence_graph = SequenceGraph()
@@ -120,22 +109,19 @@ class VerifyTippingPointsTest(unittest.TestCase):
 
         pathway_map = sequence_graph_to_pathway_map(sequence_graph)
 
-        verify_tipping_points(pathway_map)
-
-        tipping_points = {
-            current: 2024,
-            a: 2030,
-            b: 2030,
-            c: 2030,
-            d: 2030,
-            f: 2029,  # <-- can't tip this soon already
-            e: 2100,
+        tipping_point_by_action = {
+            current: 2024.0,
+            a: 2030.0,
+            b: 2030.0,
+            c: 2030.0,
+            d: 2030.0,
+            f: 2029.0,  # <-- can't tip this soon already
+            e: 2100.0,
         }
-        pathway_map.assign_tipping_points(tipping_points)
 
         with self.assertRaises(ValueError):
-            verify_tipping_points(pathway_map)
+            verify_tipping_points(pathway_map, tipping_point_by_action)
 
-        pathway_map.assign_tipping_points({f: 2040})  # All OK now
+        tipping_point_by_action[f] = 2040.0  # All OK now
 
-        verify_tipping_points(pathway_map)
+        verify_tipping_points(pathway_map, tipping_point_by_action)

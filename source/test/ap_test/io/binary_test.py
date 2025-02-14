@@ -50,13 +50,10 @@ class SQLiteTest(unittest.TestCase):
 
     def compare_colours(self, colours_we_got, colours_we_want):
         self.assertEqual(
+            [(name, (type(colour), colour)) for name, colour in colours_we_got.items()],
             [
-                (action.name, (type(colour), colour))
-                for action, colour in colours_we_got.items()
-            ],
-            [
-                (action.name, (type(colour), colour))
-                for action, colour in colours_we_want.items()
+                (name, (type(colour), colour))
+                for name, colour in colours_we_want.items()
             ],
         )
 
@@ -95,11 +92,17 @@ class SQLiteTest(unittest.TestCase):
             }
 
         colours = list(default_action_colours(len(actions)))
-        colour_by_action = {action: colours[idx] for idx, action in enumerate(actions)}
+        colour_by_action_name = {
+            action.name: colours[idx] for idx, action in enumerate(actions)
+        }
 
         # pylint: disable-next=unused-variable
         binary.write_dataset(
-            actions, sequences, tipping_point_by_action, colour_by_action, database_path
+            actions,
+            sequences,
+            tipping_point_by_action,
+            colour_by_action_name,
+            database_path,
         )
 
         # pylint: disable=unused-variable
@@ -111,7 +114,7 @@ class SQLiteTest(unittest.TestCase):
             (actions_we_got, actions),
             (sequences_we_got, sequences),
             (tipping_points_we_got, tipping_point_by_action),
-            (colours_we_got, colour_by_action),
+            (colours_we_got, colour_by_action_name),
         )
 
     def test_overwrite(self):
@@ -119,10 +122,14 @@ class SQLiteTest(unittest.TestCase):
         actions = []
         sequences = []
         tipping_point_by_action = {}
-        colour_by_action = {}
+        colour_by_action_name = {}
 
         binary.write_dataset(
-            actions, sequences, tipping_point_by_action, colour_by_action, database_path
+            actions,
+            sequences,
+            tipping_point_by_action,
+            colour_by_action_name,
+            database_path,
         )
         self.assertRaises(
             RuntimeError,
@@ -130,7 +137,7 @@ class SQLiteTest(unittest.TestCase):
             actions,
             sequences,
             tipping_point_by_action,
-            colour_by_action,
+            colour_by_action_name,
             database_path,
             overwrite=False,
         )

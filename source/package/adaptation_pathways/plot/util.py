@@ -199,7 +199,7 @@ def distribute(coordinates: list[float], min_distance: float) -> list[float]:
 
 
 def action_level_by_first_occurrence(
-    sequences: list[tuple[Action, Action]]
+    sequences: list[tuple[Action, Action]],
 ) -> dict[Action, float]:
     """
     Determine a level per action the sequences of actions passed in

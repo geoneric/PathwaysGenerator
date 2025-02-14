@@ -92,12 +92,3 @@ class DirectedGraph:
                 result += nx.all_simple_paths(graph, root_node, leaf_nodes, cutoff)
 
         return result
-
-    def set_attribute(self, name: str, value: typing.Any) -> None:
-        """
-        Add / update attribute value to / of the graph
-
-        :param name: Name of attribute to set
-        :param value: Value of the attribute to set
-        """
-        self.graph.graph[name] = value

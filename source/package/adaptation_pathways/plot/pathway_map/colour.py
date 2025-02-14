@@ -8,7 +8,6 @@ from ..colour import (
     default_label_colour,
     default_node_edge_colours,
     default_node_style,
-    default_nominal_palette,
 )
 
 
@@ -77,16 +76,6 @@ def colour_by_action_name_pathway_map(
     return colour_by_action_name
 
 
-def default_node_colours(graph: PathwayMap) -> list[alias.Colour | alias.Colours]:
-    colour_by_action_name = (
-        graph.graph.graph["colour_by_action_name"]
-        if "colour_by_action_name" in graph.graph.graph
-        else colour_by_action_name_pathway_map(graph, default_nominal_palette())
-    )
-
-    return node_colours(graph, colour_by_action_name)
-
-
 def _node_style_by_action(
     graph: PathwayMap,
 ) -> dict[ActionBegin, alias.FillStyle | alias.FillStyles]:
@@ -121,16 +110,6 @@ def default_node_styles(graph: PathwayMap) -> list[alias.FillStyle | alias.FillS
     For each node in the graph, return a style
     """
     return node_styles(graph)
-
-
-def default_edge_colours(graph: PathwayMap) -> list[alias.Colour | alias.Colours]:
-    colour_by_action_name = (
-        graph.graph.graph["colour_by_action_name"]
-        if "colour_by_action_name" in graph.graph.graph
-        else colour_by_action_name_pathway_map(graph, default_nominal_palette())
-    )
-
-    return edge_colours(graph, colour_by_action_name)
 
 
 def _styles_by_action_begin(
@@ -178,11 +157,13 @@ def default_edge_styles(graph: PathwayMap) -> list[alias.Style | alias.Styles]:
     return edge_styles(graph)
 
 
-def default_colours(pathway_map: PathwayMap) -> PlotColours:
+def default_colours(
+    pathway_map: PathwayMap, colour_by_action_name: dict[str, alias.Colour]
+) -> PlotColours:
     return PlotColours(
-        default_node_colours(pathway_map),
+        node_colours(pathway_map, colour_by_action_name),
         default_node_styles(pathway_map),
-        default_edge_colours(pathway_map),
+        edge_colours(pathway_map, colour_by_action_name),
         default_edge_styles(pathway_map),
         default_node_edge_colours(pathway_map),
         default_label_colour(),

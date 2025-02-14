@@ -12,12 +12,16 @@ from .main import main_function
 @main_function
 def export(dataset_pathname: str, basename_pathname: str) -> int:
 
-    actions, sequences, tipping_point_by_action, colour_by_action = binary.read_dataset(
-        Path(dataset_pathname)
+    actions, sequences, tipping_point_by_action, colour_by_action_name = (
+        binary.read_dataset(Path(dataset_pathname))
     )
 
     text.write_dataset(
-        actions, sequences, tipping_point_by_action, colour_by_action, basename_pathname
+        actions,
+        sequences,
+        tipping_point_by_action,
+        colour_by_action_name,
+        basename_pathname,
     )
 
     return 0

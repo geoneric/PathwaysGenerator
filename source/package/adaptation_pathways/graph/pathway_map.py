@@ -1,7 +1,8 @@
+from .. import alias
 from ..action import Action
 from ..action_combination import ActionCombination
 from .multi_rooted_graph import MultiRootedGraph
-from .node import ActionBegin, ActionEnd, TippingPoint
+from .node import ActionBegin, ActionEnd
 
 
 class PathwayMap(MultiRootedGraph):
@@ -111,96 +112,68 @@ class PathwayMap(MultiRootedGraph):
 
         return result
 
-    def assign_tipping_points(
-        self, tipping_points: dict[Action, TippingPoint], verify: bool = False
-    ) -> None:
-        """
-        Assign / update tipping points to ActionEnd nodes associated with the actions passed in
 
-        :param verify: Whether or not the tipping points should be checked for consistency,
-            using :py:func:`verify_tipping_points`
-        """
-        for action, tipping_point in tipping_points.items():
-            for action_end in self.action_ends_by_action(action):
-                action_end.tipping_point = tipping_point
-
-        if verify:
-            verify_tipping_points(self)
-
-    def tipping_points(self) -> list[TippingPoint]:
-        """
-        Return all unique tipping points, in increasing order
-        """
-        result: list[TippingPoint] = []
-
-        for action_end in self.all_action_ends():
-            result.append(action_end.tipping_point)
-
-        return list(dict.fromkeys(result))
-
-    def tipping_point_range(self) -> tuple[TippingPoint, TippingPoint]:
-        min_tipping_point = 0.0
-        max_tipping_point = 0.0
-
-        if self.nr_nodes() > 0:
-            root_nodes = self.root_nodes
-
-            # Initialize min tipping point to a value in the actual range of the tipping points
-            min_tipping_point = self.action_end(root_nodes[0]).tipping_point
-
-            for root_node in root_nodes[1:]:
-                min_tipping_point = min(
-                    min_tipping_point, self.action_end(root_node).tipping_point
-                )
-
-            # Initialize max tipping point to a value in the actual range of the tipping points
-            max_tipping_point = min_tipping_point
-
-            for end_node in self.leaf_nodes():
-                max_tipping_point = max(max_tipping_point, end_node.tipping_point)
-
-        assert (
-            min_tipping_point <= max_tipping_point
-        ), f"{min_tipping_point} < {max_tipping_point}"
-
-        return min_tipping_point, max_tipping_point
-
-    # def set_node_attribute(self, name: str, value: dict[Action, typing.Any]) -> None:
-    #     """
-    #     Add / update attribute to / of those nodes that are associated with the actions passed in
-
-    #     :param name: Name of attribute to set
-    #     :param value: Per action a value of the attribute to set
-
-    #     The caller is responsible of assuring that all nodes get assigned an attribute value.
-    #     """
-    #     for node in self.graph.nodes:
-    #         if node.action in value:
-    #             self.graph.nodes[node][name] = value[node.action]
-
-
-def verify_tipping_points(pathway_map: PathwayMap) -> None:
+def verify_tipping_points(
+    pathway_map: PathwayMap, tipping_point_by_action: alias.TippingPointByAction
+) -> None:
     """
     Verify all tipping points in the pathway map passed in are correctly set
 
-    :raises ValueError: In case one or more tipping points are not correctly set
-
-    Tipping points are correct if they strictly increase along the sequences of actions.
+    :raises KeyError: In case tipping_point_by_action does not contain tipping points for all actions
+    :raises ValueError: In case not all tipping points are strictly increasing along a sequence of actions
     """
+    for path in pathway_map.all_paths():
+        action_ends = list(path[1::2])
+        tipping_points = [
+            tipping_point_by_action[action_end.action] for action_end in action_ends
+        ]
 
-    for paths in pathway_map.all_paths():
-        # [begin, end, begin, end, ...]
+        if len(action_ends) > 1:
+            for tipping_point_idx in range(len(tipping_points) - 1):
+                tipping_point_from = tipping_points[tipping_point_idx]
+                tipping_point_to = tipping_points[tipping_point_idx + 1]
 
-        tipping_point_from = paths[1].tipping_point
+                if not tipping_point_from < tipping_point_to:
+                    raise ValueError(
+                        f"Given the sequences of actions, the tipping point of action "
+                        f"{action_ends[tipping_point_idx + 1].action} ({tipping_point_to}) "
+                        f"must be equal or larger than {tipping_point_from}"
+                    )
 
-        for idx in range(3, len(paths), 2):
-            tipping_point_to = paths[idx].tipping_point
 
-            if tipping_point_to < tipping_point_from:
-                raise ValueError(
-                    f"Given the sequences of actions, the tipping point of action "
-                    f"{paths[idx].action} ({tipping_point_to}) "
-                    f"must be equal or larger than {tipping_point_from}"
-                )
+def tipping_point_range(
+    pathway_map: PathwayMap, tipping_point_by_action: alias.TippingPointByAction
+) -> tuple[alias.TippingPoint, alias.TippingPoint]:
+    """
+    Return minimum and maximum tipping points
+    """
+    min_tipping_point = 0.0
+    max_tipping_point = 0.0
 
-            tipping_point_from = tipping_point_to
+    if pathway_map.nr_nodes() > 0:
+        root_nodes = pathway_map.root_nodes
+
+        # Initialize min tipping point to a value in the actual range of the tipping points
+        min_tipping_point = tipping_point_by_action[
+            pathway_map.action_end(root_nodes[0]).action
+        ]
+
+        for root_node in root_nodes[1:]:
+            min_tipping_point = min(
+                min_tipping_point,
+                tipping_point_by_action[pathway_map.action_end(root_node).action],
+            )
+
+        # Initialize max tipping point to a value in the actual range of the tipping points
+        max_tipping_point = min_tipping_point
+
+        for end_node in pathway_map.leaf_nodes():
+            max_tipping_point = max(
+                max_tipping_point, tipping_point_by_action[end_node.action]
+            )
+
+    assert (
+        min_tipping_point <= max_tipping_point
+    ), f"{min_tipping_point} < {max_tipping_point}"
+
+    return min_tipping_point, max_tipping_point

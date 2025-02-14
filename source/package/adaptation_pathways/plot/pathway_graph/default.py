@@ -5,15 +5,16 @@ import numpy as np
 
 from ...graph import PathwayGraph
 from ...graph.node import Node
-from ..colour import PlotColours
+from .. import alias
+from ..colour import default_nominal_palette
 from ..util import add_position, distribute, plot_graph, sort_horizontally
-from .colour import default_colours
+from .colour import colour_by_action_name_pathway_graph, default_colours
 
 
 def _distribute_horizontally(
     pathway_graph: PathwayGraph,
     from_node: Node,
-    position_by_node: dict[Node, np.ndarray],
+    position_by_node: alias.PositionByNode,
 ) -> None:
     assert isinstance(from_node, Node), type(from_node)
 
@@ -36,7 +37,7 @@ def _distribute_horizontally(
 def _distribute_vertically(
     pathway_graph: PathwayGraph,
     from_node: Node,
-    position_by_node: dict[Node, np.ndarray],
+    position_by_node: alias.PositionByNode,
 ) -> None:
     # Visit *all* actions and conversions in one go, in order of increasing x-coordinate
     # - Group actions and conversions by x-coordinate. Within each group:
@@ -91,7 +92,7 @@ def _distribute_vertically(
             position_by_node[node][1] = y_coordinates[idx]
 
 
-def _layout(pathway_graph: PathwayGraph) -> dict[Node, np.ndarray]:
+def _layout(pathway_graph: PathwayGraph) -> alias.PositionByNode:
     """
     Layout for visualizing pathway graphs
 
@@ -100,7 +101,7 @@ def _layout(pathway_graph: PathwayGraph) -> dict[Node, np.ndarray]:
 
     The goal of this layout is to be able to visualize the contents of the graph.
     """
-    position_by_node: dict[Node, np.ndarray] = {}
+    position_by_node: alias.PositionByNode = {}
 
     if pathway_graph.nr_nodes() > 0:
         from_node = pathway_graph.root_node
@@ -114,11 +115,17 @@ def _layout(pathway_graph: PathwayGraph) -> dict[Node, np.ndarray]:
 def plot(
     axes: mpl.axes.Axes,
     pathway_graph: PathwayGraph,
+    *,
+    colour_by_action_name: alias.ColourByActionName | None = None,
     title: str = "",
-    plot_colours: PlotColours | None = None,
 ) -> None:
-    if plot_colours is None:
-        plot_colours = default_colours(pathway_graph)
+
+    if colour_by_action_name is None:
+        colour_by_action_name = colour_by_action_name_pathway_graph(
+            pathway_graph, default_nominal_palette()
+        )
+
+    plot_colours = default_colours(pathway_graph, colour_by_action_name)
 
     plot_graph(
         axes,

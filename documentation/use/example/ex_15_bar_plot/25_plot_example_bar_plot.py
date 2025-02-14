@@ -1,22 +1,20 @@
 """
-Pathway map for an example
-==========================
+Bar plot for an example
+=======================
 """
 
+import typing
 from io import StringIO
 
 import matplotlib.pyplot as plt
 
 from adaptation_pathways.graph import SequenceGraph, sequence_graph_to_pathway_map
 from adaptation_pathways.io import text
-from adaptation_pathways.plot import (
-    action_level_by_first_occurrence,
-    init_axes,
-    plot_bars,
-)
+from adaptation_pathways.plot.bar_plot import plot_bars
+from adaptation_pathways.plot.util import action_level_by_first_occurrence, init_axes
 
 
-actions, colour_by_action = text.read_actions(
+actions, colour_by_action_name = text.read_actions(
     StringIO(
         """
 current #ff4c566a
@@ -56,20 +54,15 @@ current     d[1]        2100
 )
 sequence_graph = SequenceGraph(sequences)
 pathway_map = sequence_graph_to_pathway_map(sequence_graph)
-
 level_by_action = action_level_by_first_occurrence(sequences)
-colour_by_action_name = {
-    action.name: colour for action, colour in colour_by_action.items()
-}
 
-pathway_map.assign_tipping_points(tipping_point_by_action)
-pathway_map.set_attribute("level_by_action", level_by_action)
-
-arguments = {
+arguments: dict[str, typing.Any] = {
     "colour_by_action_name": colour_by_action_name,
+    "level_by_action": level_by_action,
+    "tipping_point_by_action": tipping_point_by_action,
 }
 
 _, axes = plt.subplots(layout="constrained")
 init_axes(axes)
-plot_bars(axes, pathway_map, arguments=arguments)
+plot_bars(axes, pathway_map, **arguments)
 plt.show()
