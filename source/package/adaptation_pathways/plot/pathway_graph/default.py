@@ -1,11 +1,11 @@
 import itertools
-import typing
 
 import matplotlib as mpl
 import numpy as np
 
 from ...graph import PathwayGraph
 from ...graph.node import Node
+from .. import alias
 from ..colour import default_nominal_palette
 from ..util import add_position, distribute, plot_graph, sort_horizontally
 from .colour import colour_by_action_name_pathway_graph, default_colours
@@ -116,25 +116,21 @@ def plot(
     axes: mpl.axes.Axes,
     pathway_graph: PathwayGraph,
     *,
-    arguments: dict[str, typing.Any] | None = None,
+    colour_by_action_name: alias.ColourByActionName | None = None,
+    title: str = "",
 ) -> None:
 
-    if arguments is None:
-        arguments = {}
+    if colour_by_action_name is None:
+        colour_by_action_name = colour_by_action_name_pathway_graph(
+            pathway_graph, default_nominal_palette()
+        )
 
-    # Initialize optional arguments that don't have a value yet
-    arguments.setdefault("title", "")
-    arguments.setdefault(
-        "colour_by_action_name",
-        colour_by_action_name_pathway_graph(pathway_graph, default_nominal_palette()),
-    )
-
-    plot_colours = default_colours(pathway_graph, arguments["colour_by_action_name"])
+    plot_colours = default_colours(pathway_graph, colour_by_action_name)
 
     plot_graph(
         axes,
         pathway_graph.graph,
-        arguments["title"],
+        title,
         _layout(pathway_graph),
         plot_colours,
     )

@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 
 from ..graph import SequenceGraph, sequence_graph_to_pathway_map, verify_tipping_points
 from ..io import read_dataset
-from ..plot import init_axes, plot_bars, save_plot
-from ..plot.util import action_level_by_first_occurrence
+from ..plot.bar_plot import plot_bars
+from ..plot.util import action_level_by_first_occurrence, init_axes, save_plot
 from ..version import __version__ as version
 from .main import main_function
 
@@ -44,7 +44,7 @@ def plot_bars_(
     arguments["level_by_action"] = level_by_action
     arguments["tipping_point_by_action"] = tipping_point_by_action
 
-    plot_bars(axes, pathway_map, arguments=arguments, legend_arguments=legend_arguments)
+    plot_bars(axes, pathway_map, **arguments, legend_arguments=legend_arguments)
     save_plot(plot_pathname)
 
     return 0

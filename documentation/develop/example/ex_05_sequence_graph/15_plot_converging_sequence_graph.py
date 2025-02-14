@@ -3,13 +3,15 @@ Sequence graph for converging sequence
 ======================================
 """
 
+import typing
 from io import StringIO
 
 import matplotlib.pyplot as plt
 
 from adaptation_pathways.graph import SequenceGraph
 from adaptation_pathways.io import text
-from adaptation_pathways.plot import init_axes, plot_default_sequence_graph
+from adaptation_pathways.plot.sequence_graph import plot_default_sequence_graph
+from adaptation_pathways.plot.util import init_axes
 
 
 actions, colour_by_action = text.read_actions(
@@ -43,11 +45,11 @@ colour_by_action_name = {
     action.name: colour for action, colour in colour_by_action.items()
 }
 
-arguments = {
+arguments: dict[str, typing.Any] = {
     "colour_by_action_name": colour_by_action_name,
 }
 
 _, axes = plt.subplots(layout="constrained")
 init_axes(axes)
-plot_default_sequence_graph(axes, sequence_graph, arguments=arguments)
+plot_default_sequence_graph(axes, sequence_graph, **arguments)
 plt.show()

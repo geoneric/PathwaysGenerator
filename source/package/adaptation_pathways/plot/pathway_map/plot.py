@@ -1,5 +1,4 @@
 import enum
-import typing
 
 import matplotlib as mpl
 
@@ -18,8 +17,8 @@ def plot_pathway_map(
     axes: mpl.axes.Axes,
     pathway_map: PathwayMap,
     *,
-    arguments: dict[str, typing.Any] | None = None,
-    # plot_colours: PlotColours | None = None,
+    layout: PathwayMapLayout = PathwayMapLayout.DEFAULT,
+    **arguments,
 ) -> None:
     """
     Plot a pathway map
@@ -34,11 +33,7 @@ def plot_pathway_map(
     if arguments is None:
         arguments = {}
 
-    arguments.setdefault("layout", PathwayMapLayout.DEFAULT)
-
-    layout = arguments["layout"]
-
     if layout == PathwayMapLayout.CLASSIC:
-        plot_classic(axes, pathway_map, arguments=arguments)
+        plot_classic(axes, pathway_map, **arguments)
     else:
-        plot_default(axes, pathway_map, arguments=arguments)
+        plot_default(axes, pathway_map, **arguments)

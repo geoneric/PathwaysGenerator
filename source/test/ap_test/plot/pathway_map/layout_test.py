@@ -676,7 +676,7 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
     def test_empty(self):
         sequence_graph = SequenceGraph()
         pathway_map = sequence_graph_to_pathway_map(sequence_graph)
-        positions, _ = classic_layout(pathway_map)
+        positions, _ = classic_layout(pathway_map, tipping_point_by_action={})
 
         self.assertEqual(len(positions), 0)
 
@@ -700,7 +700,7 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
                 a: 10,
             }
         }
-        positions, _ = classic_layout(pathway_map, arguments=arguments)
+        positions, _ = classic_layout(pathway_map, **arguments)
         self.assertEqual(len(positions), 4)
 
         self.assert_equal_positions(
@@ -742,7 +742,7 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
                 c: 2060,
             }
         }
-        positions, _ = classic_layout(pathway_map, arguments=arguments)
+        positions, _ = classic_layout(pathway_map, **arguments)
         self.assertEqual(len(positions), 8)
 
         self.assert_equal_positions(
@@ -788,7 +788,7 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
                 c: 2060,
             }
         }
-        positions, _ = classic_layout(pathway_map, arguments=arguments)
+        positions, _ = classic_layout(pathway_map, **arguments)
         self.assertEqual(len(positions), 12)
 
         self.assert_equal_positions(
@@ -856,7 +856,7 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
                 d: 2070,
             }
         }
-        positions, _ = classic_layout(pathway_map, arguments=arguments)
+        positions, _ = classic_layout(pathway_map, **arguments)
         self.assertEqual(len(positions), 18)
 
         self.assert_equal_positions(
@@ -924,7 +924,7 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
         paths = list(pathway_map.all_paths())
         self.assertEqual(len(paths), 4)
 
-        positions, _ = classic_layout(pathway_map, arguments=arguments)
+        positions, _ = classic_layout(pathway_map, **arguments)
         self.assertEqual(len(positions), 30)
 
         self.assert_equal_positions(
@@ -1016,7 +1016,7 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
         paths = list(pathway_map.all_paths())
         self.assertEqual(len(paths), 10)
 
-        positions, _ = classic_layout(pathway_map, arguments=arguments)
+        positions, _ = classic_layout(pathway_map, **arguments)
         self.assertEqual(len(positions), 66)
 
         self.assert_equal_positions(
@@ -1183,7 +1183,7 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
             }
         }
 
-        positions, _ = classic_layout(pathway_map, arguments=arguments)
+        positions, _ = classic_layout(pathway_map, **arguments)
         self.assertEqual(len(positions), 14)
 
         self.assert_equal_positions(
@@ -1239,7 +1239,7 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
         paths = list(pathway_map.all_paths())
         self.assertEqual(len(paths), 3)
 
-        positions, _ = classic_layout(pathway_map, arguments=arguments)
+        positions, _ = classic_layout(pathway_map, **arguments)
         self.assertEqual(len(positions), 16)
 
         self.assert_equal_positions(
@@ -1314,7 +1314,7 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
                 d: 2100,
             }
         }
-        positions, _ = classic_layout(pathway_map, arguments=arguments)
+        positions, _ = classic_layout(pathway_map, **arguments)
         self.assertEqual(len(positions), 16)
 
         self.assert_equal_positions(
@@ -1389,7 +1389,7 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
                 d: 2100,
             }
         }
-        positions, _ = classic_layout(pathway_map, arguments=arguments)
+        positions, _ = classic_layout(pathway_map, **arguments)
         self.assertEqual(len(positions), 14)
 
         self.assert_equal_positions(
@@ -1445,7 +1445,7 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
         paths = list(pathway_map.all_paths())
         self.assertEqual(len(paths), 3)
 
-        positions, _ = classic_layout(pathway_map, arguments=arguments)
+        positions, _ = classic_layout(pathway_map, **arguments)
         self.assertEqual(len(positions), 16)
 
         self.assert_equal_positions(
@@ -1502,7 +1502,7 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
         paths = list(pathway_map.all_paths())
         self.assertEqual(len(paths), 3)
 
-        positions, _ = classic_layout(pathway_map, arguments=arguments)
+        positions, _ = classic_layout(pathway_map, **arguments)
         self.assertEqual(len(positions), 14)
 
         self.assert_equal_positions(
@@ -1570,7 +1570,7 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
                 a2: 2060,
             }
         }
-        positions, _ = classic_layout(pathway_map, arguments=arguments)
+        positions, _ = classic_layout(pathway_map, **arguments)
         self.assertEqual(len(positions), 10)
 
         self.assert_equal_positions(
@@ -1619,7 +1619,7 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
             b c 2040
             """
         pathway_map, arguments = configure_pathway_map(actions, sequences)
-        positions, _ = classic_layout(pathway_map, arguments=arguments)
+        positions, _ = classic_layout(pathway_map, **arguments)
 
         y_coordinates_we_want = {
             "current": 0,
@@ -1648,7 +1648,7 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
             current b 2030
             """
         pathway_map, arguments = configure_pathway_map(actions, sequences)
-        positions, _ = classic_layout(pathway_map, arguments=arguments)
+        positions, _ = classic_layout(pathway_map, **arguments)
 
         y_coordinates_we_want = {
             "current": 0,
@@ -1679,7 +1679,7 @@ class PathwayMapClassicLayoutTest(PathwayLayoutTestBase):
             current b 2030
             """
         pathway_map, arguments = configure_pathway_map(actions, sequences)
-        positions, _ = classic_layout(pathway_map, arguments=arguments)
+        positions, _ = classic_layout(pathway_map, **arguments)
 
         y_coordinates_we_want = {
             "current": 0,

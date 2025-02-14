@@ -2,26 +2,26 @@ import typing
 
 import matplotlib.lines as mlines
 
-from ...action import Action
+from ... import alias
 from ...graph import PathwayMap, tipping_point_range
-from ...graph.node import ActionEnd, TippingPoint
-from .. import alias
+from ...graph.node import ActionEnd
+from ..colour import default_nominal_palette
+from ..pathway_map.colour import colour_by_action_name_pathway_map
 from ..plot import configure_title
 
 
 def _configure_x_axes(
     axes,
     *,
-    arguments: dict[str, typing.Any],
+    x_label,
 ):
-
     # Top x-axis
     axes.spines.top.set_visible(False)
 
     # Bottom x-axis
     axes.spines.bottom.set_visible(True)
     axes.tick_params(bottom=True)
-    axes.set_xlabel(arguments.get("x_label", ""))
+    axes.set_xlabel(x_label)
 
     x_ticks = axes.get_xticks()
 
@@ -36,11 +36,8 @@ def _configure_y_axes(
     axes,
     paths: list[list[typing.Any]],
     *,
-    arguments: dict[str, typing.Any],
+    label_by_pathway,
 ):
-
-    label_by_pathway: dict[Action, str] = arguments["label_by_pathway"]
-
     leaf_action_ends = [path[-1] for path in paths]
     assert all(isinstance(action_end, ActionEnd) for action_end in leaf_action_ends)
     leaf_actions = [action_end.action for action_end in leaf_action_ends]
@@ -74,19 +71,18 @@ def _plot_annotations(
     paths: list[list[typing.Any]],
     action_names: set[str],
     *,
-    arguments: dict[str, typing.Any],
+    colour_by_action_name,
+    label_by_pathway,
     legend_arguments: dict[str, typing.Any],
+    show_legend,
+    title,
+    x_label,
 ):
-    configure_title(axes, arguments=arguments)
-    _configure_y_axes(axes, paths, arguments=arguments)
-    _configure_x_axes(axes, arguments=arguments)
-
-    show_legend: bool = arguments.get("show_legend", False)
+    configure_title(axes, title=title)
+    _configure_y_axes(axes, paths, label_by_pathway=label_by_pathway)
+    _configure_x_axes(axes, x_label=x_label)
 
     if show_legend:
-        colour_by_action_name: dict[Action, alias.Colour] = arguments[
-            "colour_by_action_name"
-        ]
         _configure_legend(
             axes, action_names, colour_by_action_name, arguments=legend_arguments
         )
@@ -96,36 +92,35 @@ def plot_bars(
     axes,
     pathway_map: PathwayMap,
     *,
-    arguments: dict[str, typing.Any] | None = None,
+    colour_by_action_name: alias.ColourByActionName | None = None,
+    label_by_pathway: dict[ActionEnd, str] | None = None,
     legend_arguments: dict[str, typing.Any] | None = None,
+    level_by_action: (  # pylint: disable=unused-argument
+        alias.LevelByAction | None
+    ) = None,
+    show_legend: bool = False,
+    stack_bars: bool = False,
+    tipping_point_by_action: alias.TippingPointByAction,
+    title: str = "",
+    x_label: str = "",
 ) -> None:
     """
     Plot a bar plot
     """
-    if arguments is None:
-        arguments = {}
+
+    if colour_by_action_name is None:
+        colour_by_action_name = colour_by_action_name_pathway_map(
+            pathway_map, default_nominal_palette()
+        )
+
+    if label_by_pathway is None:
+        # Each pathway is uniquely identified by the action instance of its leaf node
+        label_by_pathway = {
+            leaf_node.action: "" for leaf_node in pathway_map.leaf_nodes()
+        }
 
     if legend_arguments is None:
         legend_arguments = {}
-
-    # Initialize optional arguments that don't have a value yet
-    if "label_by_pathway" not in arguments:
-        # Each pathway is uniquely identified by the action instance of its leaf node
-        arguments["label_by_pathway"] = {
-            leaf_node.action: f"{idx}"
-            for idx, leaf_node in enumerate(pathway_map.leaf_nodes())
-        }
-
-    if "stack_bars" not in arguments:
-        arguments["stack_bars"] = False
-
-    colour_by_action_name: dict[Action, alias.Colour] = arguments[
-        "colour_by_action_name"
-    ]
-    stack_bars: bool = arguments["stack_bars"]
-    tipping_point_by_action: dict[Action, TippingPoint] = arguments[
-        "tipping_point_by_action"
-    ]
 
     paths = pathway_map.all_paths()
 
@@ -172,8 +167,12 @@ def plot_bars(
         axes,
         paths,
         action_names,
-        arguments=arguments,
+        colour_by_action_name=colour_by_action_name,
+        label_by_pathway=label_by_pathway,
         legend_arguments=legend_arguments,
+        show_legend=show_legend,
+        title=title,
+        x_label=x_label,
     )
 
     axes.autoscale_view()

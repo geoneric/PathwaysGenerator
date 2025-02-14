@@ -20,8 +20,8 @@ from adaptation_pathways.graph import (
     verify_tipping_points,
 )
 from adaptation_pathways.graph.node.action import Action as ActionNode
-from adaptation_pathways.plot import init_axes, plot_classic_pathway_map
-from adaptation_pathways.plot.util import action_level_by_first_occurrence
+from adaptation_pathways.plot.pathway_map import plot_classic_pathway_map
+from adaptation_pathways.plot.util import action_level_by_first_occurrence, init_axes
 
 
 matplotlib.use("svg")
@@ -90,7 +90,7 @@ class PlottingService:
             "colour_by_action_name": action_colors,
             "level_by_action": level_by_action,
             "overlapping_lines_spread": 0.02,
-            "tipping_points": tipping_points,
+            "tipping_point_by_action": tipping_points,
             "tipping_point_overshoot": 0.2,
         }
 
@@ -98,6 +98,6 @@ class PlottingService:
             arguments["x_label"] = f"{metric.name} ({metric.unit.symbol})"
             arguments["show_legend"] = True
 
-        plot_classic_pathway_map(axes, pathway_map, arguments=arguments)
+        plot_classic_pathway_map(axes, pathway_map, **arguments)
 
         return (figure, axes)

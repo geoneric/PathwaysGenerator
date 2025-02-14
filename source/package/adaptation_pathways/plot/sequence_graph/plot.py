@@ -1,5 +1,3 @@
-import typing
-
 import matplotlib as mpl
 
 from ...graph import SequenceGraph
@@ -9,8 +7,7 @@ from .default import plot as plot_default
 def plot_sequence_graph(
     axes: mpl.axes.Axes,
     sequence_graph: SequenceGraph,
-    *,
-    arguments: dict[str, typing.Any] | None = None,
+    **arguments,
 ) -> None:
     """
     Plot a sequence graph
@@ -19,4 +16,4 @@ def plot_sequence_graph(
 
     See also: :func:`default.plot <adaptation_pathways.plot.sequence_graph.default.plot>`
     """
-    plot_default(axes, sequence_graph, arguments=arguments)
+    plot_default(axes, sequence_graph, **arguments)

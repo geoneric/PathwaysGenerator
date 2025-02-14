@@ -6,13 +6,15 @@ import matplotlib.lines as mlines
 import matplotlib.markers as mmarkers
 import numpy as np
 
+from ... import alias
 from ...action import Action
 from ...action_combination import ActionCombination
 from ...graph import PathwayMap, tipping_point_range
 from ...graph.node import ActionBegin, ActionEnd, TippingPoint
-from .. import alias
+from ..colour import default_nominal_palette
 from ..plot import configure_title
 from ..util import add_position, distribute, group_overlapping_regions_with_payloads
+from .colour import colour_by_action_name_pathway_map
 
 
 def _plot_action_lines(
@@ -20,13 +22,9 @@ def _plot_action_lines(
     pathway_map,
     layout: dict[ActionBegin | ActionEnd, np.ndarray],
     *,
-    arguments: dict[str, typing.Any],
+    colour_by_action_name,
+    tipping_point_overshoot,
 ) -> mpl.collections.LineCollection:
-
-    tipping_point_overshoot: float = arguments.get("tipping_point_overshoot", 0)
-    colour_by_action_name: dict[Action, alias.Colour] = arguments[
-        "colour_by_action_name"
-    ]
 
     edge_nodes = list(pathway_map.graph.edges())
     edge_collection = mpl.collections.LineCollection([])
@@ -58,15 +56,9 @@ def _plot_action_starts(
     pathway_map,
     layout: dict[ActionBegin | ActionEnd, np.ndarray],
     *,
-    arguments: dict[str, typing.Any],
+    colour_by_action_name,
+    start_action_marker,
 ) -> mpl.collections.PathCollection:
-
-    start_action_marker: mmarkers.MarkerStyle = arguments.get(
-        "start_action_marker", "o"
-    )
-    colour_by_action_name: dict[Action, alias.Colour] = arguments[
-        "colour_by_action_name"
-    ]
 
     nodes = pathway_map.all_action_begins()
     path_collection = mpl.collections.PathCollection(None)
@@ -87,19 +79,11 @@ def _plot_action_tipping_points(
     pathway_map,
     layout: dict[ActionBegin | ActionEnd, np.ndarray],
     *,
-    arguments: dict[str, typing.Any],
+    colour_by_action_name,
+    tipping_point_face_colour,
+    tipping_point_marker,
+    tipping_point_overshoot,
 ) -> mpl.collections.PathCollection:
-
-    tipping_point_overshoot: float = arguments.get("tipping_point_overshoot", 0)
-    tipping_point_marker: mmarkers.MarkerStyle = arguments.get(
-        "tipping_point_marker", "|" if tipping_point_overshoot > 0 else "o"
-    )
-    if isinstance(tipping_point_marker, str):
-        tipping_point_marker = mmarkers.MarkerStyle(tipping_point_marker)
-    tipping_point_face_colour = arguments.get("tipping_point_face_colour", "white")
-    colour_by_action_name: dict[Action, alias.Colour] = arguments[
-        "colour_by_action_name"
-    ]
 
     nodes = pathway_map.all_action_ends()
     path_collection = mpl.collections.PathCollection(None)
@@ -132,7 +116,7 @@ def _configure_y_axes(
     axes,
     y_coordinate_by_action_name: dict[str, float],
     *,
-    arguments: dict[str, typing.Any],
+    colour_by_action_name,
 ):
 
     # Left y-axis
@@ -141,8 +125,6 @@ def _configure_y_axes(
 
     y_labels = list(y_coordinate_by_action_name.keys())
     y_coordinates = list(y_coordinate_by_action_name.values())
-
-    colour_by_action_name: dict[str, alias.Colour] = arguments["colour_by_action_name"]
     label_colours = [colour_by_action_name[label] for label in y_labels]
 
     axes.set_yticks(y_coordinates, labels=y_labels)
@@ -160,7 +142,7 @@ def _configure_x_axes(
     axes,
     layout: dict[ActionBegin | ActionEnd, np.ndarray],
     *,
-    arguments: dict[str, typing.Any],
+    x_label,
 ):
 
     # Top x-axis
@@ -169,7 +151,7 @@ def _configure_x_axes(
     # Bottom x-axis
     axes.spines.bottom.set_visible(True)
     axes.tick_params(bottom=True)
-    axes.set_xlabel(arguments.get("x_label", ""))
+    axes.set_xlabel(x_label)
 
     if len(layout) > 0:
         # TODO Still needed?
@@ -210,17 +192,24 @@ def _plot_annotations(
     layout: dict[ActionBegin | ActionEnd, np.ndarray],
     y_coordinate_by_action_name: dict[str, float],
     *,
-    arguments: dict[str, typing.Any],
+    colour_by_action_name,
+    show_legend,
+    title,
+    x_label,
     legend_arguments: dict[str, typing.Any],
 ) -> None:
 
-    configure_title(axes, arguments=arguments)
+    configure_title(axes, title=title)
     y_labels, label_colours = _configure_y_axes(
-        axes, y_coordinate_by_action_name, arguments=arguments
+        axes,
+        y_coordinate_by_action_name,
+        colour_by_action_name=colour_by_action_name,
     )
-    _configure_x_axes(axes, layout, arguments=arguments)
-
-    show_legend: bool = arguments.get("show_legend", False)
+    _configure_x_axes(
+        axes,
+        layout,
+        x_label=x_label,
+    )
 
     if show_legend:
         _configure_legend(
@@ -235,7 +224,14 @@ def classic_pathway_map_plotter(
     layout: dict[ActionBegin | ActionEnd, np.ndarray],
     y_coordinate_by_action_name: dict[str, float],
     *,
-    arguments: dict[str, typing.Any],
+    colour_by_action_name,
+    show_legend,
+    start_action_marker,
+    tipping_point_face_colour,
+    tipping_point_marker,
+    tipping_point_overshoot,
+    title,
+    x_label,
     legend_arguments: dict[str, typing.Any],
 ) -> None:
 
@@ -245,16 +241,32 @@ def classic_pathway_map_plotter(
     # - Action tipping points
     # - Title, axes and legend
 
-    edge_collection = _plot_action_lines(axes, pathway_map, layout, arguments=arguments)
+    edge_collection = _plot_action_lines(
+        axes,
+        pathway_map,
+        layout,
+        colour_by_action_name=colour_by_action_name,
+        tipping_point_overshoot=tipping_point_overshoot,
+    )
     edge_collection.set_zorder(0)
 
     node_collection = _plot_action_starts(
-        axes, pathway_map, layout, arguments=arguments
+        axes,
+        pathway_map,
+        layout,
+        colour_by_action_name=colour_by_action_name,
+        start_action_marker=start_action_marker,
     )
     node_collection.set_zorder(1)
 
     node_collection = _plot_action_tipping_points(
-        axes, pathway_map, layout, arguments=arguments
+        axes,
+        pathway_map,
+        layout,
+        colour_by_action_name=colour_by_action_name,
+        tipping_point_face_colour=tipping_point_face_colour,
+        tipping_point_marker=tipping_point_marker,
+        tipping_point_overshoot=tipping_point_overshoot,
     )
     node_collection.set_zorder(1)
 
@@ -262,7 +274,10 @@ def classic_pathway_map_plotter(
         axes,
         layout,
         y_coordinate_by_action_name,
-        arguments=arguments,
+        colour_by_action_name=colour_by_action_name,
+        show_legend=show_legend,
+        title=title,
+        x_label=x_label,
         legend_arguments=legend_arguments,
     )
 
@@ -585,7 +600,9 @@ def _distribute_vertically(
 def _layout(
     pathway_map: PathwayMap,
     *,
-    arguments: dict[str, typing.Any] | None = None,
+    overlapping_lines_spread=(0.0, 0.0),
+    level_by_action: alias.LevelByAction | None = None,
+    tipping_point_by_action,
 ) -> tuple[dict[ActionBegin | ActionEnd, np.ndarray], dict[str, float]]:
     """
     Layout that replicates the pathway map layout of the original (pre-2024) pathway generator
@@ -604,21 +621,9 @@ def _layout(
     # The pathway map passed in must contain sane tipping points. When in doubt, call
     # ``verify_tipping_points()`` before calling this function.
 
-    # The graph in the pathway map passed in must contain an attribute called "level_by_action",
-    # with a numeric value per action, which corresponds with the position in the above mentioned
-    # stack. Low numbers correspond with a high position in the stack (large y-coordinate). Such
+    # level_by_action:
+    # Low numbers correspond with a high position in the stack (large y-coordinate). Such
     # actions will be positioned at the top of the pathway map.
-    if arguments is None:
-        arguments = {}
-
-    # Initialize optional arguments that don't have a value yet
-    arguments.setdefault("overlapping_lines_spread", 0.0)
-    arguments.setdefault("level_by_action", {})
-    arguments.setdefault("tipping_point_by_action", {})
-
-    level_by_action = arguments["level_by_action"]
-    tipping_point_by_action = arguments["tipping_point_by_action"]
-    overlapping_lines_spread = arguments["overlapping_lines_spread"]
 
     position_by_node: dict[ActionBegin | ActionEnd, np.ndarray] = {}
     y_coordinate_by_action_name: dict[str, float] = {}
@@ -656,6 +661,9 @@ def _layout(
                 position_by_node,
             )
 
+        if level_by_action is None:
+            level_by_action = {}
+
         y_coordinate_by_action_name = _distribute_vertically(
             pathway_map, root_actions_begins, level_by_action, position_by_node
         )
@@ -680,22 +688,42 @@ def plot(
     axes: mpl.axes.Axes,
     pathway_map: PathwayMap,
     *,
-    arguments: dict[str, typing.Any] | None = None,
+    colour_by_action_name: alias.ColourByActionName | None = None,
     legend_arguments: dict[str, typing.Any] | None = None,
+    level_by_action: alias.LevelByAction | None = None,
+    overlapping_lines_spread=(0.0, 0.0),
+    show_legend: bool = False,
+    start_action_marker: mmarkers.MarkerStyle = "o",
+    tipping_point_by_action: alias.TippingPointByAction,
+    tipping_point_face_colour="white",
+    tipping_point_marker: mmarkers.MarkerStyle | str | None = None,
+    tipping_point_overshoot: float = 0.0,
+    title: str = "",
+    x_label: str = "",
 ) -> None:
 
-    if arguments is None:
-        arguments = {}
+    if colour_by_action_name is None:
+        colour_by_action_name = colour_by_action_name_pathway_map(
+            pathway_map, default_nominal_palette()
+        )
 
     if legend_arguments is None:
         legend_arguments = {}
 
-    # Initialize optional arguments that don't have a value yet
-    arguments.setdefault("overlapping_lines_spread", (0, 0))
+    tipping_point_marker = (
+        tipping_point_marker
+        if tipping_point_marker is not None
+        else ("|" if tipping_point_overshoot > 0 else "o")
+    )
+
+    if isinstance(tipping_point_marker, str):
+        tipping_point_marker = mmarkers.MarkerStyle(tipping_point_marker)
 
     layout, y_coordinate_by_action_name = _layout(
         pathway_map,
-        arguments=arguments,
+        overlapping_lines_spread=overlapping_lines_spread,
+        level_by_action=level_by_action,
+        tipping_point_by_action=tipping_point_by_action,
     )
 
     classic_pathway_map_plotter(
@@ -703,6 +731,13 @@ def plot(
         pathway_map,
         layout,
         y_coordinate_by_action_name,
-        arguments=arguments,
+        colour_by_action_name=colour_by_action_name,
         legend_arguments=legend_arguments,
+        show_legend=show_legend,
+        start_action_marker=start_action_marker,
+        tipping_point_face_colour=tipping_point_face_colour,
+        tipping_point_marker=tipping_point_marker,
+        tipping_point_overshoot=tipping_point_overshoot,
+        title=title,
+        x_label=x_label,
     )

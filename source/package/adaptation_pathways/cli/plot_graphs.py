@@ -9,32 +9,28 @@ import adaptation_pathways as ap
 
 from ..graph import PathwayGraph, PathwayMap, SequenceGraph
 from ..io import read_dataset
-from ..plot import (
-    PathwayMapLayout,
-    init_axes,
-    plot_default_pathway_graph,
-    plot_default_pathway_map,
-    plot_default_sequence_graph,
-    save_plot,
-)
+from ..plot.pathway_graph import plot_default_pathway_graph
+from ..plot.pathway_map import plot_default_pathway_map
+from ..plot.sequence_graph import plot_default_sequence_graph
+from ..plot.util import init_axes, save_plot
 from .main import main_function
 
 
 def plot_sequence_graph(graph: SequenceGraph, axes, arguments, pathname):
     axes.clear()
-    plot_default_sequence_graph(axes, graph, arguments=arguments)
+    plot_default_sequence_graph(axes, graph, **arguments)
     save_plot(pathname)
 
 
 def plot_pathway_graph(graph: PathwayGraph, axes, arguments, pathname):
     axes.clear()
-    plot_default_pathway_graph(axes, graph, arguments=arguments)
+    plot_default_pathway_graph(axes, graph, **arguments)
     save_plot(pathname)
 
 
 def plot_pathway_map(graph: PathwayMap, axes, arguments, pathname):
     axes.clear()
-    plot_default_pathway_map(axes, graph, arguments=arguments)
+    plot_default_pathway_map(axes, graph, **arguments)
     save_plot(pathname)
 
 
@@ -58,9 +54,9 @@ def plot_graphs(
     basename = os.path.splitext(os.path.basename(basename_pathname))[0]
     assert os.path.isdir(plots_prefix_pathname), plots_prefix_pathname
 
-    arguments: dict[str, typing.Any] = {}
-
-    arguments["colour_by_action_name"] = colour_by_action_name
+    arguments: dict[str, typing.Any] = {
+        "colour_by_action_name": colour_by_action_name,
+    }
 
     sequence_graph = SequenceGraph(sequences)
     plot_pathname = os.path.join(
@@ -81,7 +77,6 @@ def plot_graphs(
         plots_prefix_pathname, f"{basename}-pathway_map.{output_format}"
     )
     arguments["title"] = "Pathway map"
-    arguments["layout"] = PathwayMapLayout.DEFAULT
     plot_pathway_map(pathway_map, axes, arguments, plot_pathname)
 
     return 0

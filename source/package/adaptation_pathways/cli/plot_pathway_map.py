@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 
 from ..graph import SequenceGraph, sequence_graph_to_pathway_map, verify_tipping_points
 from ..io import read_dataset
-from ..plot import init_axes, plot_classic_pathway_map, save_plot
-from ..plot.util import action_level_by_first_occurrence
+from ..plot.pathway_map import plot_classic_pathway_map
+from ..plot.util import action_level_by_first_occurrence, init_axes, save_plot
 from ..version import __version__ as version
 from .main import main_function
 
@@ -45,7 +45,7 @@ def plot_map(
     arguments["tipping_point_by_action"] = tipping_point_by_action
 
     plot_classic_pathway_map(
-        axes, pathway_map, arguments=arguments, legend_arguments=legend_arguments
+        axes, pathway_map, **arguments, legend_arguments=legend_arguments
     )
     save_plot(plot_pathname)
 
