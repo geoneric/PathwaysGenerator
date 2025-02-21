@@ -31,9 +31,9 @@ LabelByPathway = dict[Action, str]
 Per pathway, identified by its leaf Action instance, a label
 """
 
-LevelByAction = dict[Action, float]
+LevelByActionName = dict[str, float]
 """
-Per Action instance a level
+Per Action name a level
 """
 
 LevelByPathway = dict[Action, float]

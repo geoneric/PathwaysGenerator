@@ -55,6 +55,7 @@ class PlotBarsTest(unittest.TestCase):
         arguments["label_by_pathway"] = {
             path[-1].action: path[-1].action.name for path in pathway_map.all_paths()
         }
+        arguments["show_legend"] = True
 
         _, axes = plt.subplots(layout="constrained")
 
@@ -70,6 +71,12 @@ class PlotBarsTest(unittest.TestCase):
         # NOTE: Y-axis coordinates are reversed by plot_bars. They increase top to bottom.
         self.assertSequenceEqual(labels, ["a", "b", "c"])
         self.assertSequenceEqual(y_coordinates, [0, 1, 2])
+
+        legend_labels = list(
+            label.get_text() for label in axes.get_legend().get_texts()
+        )
+
+        self.assertSequenceEqual(legend_labels, ["current", "a", "b", "c"])
 
     def test_reverse_ordering(self):
         actions = """

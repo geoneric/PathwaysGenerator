@@ -11,10 +11,15 @@ from ...action_combination import ActionCombination
 from ...alias import TippingPointByAction
 from ...graph import PathwayMap, tipping_point_range
 from ...graph.node import ActionBegin, ActionEnd
-from ..alias import ColourByActionName, LevelByAction, PositionByNode, Region
+from ..alias import ColourByActionName, LevelByActionName, PositionByNode, Region
 from ..colour import default_nominal_palette
 from ..plot import configure_title
-from ..util import add_position, distribute, group_overlapping_regions_with_payloads
+from ..util import (
+    action_level_by_first_occurrence,
+    add_position,
+    distribute,
+    group_overlapping_regions_with_payloads,
+)
 from .colour import colour_by_action_name_pathway_map
 
 
@@ -168,22 +173,20 @@ def _configure_x_axes(
         axes.set_xticks(x_ticks, labels=x_labels)
 
 
-def _configure_legend(axes, *, labels, colours, arguments):
-
-    # TODO Document this:
-    # - Use rcParams["legend.*"] to tweak the default appearance of the legend
-    # - Use kwargs to override the default appearance of the legend
-    # See also:
-    # - https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.legend.html#matplotlib.axes.Axes.legend
+def _configure_legend(axes, *, action_names, colours, level_by_action_name, arguments):
 
     # Iterate over all actions that are shown on the y-axis. For each of these create a proxy artist. Then
     # create the legend, passing in the proxy artists.
+    # Take the level by action into account.
+
+    action_names = sorted(
+        list(action_names), key=lambda action_name: level_by_action_name[action_name]
+    )
 
     handles = []
 
-    # TODO Maybe we need to do something about the ordering(?)
-    for label, colour in zip(labels, colours):
-        handles.append(mlines.Line2D([], [], color=colour, label=label))
+    for action_name, colour in zip(action_names, colours):
+        handles.append(mlines.Line2D([], [], color=colour, label=action_name))
 
     axes.legend(handles=handles, **arguments)
 
@@ -194,6 +197,7 @@ def _plot_annotations(
     y_coordinate_by_action_name: dict[str, float],
     *,
     colour_by_action_name,
+    level_by_action_name,
     show_legend,
     title,
     x_label,
@@ -214,7 +218,11 @@ def _plot_annotations(
 
     if show_legend:
         _configure_legend(
-            axes, labels=y_labels, colours=label_colours, arguments=legend_arguments
+            axes,
+            action_names=y_labels,
+            colours=label_colours,
+            level_by_action_name=level_by_action_name,
+            arguments=legend_arguments,
         )
 
 
@@ -226,6 +234,7 @@ def classic_pathway_map_plotter(
     y_coordinate_by_action_name: dict[str, float],
     *,
     colour_by_action_name,
+    level_by_action_name: LevelByActionName,
     show_legend,
     start_action_marker,
     tipping_point_face_colour,
@@ -276,6 +285,7 @@ def classic_pathway_map_plotter(
         layout,
         y_coordinate_by_action_name,
         colour_by_action_name=colour_by_action_name,
+        level_by_action_name=level_by_action_name,
         show_legend=show_legend,
         title=title,
         x_label=x_label,
@@ -467,7 +477,7 @@ def _spread_horizontally(
 def _distribute_vertically(
     pathway_map: PathwayMap,
     root_actions_begins: list[ActionBegin],
-    level_by_action: LevelByAction,
+    level_by_action_name: LevelByActionName,
     position_by_node: PositionByNode,
 ) -> dict[str, float]:
 
@@ -532,35 +542,14 @@ def _distribute_vertically(
 
     # Update the levels of action combinations that continue multiple existing actions. These
     # must end up somewhere in between the continued actions.
-    if level_by_action:
-        for action, continued_actions in action_combinations_continuations.items():
-            assert action in level_by_action
-            level_by_action[action] = sum(
-                level_by_action[action] for action in continued_actions
-            ) / len(continued_actions)
+    for action, continued_actions in action_combinations_continuations.items():
+        assert action.name in level_by_action_name
+        level_by_action_name[action.name] = sum(
+            level_by_action_name[action.name] for action in continued_actions
+        ) / len(continued_actions)
 
-    levels_of_actions_to_distribute = []
-
-    for action_name in names_of_actions_to_distribute:
-        level = next(
-            (
-                level_by_action[action]
-                for action in actions
-                if action.name == action_name and action in level_by_action
-            ),
-            0,
-        )
-        levels_of_actions_to_distribute.append(level)
-
-    # Sort action names based on their individual level. Actions with lower levels must end up
-    # higher in the pathway map.
-    levels_of_actions_to_distribute, names_of_actions_to_distribute = (
-        list(t)
-        for t in zip(
-            *sorted(
-                zip(levels_of_actions_to_distribute, names_of_actions_to_distribute)
-            )
-        )
+    names_of_actions_to_distribute.sort(
+        key=lambda action_name: level_by_action_name[action_name]
     )
 
     y_coordinate_by_action_name = dict(
@@ -598,7 +587,7 @@ def _layout(
     pathway_map: PathwayMap,
     *,
     overlapping_lines_spread=(0.0, 0.0),
-    level_by_action: LevelByAction | None = None,
+    level_by_action_name: LevelByActionName,
     tipping_point_by_action,
 ) -> tuple[PositionByNode, dict[str, float]]:
     """
@@ -618,7 +607,7 @@ def _layout(
     # The pathway map passed in must contain sane tipping points. When in doubt, call
     # ``verify_tipping_points()`` before calling this function.
 
-    # level_by_action:
+    # level_by_action_name:
     # Low numbers correspond with a high position in the stack (large y-coordinate). Such
     # actions will be positioned at the top of the pathway map.
 
@@ -658,11 +647,8 @@ def _layout(
                 position_by_node,
             )
 
-        if level_by_action is None:
-            level_by_action = {}
-
         y_coordinate_by_action_name = _distribute_vertically(
-            pathway_map, root_actions_begins, level_by_action, position_by_node
+            pathway_map, root_actions_begins, level_by_action_name, position_by_node
         )
 
         if not isinstance(overlapping_lines_spread, tuple):
@@ -687,7 +673,7 @@ def plot(
     *,
     colour_by_action_name: ColourByActionName | None = None,
     legend_arguments: dict[str, typing.Any] | None = None,
-    level_by_action: LevelByAction | None = None,
+    level_by_action_name: LevelByActionName | None = None,
     overlapping_lines_spread=(0.0, 0.0),
     show_legend: bool = False,
     start_action_marker: mmarkers.MarkerStyle = "o",
@@ -707,6 +693,9 @@ def plot(
     if legend_arguments is None:
         legend_arguments = {}
 
+    if level_by_action_name is None:
+        level_by_action_name = action_level_by_first_occurrence(pathway_map)
+
     tipping_point_marker = (
         tipping_point_marker
         if tipping_point_marker is not None
@@ -719,7 +708,7 @@ def plot(
     layout, y_coordinate_by_action_name = _layout(
         pathway_map,
         overlapping_lines_spread=overlapping_lines_spread,
-        level_by_action=level_by_action,
+        level_by_action_name=level_by_action_name,
         tipping_point_by_action=tipping_point_by_action,
     )
 
@@ -730,6 +719,7 @@ def plot(
         y_coordinate_by_action_name,
         colour_by_action_name=colour_by_action_name,
         legend_arguments=legend_arguments,
+        level_by_action_name=level_by_action_name,
         show_legend=show_legend,
         start_action_marker=start_action_marker,
         tipping_point_face_colour=tipping_point_face_colour,

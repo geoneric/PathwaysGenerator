@@ -5,11 +5,16 @@ import matplotlib.lines as mlines
 from ...alias import TippingPointByAction
 from ...graph import PathwayMap, tipping_point_range
 from ...graph.node import ActionEnd
-from ..alias import ColourByActionName, LabelByPathway, LevelByPathway
+from ..alias import (
+    ColourByActionName,
+    LabelByPathway,
+    LevelByActionName,
+    LevelByPathway,
+)
 from ..colour import default_nominal_palette
 from ..pathway_map.colour import colour_by_action_name_pathway_map
 from ..plot import configure_title
-from ..util import pathway_level_by_first_occurrence
+from ..util import action_level_by_first_occurrence, pathway_level_by_first_occurrence
 
 
 def _configure_x_axes(
@@ -53,11 +58,21 @@ def _configure_y_axes(
 
 
 def _configure_legend(
-    axes, action_names: set[str], colour_by_action_name, *, arguments
+    axes,
+    action_names: typing.Iterable,
+    colour_by_action_name,
+    level_by_action_name: LevelByActionName,
+    *,
+    arguments,
 ):
 
     # Iterate over all actions that are shown on the y-axis. For each of these create a proxy artist. Then
     # create the legend, passing in the proxy artists.
+    # Take the level by action into account.
+
+    action_names = sorted(
+        list(action_names), key=lambda action_name: level_by_action_name[action_name]
+    )
 
     colours = [colour_by_action_name[name] for name in action_names]
     handles = []
@@ -76,6 +91,7 @@ def _plot_annotations(
     colour_by_action_name,
     label_by_pathway,
     legend_arguments: dict[str, typing.Any],
+    level_by_action_name: LevelByActionName,
     show_legend,
     title,
     x_label,
@@ -86,7 +102,11 @@ def _plot_annotations(
 
     if show_legend:
         _configure_legend(
-            axes, action_names, colour_by_action_name, arguments=legend_arguments
+            axes,
+            action_names,
+            colour_by_action_name,
+            level_by_action_name,
+            arguments=legend_arguments,
         )
 
 
@@ -97,6 +117,7 @@ def plot_bars(
     colour_by_action_name: ColourByActionName | None = None,
     label_by_pathway: LabelByPathway | None = None,
     legend_arguments: dict[str, typing.Any] | None = None,
+    level_by_action_name: LevelByActionName | None = None,
     level_by_pathway: LevelByPathway | None = None,
     show_legend: bool = False,
     stack_bars: bool = False,
@@ -112,7 +133,9 @@ def plot_bars(
     :param colour_by_action_name: For each action a colour
     :param label_by_pathway: For each pathway a label. Labels are used for the y-axis and in the legend.
     :param legend_arguments: Arguments for tweaking the legend. See also the `Matplotlib documentation`_.
-    :param level_by_pathway: For each pathway a level. Levels are used to order bars vertically. Pathways with
+    :param level_by_action_name: For each action a level. Levels are used to order legend items. Actions with
+        low levels end up high in the legend.
+    :param level_by_pathway: For each pathway a level. Levels are used to order bars. Pathways with
         low levels end up high in the plot.
     :param bool show_legend: Whether or not to show the legend
     :param bool stack_bars: Whether or not to stack the bars, removing whitespace between them
@@ -136,6 +159,9 @@ def plot_bars(
 
     if legend_arguments is None:
         legend_arguments = {}
+
+    if level_by_action_name is None:
+        level_by_action_name = action_level_by_first_occurrence(pathway_map)
 
     if level_by_pathway is None:
         level_by_pathway = pathway_level_by_first_occurrence(pathway_map)
@@ -190,6 +216,7 @@ def plot_bars(
         colour_by_action_name=colour_by_action_name,
         label_by_pathway=label_by_pathway,
         legend_arguments=legend_arguments,
+        level_by_action_name=level_by_action_name,
         show_legend=show_legend,
         title=title,
         x_label=x_label,
