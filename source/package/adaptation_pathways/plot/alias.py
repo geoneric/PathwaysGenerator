@@ -10,8 +10,6 @@ from ..action import Action
 from ..graph.node import Node
 
 
-# from .colour import Colour, Colours  # pylint: disable=unused-import
-
 Colour = tuple[float, float, float, float]
 """
 A colour is represented by four floating point values [0, 1], representing RGBA values respectively
@@ -23,9 +21,25 @@ Styles = list[Style]
 FillStyle = str
 FillStyles = list[Style]
 
-ColourByAction = dict[Action, Colour]
 ColourByActionName = dict[str, Colour]
+"""
+Per action name a colour
+"""
+
+LabelByPathway = dict[Action, str]
+"""
+Per pathway, identified by its leaf Action instance, a label
+"""
+
 LevelByAction = dict[Action, float]
+"""
+Per Action instance a level
+"""
+
+LevelByPathway = dict[Action, float]
+"""
+Per pathway, identified by its leaf Action instance, a level
+"""
 
 Region = tuple[float, float]
 

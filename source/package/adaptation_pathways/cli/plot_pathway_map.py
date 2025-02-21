@@ -127,7 +127,6 @@ Examples:
     if len(os.path.splitext(plot_pathname)[1]) == 0:
         plot_pathname += ".pdf"
 
-    # https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.legend.html#matplotlib.axes.Axes.legend
     legend_arguments = {
         "framealpha": 0.2,
         "fancybox": False,

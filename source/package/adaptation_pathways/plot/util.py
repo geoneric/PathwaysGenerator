@@ -11,7 +11,9 @@ import networkx as nx
 import numpy as np
 
 from ..action import Action
-from . import alias
+from ..alias import Sequences
+from ..graph import PathwayMap
+from .alias import LevelByAction, LevelByPathway, Region
 from .colour import PlotColours
 
 
@@ -199,10 +201,10 @@ def distribute(coordinates: list[float], min_distance: float) -> list[float]:
 
 
 def action_level_by_first_occurrence(
-    sequences: list[tuple[Action, Action]],
-) -> dict[Action, float]:
+    sequences: Sequences,
+) -> LevelByAction:
     """
-    Determine a level per action the sequences of actions passed in
+    Determine a level per action given the sequences of actions passed in
 
     The returned collection of levels can be used for vertically ordering actions in graphs. The
     levels are based on the order in which the actions are mentioned in the input collection.
@@ -219,7 +221,26 @@ def action_level_by_first_occurrence(
     return level_by_action
 
 
-def group_overlapping_regions(regions: list[alias.Region]) -> list[list[alias.Region]]:
+def pathway_level_by_first_occurrence(pathway_map: PathwayMap) -> LevelByPathway:
+    """
+    Determine a level per pathway given the pathway map passed in
+
+    The returned collection of levels can be used for vertically ordering pathways in graphs. The
+    levels are based on the order in which the pathways are mentioned in the input graph.
+    Pathways occurring earlier in the collection, are assigned lower levels.
+
+    A pathway is identified by the action instance layered in its leaf node's ActionEnd instance.
+    """
+    level_by_pathway: LevelByPathway = {}
+
+    for idx, action_end in enumerate(pathway_map.leaf_nodes(), 1):
+        assert action_end not in level_by_pathway
+        level_by_pathway[action_end.action] = idx
+
+    return level_by_pathway
+
+
+def group_overlapping_regions(regions: list[Region]) -> list[list[Region]]:
     """
     Given regions, defined by start and end coordinates, group the ones that overlap
 
@@ -233,7 +254,7 @@ def group_overlapping_regions(regions: list[alias.Region]) -> list[list[alias.Re
     # - Each next region is within the group if its min coordinate lies within the previous min and overall
     #   max coordinate. Otherwise it is the member of a new group
 
-    overlapping_regions: list[list[alias.Region]] = []
+    overlapping_regions: list[list[Region]] = []
 
     regions = sorted(regions, key=lambda region: region[0])
 
@@ -258,8 +279,8 @@ def group_overlapping_regions(regions: list[alias.Region]) -> list[list[alias.Re
 
 
 def group_overlapping_regions_with_payloads(
-    regions: list[alias.Region], payloads: list[typing.Any]
-) -> tuple[list[list[alias.Region]], list[list[typing.Any]]]:
+    regions: list[Region], payloads: list[typing.Any]
+) -> tuple[list[list[Region]], list[list[typing.Any]]]:
     """
     Given regions, defined by start and end coordinates, group the ones that overlap
 
@@ -268,7 +289,7 @@ def group_overlapping_regions_with_payloads(
     regions. This allows the payload and the region to be re-associated again.
     """
 
-    overlapping_regions: list[list[alias.Region]] = []
+    overlapping_regions: list[list[Region]] = []
     overlapping_payloads: list[list[typing.Any]] = []
 
     # First sort the payloads by increasing min_coordinate

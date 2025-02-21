@@ -5,10 +5,11 @@ import matplotlib.lines as mlines
 from ...alias import TippingPointByAction
 from ...graph import PathwayMap, tipping_point_range
 from ...graph.node import ActionEnd
-from ..alias import ColourByActionName, LevelByAction
+from ..alias import ColourByActionName, LabelByPathway, LevelByPathway
 from ..colour import default_nominal_palette
 from ..pathway_map.colour import colour_by_action_name_pathway_map
 from ..plot import configure_title
+from ..util import pathway_level_by_first_occurrence
 
 
 def _configure_x_axes(
@@ -94,9 +95,9 @@ def plot_bars(
     pathway_map: PathwayMap,
     *,
     colour_by_action_name: ColourByActionName | None = None,
-    label_by_pathway: dict[ActionEnd, str] | None = None,
+    label_by_pathway: LabelByPathway | None = None,
     legend_arguments: dict[str, typing.Any] | None = None,
-    level_by_action: LevelByAction | None = None,  # pylint: disable=unused-argument
+    level_by_pathway: LevelByPathway | None = None,
     show_legend: bool = False,
     stack_bars: bool = False,
     tipping_point_by_action: TippingPointByAction,
@@ -104,7 +105,22 @@ def plot_bars(
     x_label: str = "",
 ) -> None:
     """
-    Plot a bar plot
+    Plot pathways by horizontal bars coloured by the actions
+
+    :param axes: Axes to use for plotting
+    :param PathwayMap pathway_map: Graph containing the pathways to plot
+    :param colour_by_action_name: For each action a colour
+    :param label_by_pathway: For each pathway a label. Labels are used for the y-axis and in the legend.
+    :param legend_arguments: Arguments for tweaking the legend. See also the `Matplotlib documentation`_.
+    :param level_by_pathway: For each pathway a level. Levels are used to order bars vertically. Pathways with
+        low levels end up high in the plot.
+    :param bool show_legend: Whether or not to show the legend
+    :param bool stack_bars: Whether or not to stack the bars, removing whitespace between them
+    :param tipping_point_by_action: For each action instance a tipping point
+    :param str title: Title
+    :param str x_label: X-axis label
+
+    .. _Matplotlib documentation: https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.legend.html#matplotlib.axes.Axes.legend
     """
 
     if colour_by_action_name is None:
@@ -121,7 +137,12 @@ def plot_bars(
     if legend_arguments is None:
         legend_arguments = {}
 
+    if level_by_pathway is None:
+        level_by_pathway = pathway_level_by_first_occurrence(pathway_map)
+
     paths = pathway_map.all_paths()
+
+    paths.sort(key=lambda path: level_by_pathway[path[-1].action])
 
     bar_height = 0.8 if not stack_bars else 1.0
 
