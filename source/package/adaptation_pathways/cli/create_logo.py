@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from ..graph import SequenceGraph, sequence_graph_to_pathway_map
 from ..io import text
 from ..plot.pathway_map import plot_classic_pathway_map
-from ..plot.util import action_level_by_first_occurrence, init_axes, save_plot
+from ..plot.util import init_axes, save_plot
 from ..version import __version__ as version
 from .main import main_function
 
@@ -39,7 +39,6 @@ def create_logo(plot_pathname: str) -> int:
     )
     sequence_graph = SequenceGraph(sequences)
     pathway_map = sequence_graph_to_pathway_map(sequence_graph)
-    level_by_action = action_level_by_first_occurrence(sequences)
 
     _, axes = plt.subplots(layout="constrained")
     init_axes(axes)
@@ -47,7 +46,6 @@ def create_logo(plot_pathname: str) -> int:
         axes,
         pathway_map,
         colour_by_action_name=colour_by_action_name,
-        level_by_action=level_by_action,
         tipping_point_by_action=tipping_point_by_action,
     )
 

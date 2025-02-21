@@ -21,7 +21,7 @@ from adaptation_pathways.graph import (
 )
 from adaptation_pathways.graph.node.action import Action as ActionNode
 from adaptation_pathways.plot.pathway_map import plot_classic_pathway_map
-from adaptation_pathways.plot.util import action_level_by_first_occurrence, init_axes
+from adaptation_pathways.plot.util import init_axes
 
 
 matplotlib.use("svg")
@@ -78,7 +78,6 @@ class PlottingService:
             sequences.append((parent_action_node.action, action_node.action))
 
         # Mostly copied from plot_pathway_map.py
-        level_by_action = action_level_by_first_occurrence(sequences)
         pathway_map = sequence_graph_to_pathway_map(sequence_graph)
 
         verify_tipping_points(pathway_map, tipping_points)
@@ -88,7 +87,6 @@ class PlottingService:
 
         arguments: dict[str, Any] = {
             "colour_by_action_name": action_colors,
-            "level_by_action": level_by_action,
             "overlapping_lines_spread": 0.02,
             "tipping_point_by_action": tipping_points,
             "tipping_point_overshoot": 0.2,

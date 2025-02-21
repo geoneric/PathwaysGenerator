@@ -17,21 +17,25 @@ def node_colours(
     colours: list[alias.Colour | alias.Colours] = []
 
     # Colour each action begin / end combo unique
-    for node in graph._graph.nodes:
-        assert isinstance(node, (ActionBegin, ActionEnd)), node
 
-        action = node.action
+    for path in graph.all_paths():
+        for node in path:
+            assert isinstance(node, (ActionBegin, ActionEnd)), node
 
-        if isinstance(action, ActionCombination):
-            # Multi-colour node
-            colours.append(
-                list(
-                    colour_by_action_name[combined_action.name]
-                    for combined_action in action.actions
-                )
-            )
-        else:
-            colours.append(colour_by_action_name[action.name])
+            action = node.action
+
+            if isinstance(action, ActionCombination):
+                # TODO Handle combinations
+                colours.append(colour_by_action_name[action.name])
+                # Multi-colour node
+                # colours.append(
+                #     list(
+                #         colour_by_action_name[combined_action.name]
+                #         for combined_action in action.actions
+                #     )
+                # )
+            else:
+                colours.append(colour_by_action_name[action.name])
 
     return colours
 
@@ -42,21 +46,27 @@ def edge_colours(
     colours: list[alias.Colour | alias.Colours] = []
 
     # Iterate over all edges and use the colour associated with the action associated with the edge
-    for from_node, _ in graph._graph.edges:
-        assert isinstance(from_node, (ActionBegin, ActionEnd)), from_node
+    for path in graph.all_paths():
+        for from_node in path:
+            assert isinstance(from_node, (ActionBegin, ActionEnd)), from_node
 
-        action = from_node.action
+            action = from_node.action
+            # colours.append(colour_by_action_name[action.name])
 
-        if isinstance(from_node, ActionBegin) and isinstance(action, ActionCombination):
-            # Multi-colour dash
-            colours.append(
-                list(
-                    colour_by_action_name[combined_action.name]
-                    for combined_action in action.actions
-                )
-            )
-        else:
-            colours.append(colour_by_action_name[action.name])
+            if isinstance(from_node, ActionBegin) and isinstance(
+                action, ActionCombination
+            ):
+                # TODO Handle combination
+                colours.append(colour_by_action_name[action.actions[0].name])
+                # Multi-colour dash
+                # colours.append(
+                #     list(
+                #         colour_by_action_name[combined_action.name]
+                #         for combined_action in action.actions
+                #     )
+                # )
+            else:
+                colours.append(colour_by_action_name[action.name])
 
     return colours
 
