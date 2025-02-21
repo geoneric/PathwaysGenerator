@@ -48,7 +48,6 @@ f[3]        e[4]    2090
 )
 sequence_graph = SequenceGraph(sequences)
 pathway_map = sequence_graph_to_pathway_map(sequence_graph)
-
 level_by_action = action_level_by_first_occurrence(sequences)
 
 arguments: dict[str, typing.Any] = {
