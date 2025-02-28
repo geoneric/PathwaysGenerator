@@ -2,7 +2,7 @@
 This module contains aliases to be used as type hints.
 """
 
-from typing import TypeAlias
+from typing import Any, TypeAlias
 
 import numpy as np
 
@@ -40,6 +40,11 @@ LevelByPathway = dict[Action, float]
 """
 Per pathway, identified by its leaf Action instance, a level
 """
+
+MarkerByActionName = dict[str, Any]
+
+MarkerStyle = dict
+
 
 Region = tuple[float, float]
 
