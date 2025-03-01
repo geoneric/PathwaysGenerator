@@ -10,6 +10,8 @@ from ..alias import (
     LabelByPathway,
     LevelByActionName,
     LevelByPathway,
+    MarkerByActionName,
+    MarkerStyle,
 )
 from ..colour import default_nominal_palette
 from ..pathway_map.colour import colour_by_action_name_pathway_map
@@ -62,6 +64,8 @@ def _configure_legend(
     action_names: typing.Iterable,
     colour_by_action_name,
     level_by_action_name: LevelByActionName,
+    marker_by_action_name: MarkerByActionName,
+    marker_style: MarkerStyle,
     *,
     arguments,
 ):
@@ -74,11 +78,24 @@ def _configure_legend(
         list(action_names), key=lambda action_name: level_by_action_name[action_name]
     )
 
-    colours = [colour_by_action_name[name] for name in action_names]
+    # colours = [colour_by_action_name[name] for name in action_names]
     handles = []
 
-    for label, colour in zip(action_names, colours):
-        handles.append(mlines.Line2D([], [], color=colour, label=label))
+    # for label, colour in zip(action_names, colours):
+    #     handles.append(mlines.Line2D([], [], color=colour, label=label))
+
+    for action_name in action_names:
+        handles.append(
+            mlines.Line2D(
+                [],
+                [],
+                label=action_name,
+                marker=marker_by_action_name[action_name],
+                color="none",
+                markeredgecolor=colour_by_action_name[action_name],
+                **marker_style,
+            )
+        )
 
     axes.legend(handles=handles, **arguments)
 
@@ -92,6 +109,8 @@ def _plot_annotations(
     label_by_pathway,
     legend_arguments: dict[str, typing.Any],
     level_by_action_name: LevelByActionName,
+    marker_by_action_name: MarkerByActionName,
+    marker_style: MarkerStyle,
     show_legend,
     title,
     x_label,
@@ -106,6 +125,8 @@ def _plot_annotations(
             action_names,
             colour_by_action_name,
             level_by_action_name,
+            marker_by_action_name=marker_by_action_name,
+            marker_style=marker_style,
             arguments=legend_arguments,
         )
 
@@ -119,6 +140,8 @@ def plot_bars(
     legend_arguments: dict[str, typing.Any] | None = None,
     level_by_action_name: LevelByActionName | None = None,
     level_by_pathway: LevelByPathway | None = None,
+    marker_by_action_name: MarkerByActionName | None = None,
+    marker_style: MarkerStyle | None = None,
     show_legend: bool = False,
     stack_bars: bool = False,
     tipping_point_by_action: TippingPointByAction,
@@ -137,6 +160,8 @@ def plot_bars(
         low levels end up high in the legend.
     :param level_by_pathway: For each pathway a level. Levels are used to order bars. Pathways with
         low levels end up high in the plot.
+    :param marker_by_action_name: For each action a marker, which will be used in the legend
+    :param marker_style: The style to use for the markers
     :param bool show_legend: Whether or not to show the legend
     :param bool stack_bars: Whether or not to stack the bars, removing whitespace between them
     :param tipping_point_by_action: For each action instance a tipping point
@@ -165,6 +190,17 @@ def plot_bars(
 
     if level_by_pathway is None:
         level_by_pathway = pathway_level_by_first_occurrence(pathway_map)
+
+    if marker_by_action_name is None:
+        marker_by_action_name = {
+            action_name: "_" for action_name in colour_by_action_name
+        }
+
+    if marker_style is None:
+        marker_style = {
+            "markeredgewidth": 1.5,
+            "markersize": 10,
+        }
 
     paths = pathway_map.all_paths()
 
@@ -217,6 +253,8 @@ def plot_bars(
         label_by_pathway=label_by_pathway,
         legend_arguments=legend_arguments,
         level_by_action_name=level_by_action_name,
+        marker_by_action_name=marker_by_action_name,
+        marker_style=marker_style,
         show_legend=show_legend,
         title=title,
         x_label=x_label,
