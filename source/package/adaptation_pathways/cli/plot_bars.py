@@ -38,6 +38,18 @@ def plot_bars_(
     arguments["colour_by_action_name"] = colour_by_action_name
     arguments["tipping_point_by_action"] = tipping_point_by_action
 
+    # from svg_pltmarker import get_marker_from_svg
+    # marker = get_marker_from_svg(url="https://upload.wikimedia.org/wikipedia/commons/8/84/Matplotlib_icon.svg")
+    # arguments["marker_by_action_name"] = {action_name: marker for action_name in colour_by_action_name}
+    # arguments["marker_by_pathway"] = {
+    #     leaf_node.action: marker for leaf_node in pathway_map.leaf_nodes()
+    # }
+    # arguments["marker_style"] = {
+    #     "markerfacecolor": "none",
+    #     "markeredgewidth": 0.2,
+    #     "markersize": 15,
+    # }
+
     plot_bars(axes, pathway_map, **arguments, legend_arguments=legend_arguments)
     save_plot(plot_pathname)
 

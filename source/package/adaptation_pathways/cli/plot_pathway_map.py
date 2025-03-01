@@ -40,12 +40,17 @@ def plot_map(
 
     # TODO Doc this:
     # from svg_pltmarker import get_marker_from_svg
-    # marker = get_marker_from_svg(url="https://upload.wikimedia.org/wikipedia/commons/8/84/Matplotlib_icon.svg")
-    # arguments["marker_by_action_name"] = {action_name: marker for action_name in colour_by_action_name}
+
+    # marker = get_marker_from_svg(
+    #     url="https://upload.wikimedia.org/wikipedia/commons/8/84/Matplotlib_icon.svg"
+    # )
+    # arguments["marker_by_action_name"] = {
+    #     action_name: marker for action_name in colour_by_action_name
+    # }
     # arguments["marker_style"] = {
     #     "markerfacecolor": "none",
     #     "markeredgewidth": 0.2,
-    #     "markersize": 12,
+    #     "markersize": 15,
     # }
     # arguments["use_markers_as_yticks"] = True
 

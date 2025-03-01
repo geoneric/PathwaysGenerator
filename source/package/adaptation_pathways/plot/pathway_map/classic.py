@@ -20,7 +20,7 @@ from ..alias import (
     Region,
 )
 from ..colour import default_nominal_palette
-from ..plot import configure_title
+from ..plot import configure_title, y_axis_blended_to_data
 from ..util import (
     action_level_by_first_occurrence,
     add_position,
@@ -138,30 +138,29 @@ def _configure_y_axes(
     axes.tick_params(left=False)
 
     y_labels = list(y_coordinate_by_action_name.keys())
-    label_colours = [colour_by_action_name[label] for label in y_labels]
 
     if use_markers_as_yticks:
-        y_coordinates = list(y_coordinate_by_action_name.values())
+        axes.set_yticks(list(y_coordinate_by_action_name.values()), labels="")
+
+        label_colours = [colour_by_action_name[label] for label in y_labels]
         markers = [marker_by_action_name[label] for label in y_labels]
 
-        axes.set_yticks(y_coordinates, labels="")
-
-        ytick_labels = axes.get_yticklabels()
-
-        # TODO Finding the x-coordinate is a bit of a hack now. Would be nice to be able to determine a good
-        # position and have the plot adjust its boundaries if necessary.
         min_x, max_x = axes.get_xlim()
         x_range = max_x - min_x
-        x_coordinate = min_x + 0.02 * x_range
+        x_offset = 0.01 * x_range  # TODO Heuristic we may want to improve
 
-        for idx, y_tick in enumerate(ytick_labels):
-            y_coordinate = y_tick.get_position()[1]
+        for idx, y_tick in enumerate(axes.get_yticklabels()):
+            x_coordinate, y_coordinate = y_axis_blended_to_data(
+                axes, y_tick.get_position()
+            )
+
             artist = mlines.Line2D(
-                [x_coordinate],
+                [x_coordinate - x_offset],
                 [y_coordinate],
                 marker=markers[idx],
                 color="none",
                 markeredgecolor=label_colours[idx],
+                clip_on=False,
                 **marker_style,
             )
             axes.add_artist(artist)

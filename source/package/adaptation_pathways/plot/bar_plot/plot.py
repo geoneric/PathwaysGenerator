@@ -7,15 +7,15 @@ from ...graph import PathwayMap, tipping_point_range
 from ...graph.node import ActionEnd
 from ..alias import (
     ColourByActionName,
-    LabelByPathway,
     LevelByActionName,
     LevelByPathway,
     MarkerByActionName,
+    MarkerByPathway,
     MarkerStyle,
 )
 from ..colour import default_nominal_palette
 from ..pathway_map.colour import colour_by_action_name_pathway_map
-from ..plot import configure_title
+from ..plot import configure_title, y_axis_blended_to_data
 from ..util import action_level_by_first_occurrence, pathway_level_by_first_occurrence
 
 
@@ -45,18 +45,39 @@ def _configure_y_axes(
     axes,
     paths: list[list[typing.Any]],
     *,
-    label_by_pathway,
+    # label_by_pathway,
+    marker_by_pathway: MarkerByPathway,
+    marker_style: MarkerStyle,
 ):
     leaf_action_ends = [path[-1] for path in paths]
     assert all(isinstance(action_end, ActionEnd) for action_end in leaf_action_ends)
     leaf_actions = [action_end.action for action_end in leaf_action_ends]
 
-    labels = [label_by_pathway[action] for action in leaf_actions]
-
+    # labels = [label_by_pathway[action] for action in leaf_actions]
     y_coordinates = list(range(len(paths)))
+    axes.set_yticks(y_coordinates, labels="")
 
-    axes.set_yticks(y_coordinates, labels=labels)
-    axes.invert_yaxis()  # labels read top-to-bottom
+    markers = [marker_by_pathway.get(action, None) for action in leaf_actions]
+
+    min_x, max_x = axes.get_xlim()
+    x_range = max_x - min_x
+    x_offset = 0.03 * x_range  # TODO Heuristic we may want to improve
+
+    for idx, y_tick in enumerate(axes.get_yticklabels()):
+        x_coordinate, y_coordinate = y_axis_blended_to_data(axes, y_tick.get_position())
+
+        artist = mlines.Line2D(
+            [x_coordinate - x_offset],
+            [y_coordinate],
+            marker=markers[idx],
+            color="none",
+            markeredgecolor="blue",
+            clip_on=False,
+            **marker_style,
+        )
+        axes.add_artist(artist)
+
+    axes.invert_yaxis()  # Labels read top-to-bottom
 
 
 def _configure_legend(
@@ -106,17 +127,23 @@ def _plot_annotations(
     action_names: set[str],
     *,
     colour_by_action_name,
-    label_by_pathway,
+    # label_by_pathway,
     legend_arguments: dict[str, typing.Any],
     level_by_action_name: LevelByActionName,
     marker_by_action_name: MarkerByActionName,
+    marker_by_pathway: MarkerByPathway,
     marker_style: MarkerStyle,
     show_legend,
     title,
     x_label,
 ):
     configure_title(axes, title=title)
-    _configure_y_axes(axes, paths, label_by_pathway=label_by_pathway)
+    _configure_y_axes(
+        axes,
+        paths,  # label_by_pathway=label_by_pathway,
+        marker_by_pathway=marker_by_pathway,
+        marker_style=marker_style,
+    )
     _configure_x_axes(axes, x_label=x_label)
 
     if show_legend:
@@ -136,11 +163,12 @@ def plot_bars(
     pathway_map: PathwayMap,
     *,
     colour_by_action_name: ColourByActionName | None = None,
-    label_by_pathway: LabelByPathway | None = None,
+    # label_by_pathway: LabelByPathway | None = None,
     legend_arguments: dict[str, typing.Any] | None = None,
     level_by_action_name: LevelByActionName | None = None,
     level_by_pathway: LevelByPathway | None = None,
     marker_by_action_name: MarkerByActionName | None = None,
+    marker_by_pathway: MarkerByPathway | None = None,
     marker_style: MarkerStyle | None = None,
     show_legend: bool = False,
     stack_bars: bool = False,
@@ -154,13 +182,13 @@ def plot_bars(
     :param axes: Axes to use for plotting
     :param PathwayMap pathway_map: Graph containing the pathways to plot
     :param colour_by_action_name: For each action a colour
-    :param label_by_pathway: For each pathway a label. Labels are used for the y-axis and in the legend.
     :param legend_arguments: Arguments for tweaking the legend. See also the `Matplotlib documentation`_.
     :param level_by_action_name: For each action a level. Levels are used to order legend items. Actions with
         low levels end up high in the legend.
     :param level_by_pathway: For each pathway a level. Levels are used to order bars. Pathways with
         low levels end up high in the plot.
     :param marker_by_action_name: For each action a marker, which will be used in the legend
+    :param marker_by_pathway: For each pathway a marker, which will be used to annotate the bars
     :param marker_style: The style to use for the markers
     :param bool show_legend: Whether or not to show the legend
     :param bool stack_bars: Whether or not to stack the bars, removing whitespace between them
@@ -176,11 +204,11 @@ def plot_bars(
             pathway_map, default_nominal_palette()
         )
 
-    if label_by_pathway is None:
-        # Each pathway is uniquely identified by the action instance of its leaf node
-        label_by_pathway = {
-            leaf_node.action: "" for leaf_node in pathway_map.leaf_nodes()
-        }
+    # if label_by_pathway is None:
+    #     # Each pathway is uniquely identified by the action instance of its leaf node
+    #     label_by_pathway = {
+    #         leaf_node.action: "" for leaf_node in pathway_map.leaf_nodes()
+    #     }
 
     if legend_arguments is None:
         legend_arguments = {}
@@ -195,6 +223,9 @@ def plot_bars(
         marker_by_action_name = {
             action_name: "_" for action_name in colour_by_action_name
         }
+
+    if marker_by_pathway is None:
+        marker_by_pathway = {}
 
     if marker_style is None:
         marker_style = {
@@ -250,10 +281,11 @@ def plot_bars(
         paths,
         action_names,
         colour_by_action_name=colour_by_action_name,
-        label_by_pathway=label_by_pathway,
+        # label_by_pathway=label_by_pathway,
         legend_arguments=legend_arguments,
         level_by_action_name=level_by_action_name,
         marker_by_action_name=marker_by_action_name,
+        marker_by_pathway=marker_by_pathway,
         marker_style=marker_style,
         show_legend=show_legend,
         title=title,

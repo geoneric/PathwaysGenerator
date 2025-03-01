@@ -42,6 +42,7 @@ Per pathway, identified by its leaf Action instance, a level
 """
 
 MarkerByActionName = dict[str, Any]
+MarkerByPathway = dict[Action, Any]
 
 MarkerStyle = dict
 
