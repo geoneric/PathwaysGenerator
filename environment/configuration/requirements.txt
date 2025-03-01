@@ -4,3 +4,4 @@ networkx[default]
 pyside6>=6.6
 flet==0.25.*
 pyodide-py
+svg-pltmarker

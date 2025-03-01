@@ -11,9 +11,16 @@ from ...action_combination import ActionCombination
 from ...alias import TippingPointByAction
 from ...graph import PathwayMap, tipping_point_range
 from ...graph.node import ActionBegin, ActionEnd
-from ..alias import ColourByActionName, LevelByActionName, PositionByNode, Region
+from ..alias import (
+    ColourByActionName,
+    LevelByActionName,
+    MarkerByActionName,
+    MarkerStyle,
+    PositionByNode,
+    Region,
+)
 from ..colour import default_nominal_palette
-from ..plot import configure_title
+from ..plot import configure_title, y_axis_blended_to_data
 from ..util import (
     action_level_by_first_occurrence,
     add_position,
@@ -73,9 +80,7 @@ def _plot_action_starts(
         node_pos = np.asarray([layout[node] for node in nodes])
         x, y = zip(*node_pos)
         colours = [colour_by_action_name[node.action.name] for node in nodes]
-        path_collection = axes.scatter(
-            x, y, marker=start_action_marker, c=colours
-        )  # , c = node_colours) , s=100)
+        path_collection = axes.scatter(x, y, marker=start_action_marker, c=colours)
 
     return path_collection
 
@@ -123,6 +128,9 @@ def _configure_y_axes(
     y_coordinate_by_action_name: dict[str, float],
     *,
     colour_by_action_name,
+    marker_by_action_name: MarkerByActionName,
+    marker_style: MarkerStyle,
+    use_markers_as_yticks: bool,
 ):
 
     # Left y-axis
@@ -130,18 +138,37 @@ def _configure_y_axes(
     axes.tick_params(left=False)
 
     y_labels = list(y_coordinate_by_action_name.keys())
-    y_coordinates = list(y_coordinate_by_action_name.values())
-    label_colours = [colour_by_action_name[label] for label in y_labels]
 
-    axes.set_yticks(y_coordinates, labels=y_labels)
+    if use_markers_as_yticks:
+        axes.set_yticks(list(y_coordinate_by_action_name.values()), labels="")
 
-    for colour, tick in zip(label_colours, axes.yaxis.get_major_ticks()):
-        tick.label1.set_color(colour)
+        label_colours = [colour_by_action_name[label] for label in y_labels]
+        markers = [marker_by_action_name[label] for label in y_labels]
+
+        min_x, max_x = axes.get_xlim()
+        x_range = max_x - min_x
+        x_offset = 0.01 * x_range  # TODO Heuristic we may want to improve
+
+        for idx, y_tick in enumerate(axes.get_yticklabels()):
+            x_coordinate, y_coordinate = y_axis_blended_to_data(
+                axes, y_tick.get_position()
+            )
+
+            artist = mlines.Line2D(
+                [x_coordinate - x_offset],
+                [y_coordinate],
+                marker=markers[idx],
+                color="none",
+                markeredgecolor=label_colours[idx],
+                clip_on=False,
+                **marker_style,
+            )
+            axes.add_artist(artist)
 
     # Right y-axis
     axes.spines.right.set_visible(False)
 
-    return y_labels, label_colours
+    return y_labels
 
 
 def _configure_x_axes(
@@ -173,7 +200,16 @@ def _configure_x_axes(
         axes.set_xticks(x_ticks, labels=x_labels)
 
 
-def _configure_legend(axes, *, action_names, colours, level_by_action_name, arguments):
+def _configure_legend(
+    axes,
+    *,
+    action_names,
+    colour_by_action_name: ColourByActionName,
+    level_by_action_name: LevelByActionName,
+    marker_by_action_name: MarkerByActionName,
+    marker_style: MarkerStyle,
+    arguments,
+):
 
     # Iterate over all actions that are shown on the y-axis. For each of these create a proxy artist. Then
     # create the legend, passing in the proxy artists.
@@ -185,8 +221,18 @@ def _configure_legend(axes, *, action_names, colours, level_by_action_name, argu
 
     handles = []
 
-    for action_name, colour in zip(action_names, colours):
-        handles.append(mlines.Line2D([], [], color=colour, label=action_name))
+    for action_name in action_names:
+        handles.append(
+            mlines.Line2D(
+                [],
+                [],
+                label=action_name,
+                marker=marker_by_action_name[action_name],
+                color="none",
+                markeredgecolor=colour_by_action_name[action_name],
+                **marker_style,
+            )
+        )
 
     axes.legend(handles=handles, **arguments)
 
@@ -196,19 +242,25 @@ def _plot_annotations(
     layout: PositionByNode,
     y_coordinate_by_action_name: dict[str, float],
     *,
-    colour_by_action_name,
-    level_by_action_name,
-    show_legend,
-    title,
-    x_label,
+    colour_by_action_name: ColourByActionName,
+    level_by_action_name: LevelByActionName,
+    marker_by_action_name: MarkerByActionName,
+    marker_style: MarkerStyle,
+    show_legend: bool,
+    title: str,
+    use_markers_as_yticks: bool,
+    x_label: str,
     legend_arguments: dict[str, typing.Any],
 ) -> None:
 
     configure_title(axes, title=title)
-    y_labels, label_colours = _configure_y_axes(
+    y_labels = _configure_y_axes(
         axes,
         y_coordinate_by_action_name,
         colour_by_action_name=colour_by_action_name,
+        marker_by_action_name=marker_by_action_name,
+        marker_style=marker_style,
+        use_markers_as_yticks=use_markers_as_yticks,
     )
     _configure_x_axes(
         axes,
@@ -220,8 +272,10 @@ def _plot_annotations(
         _configure_legend(
             axes,
             action_names=y_labels,
-            colours=label_colours,
+            colour_by_action_name=colour_by_action_name,
             level_by_action_name=level_by_action_name,
+            marker_by_action_name=marker_by_action_name,
+            marker_style=marker_style,
             arguments=legend_arguments,
         )
 
@@ -235,12 +289,15 @@ def classic_pathway_map_plotter(
     *,
     colour_by_action_name,
     level_by_action_name: LevelByActionName,
+    marker_by_action_name: MarkerByActionName,
+    marker_style: MarkerStyle,
     show_legend,
     start_action_marker,
     tipping_point_face_colour,
     tipping_point_marker,
     tipping_point_overshoot,
     title,
+    use_markers_as_yticks: bool,
     x_label,
     legend_arguments: dict[str, typing.Any],
 ) -> None:
@@ -286,8 +343,11 @@ def classic_pathway_map_plotter(
         y_coordinate_by_action_name,
         colour_by_action_name=colour_by_action_name,
         level_by_action_name=level_by_action_name,
+        marker_by_action_name=marker_by_action_name,
+        marker_style=marker_style,
         show_legend=show_legend,
         title=title,
+        use_markers_as_yticks=use_markers_as_yticks,
         x_label=x_label,
         legend_arguments=legend_arguments,
     )
@@ -674,6 +734,8 @@ def plot(
     colour_by_action_name: ColourByActionName | None = None,
     legend_arguments: dict[str, typing.Any] | None = None,
     level_by_action_name: LevelByActionName | None = None,
+    marker_by_action_name: MarkerByActionName | None = None,
+    marker_style: MarkerStyle | None = None,
     overlapping_lines_spread=(0.0, 0.0),
     show_legend: bool = False,
     start_action_marker: mmarkers.MarkerStyle = "o",
@@ -682,6 +744,7 @@ def plot(
     tipping_point_marker: mmarkers.MarkerStyle | str | None = None,
     tipping_point_overshoot: float = 0.0,
     title: str = "",
+    use_markers_as_yticks: bool = False,
     x_label: str = "",
 ) -> None:
 
@@ -695,6 +758,17 @@ def plot(
 
     if level_by_action_name is None:
         level_by_action_name = action_level_by_first_occurrence(pathway_map)
+
+    if marker_by_action_name is None:
+        marker_by_action_name = {
+            action_name: "_" for action_name in colour_by_action_name
+        }
+
+    if marker_style is None:
+        marker_style = {
+            "markeredgewidth": 1.5,
+            "markersize": 10,
+        }
 
     tipping_point_marker = (
         tipping_point_marker
@@ -720,11 +794,14 @@ def plot(
         colour_by_action_name=colour_by_action_name,
         legend_arguments=legend_arguments,
         level_by_action_name=level_by_action_name,
+        marker_by_action_name=marker_by_action_name,
+        marker_style=marker_style,
         show_legend=show_legend,
         start_action_marker=start_action_marker,
         tipping_point_face_colour=tipping_point_face_colour,
         tipping_point_marker=tipping_point_marker,
         tipping_point_overshoot=tipping_point_overshoot,
         title=title,
+        use_markers_as_yticks=use_markers_as_yticks,
         x_label=x_label,
     )

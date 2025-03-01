@@ -38,6 +38,22 @@ def plot_map(
     arguments["colour_by_action_name"] = colour_by_action_name
     arguments["tipping_point_by_action"] = tipping_point_by_action
 
+    # TODO Doc this:
+    # from svg_pltmarker import get_marker_from_svg
+
+    # marker = get_marker_from_svg(
+    #     url="https://upload.wikimedia.org/wikipedia/commons/8/84/Matplotlib_icon.svg"
+    # )
+    # arguments["marker_by_action_name"] = {
+    #     action_name: marker for action_name in colour_by_action_name
+    # }
+    # arguments["marker_style"] = {
+    #     "markerfacecolor": "none",
+    #     "markeredgewidth": 0.2,
+    #     "markersize": 15,
+    # }
+    # arguments["use_markers_as_yticks"] = True
+
     plot_classic_pathway_map(
         axes, pathway_map, **arguments, legend_arguments=legend_arguments
     )
