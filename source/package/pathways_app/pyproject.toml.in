@@ -28,5 +28,5 @@ dependencies = [
     "adaptation_pathways==@CMAKE_PROJECT_VERSION@",
     "jsonpickle",
     "pyparsing",
-    "flet>=0.25.1"
+    "flet==0.25.*"
 ]

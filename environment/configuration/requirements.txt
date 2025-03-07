@@ -1,7 +1,6 @@
-docopt
-matplotlib
-networkx[default]
-pyside6>=6.6
+docopt==0.6.2
+matplotlib==3.*
+networkx[default]==3.*
 flet==0.25.*
 pyodide-py
-svg-pltmarker
+svg-pltmarker==1.*
